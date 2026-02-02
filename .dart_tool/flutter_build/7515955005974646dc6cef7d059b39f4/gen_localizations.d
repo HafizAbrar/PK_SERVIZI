@@ -1,1 +1,0 @@
- E:\\pk_servizi\\lib\\l10n\\app_localizations_en.dart E:\\pk_servizi\\lib\\l10n\\app_localizations_it.dart E:\\pk_servizi\\lib\\l10n\\app_localizations.dart:  E:\\pk_servizi\\l10n.yaml E:\\pk_servizi\\lib\\l10n\\app_en.arb E:\\pk_servizi\\lib\\l10n\\app_it.arb
