@@ -1,0 +1,18 @@
+# Flutter build outputs
+/build/
+/windows/flutter/ephemeral/
+
+# Plugin symlinks (regenerated automatically)
+/windows/flutter/ephemeral/.plugin_symlinks/
+
+# Large test files
+**/test_files/
+**/*.jpg
+**/*.png
+**/*.ico
+
+# Build artifacts
+*.dll
+*.exe
+*.obj
+*.pdb
