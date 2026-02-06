@@ -137,18 +137,84 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 ),
                 const SizedBox(height: 25),
                 Center(
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.white,
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/logos/LOGO 1 pk_services.png',
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF0A1D37), Color(0xFF1E3A5F)],
                       ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Colors.white.withOpacity(0.1), Colors.transparent],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        Center(
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFFD4AF37), Color(0xFF996515)],
+                            ).createShader(bounds),
+                            child: const Text(
+                              'PK',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 20),
+                const Text(
+                  'PK SERVIZI',
+                  style: TextStyle(
+                    fontSize: 24,
+                    fontWeight: FontWeight.w600,
+                    letterSpacing: 6,
+                    color: Color(0xFF0A1D37),
+                  ),
+                ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'EXCELLENCE IN FISCAL CARE',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3,
+                        color: Color(0xFF996515),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+                  ],
                 ),
                 const SizedBox(height: 30),
                 _buildField(

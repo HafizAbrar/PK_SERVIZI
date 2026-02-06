@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import '../providers/auth_provider.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../l10n/app_localizations.dart';
+import '../../../../core/services/biometric_service.dart';
 
 class SignInScreen extends ConsumerStatefulWidget {
   const SignInScreen({super.key});
@@ -18,15 +19,28 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
   static const _storage = FlutterSecureStorage();
+  final _biometricService = BiometricService();
 
   bool isButtonEnabled = false;
   bool _obscurePassword = true;
+  bool _showBiometric = false;
 
   @override
   void initState() {
     super.initState();
     _emailController.addListener(_validate);
     _passwordController.addListener(_validate);
+    _checkBiometric();
+  }
+
+  Future<void> _checkBiometric() async {
+    final canUse = await _biometricService.canUseBiometric();
+    
+    if (mounted) {
+      setState(() {
+        _showBiometric = true; // Always show for testing
+      });
+    }
   }
 
   @override
@@ -46,7 +60,6 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
   Future<void> _signIn() async {
     if (!_formKey.currentState!.validate()) return;
 
-    // Save credentials for biometric login
     await _storage.write(key: 'saved_email', value: _emailController.text);
     await _storage.write(key: 'saved_password', value: _passwordController.text);
 
@@ -56,21 +69,27 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     );
   }
 
-  Future<void> _quickLogin() async {
-    final savedEmail = await _storage.read(key: 'saved_email');
-    final savedPassword = await _storage.read(key: 'saved_password');
+  Future<void> _biometricLogin() async {
+    // Check if user has saved credentials
+    final credentials = await _biometricService.getSavedCredentials();
     
-    if (savedEmail != null && savedPassword != null) {
-      await ref.read(authStateProvider.notifier).login(
-        email: savedEmail,
-        password: savedPassword,
-      );
-    } else {
+    if (credentials == null) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('No saved credentials found. Please login first.')),
+          const SnackBar(content: Text('Please login or signup by credentials')),
         );
       }
+      return;
+    }
+    
+    // Activate fingerprint scanner
+    final authenticated = await _biometricService.authenticate();
+    
+    if (authenticated) {
+      await ref.read(authStateProvider.notifier).login(
+        email: credentials['email']!,
+        password: credentials['password']!,
+      );
     }
   }
 
@@ -133,18 +152,89 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                 ),
                 const SizedBox(height: AppTheme.spacingXLarge),
                 Center(
-                  child: CircleAvatar(
-                    radius: 60,
-                    backgroundColor: Colors.white,
-                    child: ClipOval(
-                      child: Image.asset(
-                        'assets/logos/LOGO 1 pk_services.png',
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
+                  child: Container(
+                    width: 96,
+                    height: 96,
+                    decoration: BoxDecoration(
+                      gradient: const LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [Color(0xFF0A1D37), Color(0xFF1E3A5F)],
                       ),
+                      borderRadius: BorderRadius.circular(20),
+                      boxShadow: [
+                        BoxShadow(
+                          color: Colors.black.withOpacity(0.3),
+                          blurRadius: 20,
+                          offset: const Offset(0, 10),
+                        ),
+                      ],
+                    ),
+                    child: Stack(
+                      children: [
+                        Container(
+                          decoration: BoxDecoration(
+                            gradient: LinearGradient(
+                              begin: Alignment.topLeft,
+                              end: Alignment.bottomRight,
+                              colors: [Colors.white.withOpacity(0.1), Colors.transparent],
+                            ),
+                            borderRadius: BorderRadius.circular(20),
+                          ),
+                        ),
+                        Center(
+                          child: ShaderMask(
+                            shaderCallback: (bounds) => const LinearGradient(
+                              colors: [Color(0xFFD4AF37), Color(0xFF996515)],
+                            ).createShader(bounds),
+                            child: const Text(
+                              'PK',
+                              style: TextStyle(
+                                fontSize: 36,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                                letterSpacing: -2,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
                     ),
                   ),
+                ),
+                const SizedBox(height: 20),
+                 Row(
+                   mainAxisAlignment: MainAxisAlignment.center,
+                   children: [
+                     Text(
+                      'PK SERVIZI',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 6,
+                        color: Color(0xFF0A1D37),
+                      ),
+                                     ),
+                   ],
+                 ),
+                const SizedBox(height: 8),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+                    const SizedBox(width: 12),
+                    const Text(
+                      'EXCELLENCE IN FISCAL CARE',
+                      style: TextStyle(
+                        fontSize: 9,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 3,
+                        color: Color(0xFF996515),
+                      ),
+                    ),
+                    const SizedBox(width: 12),
+                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+                  ],
                 ),
                 const SizedBox(height: AppTheme.spacingXLarge),
                 _buildField(
@@ -196,31 +286,13 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                           ),
                   ),
                 ),
-                const SizedBox(height: AppTheme.spacingLarge),
-                Row(
-                  children: [
-                    Expanded(child: Divider(color: AppTheme.dividerColor)),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingMedium),
-                      child: Text('OR', style: TextStyle(color: AppTheme.textSecondary)),
-                    ),
-                    Expanded(child: Divider(color: AppTheme.dividerColor)),
-                  ],
-                ),
-                const SizedBox(height: AppTheme.spacingLarge),
-                SizedBox(
-                  width: double.infinity,
-                  child: OutlinedButton.icon(
-                    style: AppTheme.secondaryButtonStyle,
-                    onPressed: _quickLogin,
-                    icon: const Icon(Icons.fingerprint, size: 24),
-                    label: const Text(
-                      'Quick Sign In',
-                      style: TextStyle(
-                        fontSize: AppTheme.fontSizeRegular,
-                        color: Colors.black87,
-                      ),
-                    ),
+                const SizedBox(height: AppTheme.spacingMedium),
+                Center(
+                  child: IconButton(
+                    onPressed: _biometricLogin,
+                    icon: const Icon(Icons.fingerprint, size: 48),
+                    color: AppTheme.primaryColor,
+                    tooltip: 'Login with fingerprint',
                   ),
                 ),
                 const SizedBox(height: AppTheme.spacingSmall),

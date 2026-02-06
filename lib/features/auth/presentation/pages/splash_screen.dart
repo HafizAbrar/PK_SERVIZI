@@ -1,6 +1,5 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
-import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({super.key});
@@ -10,25 +9,17 @@ class SplashScreen extends StatefulWidget {
 }
 
 class _SplashScreenState extends State<SplashScreen> {
-  static const _storage = FlutterSecureStorage();
-
   @override
   void initState() {
     super.initState();
-    _checkCredentials();
+    _initialize();
   }
 
-  _checkCredentials() async {
+  _initialize() async {
     await Future.delayed(const Duration(seconds: 2));
     
-    final token = await _storage.read(key: 'access_token');
-    
     if (mounted) {
-      if (token != null) {
-        context.go('/home');
-      } else {
-        context.go('/login');
-      }
+      context.go('/login');
     }
   }
 
