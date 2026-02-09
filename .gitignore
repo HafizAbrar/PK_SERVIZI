@@ -1,22 +1,11 @@
-# Flutter build outputs
-/build/
-/windows/flutter/ephemeral/
-
-# Plugin symlinks (regenerated automatically)
-/windows/flutter/ephemeral/.plugin_symlinks/
-
-# Large test files
-**/test_files/
-**/*.jpg
-**/*.png
-**/*.ico
-
-# Build artifacts
-*.dll
-*.exe
-*.obj
-*.pdb
 .dart_tool/
-.packages
-.pub/
 build/
+.pub/
+.packages
+.idea/
+
+android/.gradle/
+android/app/build/
+
+ios/Pods/
+ios/Flutter/build/
