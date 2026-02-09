@@ -16,3 +16,7 @@
 *.exe
 *.obj
 *.pdb
+.dart_tool/
+.packages
+.pub/
+build/
