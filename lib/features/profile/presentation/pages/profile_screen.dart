@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../providers/profile_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
 
@@ -16,15 +17,16 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   @override
   Widget build(BuildContext context) {
     final profileAsync = ref.watch(profileProvider);
+    final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Profile',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          l10n.profile,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         actions: [
           IconButton(
@@ -41,72 +43,85 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: profileAsync.when(
-          data: (profile) => _buildProfileContent(profile),
+          data: (profile) => RefreshIndicator(
+            color: AppTheme.primaryColor,
+            onRefresh: () async => ref.invalidate(profileProvider),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              padding: const EdgeInsets.all(AppTheme.spacingLarge),
+              child: _buildProfileContent(profile),
+            ),
+          ),
           loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => const Center(child: Text('Error loading profile')),
+          error: (_, __) => RefreshIndicator(
+            color: AppTheme.primaryColor,
+            onRefresh: () async => ref.invalidate(profileProvider),
+            child: SingleChildScrollView(
+              physics: const AlwaysScrollableScrollPhysics(),
+              child: Center(child: Text(l10n.failedToLoad)),
+            ),
+          ),
         ),
       ),
     );
   }
 
   Widget _buildProfileContent(Map<String, dynamic> profile) {
-    return SingleChildScrollView(
-      padding: const EdgeInsets.all(AppTheme.spacingLarge),
-      child: Column(
-        children: [
-          const SizedBox(height: AppTheme.spacingMedium),
-          CircleAvatar(
-            radius: 60,
-            backgroundColor: AppTheme.primaryColor,
-            child: (profile['avatar'] != null && profile['avatar'].toString().isNotEmpty)
-                ? ClipOval(
-                    child: Image.network(
-                      profile['avatar'],
-                      width: 120,
-                      height: 120,
-                      fit: BoxFit.cover,
-                      errorBuilder: (context, error, stackTrace) {
-                        // print('Avatar load error: $error');
-                        return const Icon(Icons.person, size: 60, color: Colors.white);
-                      },
-                      loadingBuilder: (context, child, loadingProgress) {
-                        if (loadingProgress == null) return child;
-                        return const CircularProgressIndicator(color: Colors.white);
-                      },
-                    ),
-                  )
-                : const Icon(Icons.person, size: 60, color: Colors.white),
+    final l10n = AppLocalizations.of(context)!;
+    return Column(
+      children: [
+        const SizedBox(height: AppTheme.spacingMedium),
+        CircleAvatar(
+          radius: 60,
+          backgroundColor: AppTheme.primaryColor,
+          child: (profile['profile']?['avatarUrl'] != null && profile['profile']['avatarUrl'].toString().isNotEmpty)
+              ? ClipOval(
+                  child: Image.network(
+                    profile['profile']['avatarUrl'],
+                    width: 120,
+                    height: 120,
+                    fit: BoxFit.cover,
+                    errorBuilder: (context, error, stackTrace) {
+                      return const Icon(Icons.person, size: 60, color: Colors.white);
+                    },
+                    loadingBuilder: (context, child, loadingProgress) {
+                      if (loadingProgress == null) return child;
+                      return const CircularProgressIndicator(color: Colors.white);
+                    },
+                  ),
+                )
+              : const Icon(Icons.person, size: 60, color: Colors.white),
+        ),
+        const SizedBox(height: AppTheme.spacingMedium),
+        Text(
+          profile['fullName'] ?? l10n.user,
+          style: TextStyle(
+            fontSize: AppTheme.fontSizeXXLarge,
+            fontWeight: FontWeight.bold,
+            color: AppTheme.primaryColor,
           ),
-          const SizedBox(height: AppTheme.spacingMedium),
-          Text(
-            profile['fullName'] ?? 'User Name',
-            style: TextStyle(
-              fontSize: AppTheme.fontSizeXXLarge,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            ),
+        ),
+        Text(
+          profile['email'] ?? l10n.defaultEmail,
+          style: TextStyle(
+            fontSize: AppTheme.fontSizeRegular,
+            color: AppTheme.textSecondary,
           ),
-          Text(
-            profile['email'] ?? 'user@email.com',
-            style: TextStyle(
-              fontSize: AppTheme.fontSizeRegular,
-              color: AppTheme.textSecondary,
-            ),
-          ),
-          const SizedBox(height: AppTheme.spacingXLarge),
-          _buildProfileOptions(),
-        ],
-      ),
+        ),
+        const SizedBox(height: AppTheme.spacingXLarge),
+        _buildProfileOptions(),
+      ],
     );
   }
 
   Widget _buildProfileOptions() {
+    final l10n = AppLocalizations.of(context)!;
     final options = [
-      {'title': 'Edit Profile', 'icon': Icons.edit, 'route': '/profile/edit'},
-      {'title': 'My Appointments', 'icon': Icons.calendar_today, 'route': '/appointments'},
-      {'title': 'Change Password', 'icon': Icons.lock, 'route': '/profile/change-password'},
-      {'title': 'My Subscriptions', 'icon': Icons.subscriptions, 'route': '/subscription'},
-      {'title': 'Settings', 'icon': Icons.settings, 'route': '/settings'},
+      {'title': l10n.editProfile, 'icon': Icons.edit, 'route': '/profile/edit'},
+      {'title': l10n.myAppointments, 'icon': Icons.calendar_today, 'route': '/appointments'},
+      {'title': l10n.changePassword, 'icon': Icons.lock, 'route': '/profile/change-password'},
+      {'title': l10n.mySubscriptions, 'icon': Icons.subscriptions, 'route': '/subscription'},
+      {'title': l10n.settings, 'icon': Icons.settings, 'route': '/settings'},
     ];
 
     return Column(
@@ -124,7 +139,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
           margin: const EdgeInsets.only(bottom: AppTheme.spacingSmall),
           child: ListTile(
             leading: const Icon(Icons.logout, color: Colors.red),
-            title: const Text('Logout', style: TextStyle(color: Colors.red)),
+            title: Text(l10n.logout, style: const TextStyle(color: Colors.red)),
             trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red),
             onTap: _handleLogout,
           ),
@@ -134,19 +149,20 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   void _handleLogout() async {
+    final l10n = AppLocalizations.of(context)!;
     final shouldLogout = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Logout'),
-        content: const Text('Are you sure you want to logout?'),
+        title: Text(l10n.logout),
+        content: Text(l10n.doYouWantToExit),
         actions: [
           TextButton(
             onPressed: () => Navigator.of(context).pop(false),
-            child: const Text('Cancel'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.of(context).pop(true),
-            child: const Text('Logout', style: TextStyle(color: Colors.red)),
+            child: Text(l10n.logout, style: const TextStyle(color: Colors.red)),
           ),
         ],
       ),

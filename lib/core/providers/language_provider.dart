@@ -23,5 +23,11 @@ class LanguageNotifier extends StateNotifier<Locale> {
   Future<void> setLanguage(Locale locale) async {
     state = locale;
     await _storage.write(key: 'language_code', value: locale.languageCode);
+    await _storage.write(key: 'language_selected', value: 'true');
+  }
+
+  Future<bool> isLanguageSelected() async {
+    final selected = await _storage.read(key: 'language_selected');
+    return selected == 'true';
   }
 }

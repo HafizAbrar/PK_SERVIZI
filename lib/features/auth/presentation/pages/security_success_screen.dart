@@ -1,25 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class SecuritySuccessScreen extends StatelessWidget {
   const SecuritySuccessScreen({super.key});
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.white,
+      appBar: AppBar(
+        backgroundColor: Colors.transparent,
+        elevation: 0,
+        automaticallyImplyLeading: false,
+        title: Text(
+          l10n.success,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+      ),
       body: SingleChildScrollView(
         child: Container(
-          height: MediaQuery.of(context).size.height,
-          width: double.infinity,
-          decoration: BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.circular(20),
-          ),
+          padding: const EdgeInsets.all(20),
           child: Column(
             mainAxisAlignment: MainAxisAlignment.center,
             crossAxisAlignment: CrossAxisAlignment.center,
             children: [
+              const SizedBox(height: 60),
               Container(
                 height: 200,
                 width: double.infinity,
@@ -33,10 +42,10 @@ class SecuritySuccessScreen extends StatelessWidget {
               ),
               const SizedBox(height: 20),
               Text(
-                'Password Changed Successfully!',
+                l10n.passwordChangedSuccessfully,
                 style: TextStyle(
-                  color: const Color(0xFF1B5E20),
-                  fontSize: 15,
+                  color: AppTheme.primaryColor,
+                  fontSize: 18,
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -44,9 +53,9 @@ class SecuritySuccessScreen extends StatelessWidget {
               Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 20.0),
                 child: Text(
-                  'Your password is changed! Please sign in with new password',
+                  l10n.passwordChangedMessage,
                   style: TextStyle(
-                    color: Colors.grey[600],
+                    color: AppTheme.textSecondary,
                     fontSize: 14,
                   ),
                   maxLines: 2,
@@ -54,23 +63,18 @@ class SecuritySuccessScreen extends StatelessWidget {
                 ),
               ),
               const SizedBox(height: 30),
-              ElevatedButton(
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFF1B5E20),
-                  padding: const EdgeInsets.symmetric(horizontal: 80, vertical: 15),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(20.0),
-                  ),
-                ),
-                onPressed: () {
-                  context.go('/login');
-                },
-                child: const Text(
-                  'OK',
-                  style: TextStyle(
-                    color: Colors.white,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 18,
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  style: AppTheme.primaryButtonStyle,
+                  onPressed: () => context.go('/login'),
+                  child: Text(
+                    l10n.ok,
+                    style: const TextStyle(
+                      color: Colors.white,
+                      fontWeight: FontWeight.bold,
+                      fontSize: 18,
+                    ),
                   ),
                 ),
               ),

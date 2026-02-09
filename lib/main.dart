@@ -6,7 +6,7 @@ import 'core/navigation/app_router.dart';
 import 'core/providers/language_provider.dart';
 import 'core/theme/app_theme.dart';
 import 'core/services/deep_link_service.dart';
-import 'l10n/app_localizations.dart';
+import 'generated/l10n/app_localizations.dart';
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -47,6 +47,7 @@ class MyApp extends ConsumerWidget {
       supportedLocales: const [
         Locale('en'),
         Locale('it'),
+        Locale('fr'),
       ],
       debugShowCheckedModeBanner: false,
     );

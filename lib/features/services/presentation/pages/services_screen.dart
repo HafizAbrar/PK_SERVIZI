@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import '../../../../core/network/api_client.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final serviceTypesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final apiClient = ref.read(apiClientProvider);
@@ -40,10 +42,11 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     final selectedServiceType = ref.watch(selectedServiceTypeProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAFC),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
           _buildHeader(),
+          const SizedBox(height: 36),
           _buildSearchBar(),
           _buildCategoryTabs(serviceTypesAsync),
           Expanded(
@@ -55,42 +58,41 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
   }
 
   Widget _buildHeader() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 50, 20, 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
         boxShadow: [
           BoxShadow(
-            color: Color(0x0A000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       child: Row(
         children: [
-          const Expanded(
-            child: Text(
-              'Our Services',
-              style: TextStyle(
-                fontSize: 28,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF111418),
-                letterSpacing: -0.5,
-              ),
+          Text(
+            l10n.services,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
+          const Spacer(),
           Container(
-            width: 40,
-            height: 40,
+            padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF1F5F9),
+              color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: IconButton(
-              onPressed: () => context.go('/notifications'),
-              icon: const Icon(Icons.notifications_outlined, color: Color(0xFF64748B), size: 20),
-            ),
+            child: const Icon(Icons.notifications, color: Colors.white, size: 24),
           ),
         ],
       ),
@@ -98,25 +100,32 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
   }
 
   Widget _buildSearchBar() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 0, 20, 16),
-      color: Colors.white,
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      transform: Matrix4.translationValues(0, -24, 0),
       child: Container(
-        height: 48,
+        height: 56,
         decoration: BoxDecoration(
-          color: const Color(0xFFF8FAFC),
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE2E8F0)),
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.1),
+              blurRadius: 20,
+              offset: const Offset(0, 4),
+            ),
+          ],
         ),
         child: TextField(
           controller: _searchController,
           onChanged: (value) => setState(() => _searchQuery = value),
-          decoration: const InputDecoration(
-            hintText: 'Search services...',
-            hintStyle: TextStyle(color: Color(0xFF94A3B8), fontSize: 15),
-            prefixIcon: Icon(Icons.search, color: Color(0xFF94A3B8), size: 20),
+          decoration: InputDecoration(
+            hintText: l10n.searchDocumentsOrServices,
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 24),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(vertical: 14),
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
           ),
         ),
       ),
@@ -125,11 +134,9 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
 
   Widget _buildCategoryTabs(AsyncValue<List<Map<String, dynamic>>> serviceTypesAsync) {
     return Container(
-      padding: const EdgeInsets.symmetric(vertical: 16),
-      color: Colors.white,
+      padding: const EdgeInsets.only(bottom: 16),
       child: serviceTypesAsync.when(
         data: (serviceTypes) {
-          // Auto-select first service type if none selected
           WidgetsBinding.instance.addPostFrameCallback((_) {
             if (serviceTypes.isNotEmpty && ref.read(selectedServiceTypeProvider) == null) {
               ref.read(selectedServiceTypeProvider.notifier).state = serviceTypes.first['id'];
@@ -137,7 +144,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           });
           
           return SizedBox(
-            height: 40,
+            height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
@@ -149,8 +156,8 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             ),
           );
         },
-        loading: () => const SizedBox(height: 40),
-        error: (_, __) => const SizedBox(height: 40),
+        loading: () => const SizedBox(height: 50),
+        error: (_, __) => const SizedBox(height: 50),
       ),
     );
   }
@@ -161,18 +168,26 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
       child: GestureDetector(
         onTap: () => ref.read(selectedServiceTypeProvider.notifier).state = serviceTypeId,
         child: Container(
-          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF186ADC) : Colors.transparent,
+            color: isSelected ? const Color(0xFF0A192F) : Colors.white,
             borderRadius: BorderRadius.circular(20),
-            border: isSelected ? null : Border.all(color: const Color(0xFFE2E8F0)),
+            border: Border.all(
+              color: isSelected ? const Color(0xFF0A192F) : Colors.grey[300]!,
+            ),
+            boxShadow: isSelected ? [
+              BoxShadow(
+                color: const Color(0xFF0A192F).withValues(alpha: 0.2),
+                blurRadius: 8,
+              ),
+            ] : null,
           ),
-          child: Text(
+          child: TranslatedText(
             label,
             style: TextStyle(
               fontSize: 14,
-              fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-              color: isSelected ? Colors.white : const Color(0xFF64748B),
+              fontWeight: FontWeight.w600,
+              color: isSelected ? Colors.white : const Color(0xFF0A192F),
             ),
           ),
         ),
@@ -182,7 +197,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
 
   Widget _buildServicesList(String? selectedServiceType) {
     if (selectedServiceType == null) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC)));
+      return const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D)));
     }
     
     final servicesAsync = ref.watch(servicesByTypeProvider(selectedServiceType));
@@ -194,28 +209,32 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           return (service['name'] ?? '').toLowerCase().contains(_searchQuery.toLowerCase());
         }).toList();
 
+        if (filteredServices.isEmpty) {
+          return _buildEmptyState();
+        }
+
         return ListView.builder(
           padding: const EdgeInsets.all(20),
           itemCount: filteredServices.length,
           itemBuilder: (context, index) => _buildServiceCard(filteredServices[index]),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC))),
+      loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
       error: (_, __) => _buildErrorState(() => ref.refresh(servicesByTypeProvider(selectedServiceType))),
     );
   }
 
   Widget _buildServiceCard(Map<String, dynamic> service) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: const [
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
           BoxShadow(
-            color: Color(0x08000000),
-            blurRadius: 8,
-            offset: Offset(0, 2),
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
           ),
         ],
       ),
@@ -227,26 +246,25 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             Row(
               children: [
                 Container(
-                  width: 48,
-                  height: 48,
+                  width: 56,
+                  height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF186ADC).withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(12),
+                    color: const Color(0xFF0A192F),
+                    borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.description, size: 24, color: Color(0xFF186ADC)),
+                  child: const Icon(Icons.business, size: 28, color: Color(0xFFF2D00D)),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     children: [
-                      Text(
+                      TranslatedText(
                         service['name'] ?? 'Service',
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF111418),
-                          letterSpacing: -0.2,
+                          color: Color(0xFF0A192F),
                         ),
                       ),
                       const SizedBox(height: 4),
@@ -255,7 +273,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFF186ADC),
+                          color: Color(0xFFF2D00D),
                         ),
                       ),
                     ],
@@ -264,12 +282,12 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
               ],
             ),
             const SizedBox(height: 16),
-            Text(
+            TranslatedText(
               service['description'] ?? 'Professional service with expert guidance',
-              style: const TextStyle(
-                fontSize: 15,
-                color: Color(0xFF64748B),
-                height: 1.4,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+                height: 1.5,
               ),
             ),
             const SizedBox(height: 20),
@@ -278,21 +296,31 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
               children: [
                 TextButton(
                   onPressed: () => context.push('/services/${service['id']}'),
-                  child: const Text(
-                    'View Detail',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF186ADC)),
+                  child: Text(
+                    l10n.viewDetails,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFFF2D00D),
+                    ),
                   ),
                 ),
                 ElevatedButton(
                   onPressed: () => _initiateServiceRequest(context, service['id']),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF186ADC),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                    backgroundColor: const Color(0xFFF2D00D),
+                    foregroundColor: const Color(0xFF0A192F),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                    elevation: 0,
                   ),
-                  child: const Text(
-                    'Get Service',
-                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Colors.white),
+                  child: Text(
+                    l10n.startService.toUpperCase(),
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      letterSpacing: 1,
+                    ),
                   ),
                 ),
               ],
@@ -303,30 +331,91 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     );
   }
 
-  Widget _buildErrorState(VoidCallback onRetry) {
+  Widget _buildEmptyState() {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.error_outline, size: 64, color: Color(0xFF94A3B8)),
-          const SizedBox(height: 16),
-          const Text(
-            'Something went wrong',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.w600, color: Color(0xFF475569)),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.search_off,
+              size: 64,
+              color: Color(0xFF0A192F),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.noServiceRequests,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0A192F),
+            ),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Please try again',
-            style: TextStyle(fontSize: 15, color: Color(0xFF94A3B8)),
+          Text(
+            l10n.pleaseTryAgain,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
           ),
-          const SizedBox(height: 24),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildErrorState(VoidCallback onRetry) {
+    final l10n = AppLocalizations.of(context)!;
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Color(0xFFEF4444),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.error,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0A192F),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.pleaseTryAgain,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 20),
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF186ADC),
-              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              backgroundColor: const Color(0xFFF2D00D),
+              foregroundColor: const Color(0xFF0A192F),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: const Text('Try Again', style: TextStyle(color: Colors.white, fontWeight: FontWeight.w600)),
+            child: Text(l10n.retry.toUpperCase(), style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -334,6 +423,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
   }
 
   Future<void> _initiateServiceRequest(BuildContext context, String serviceId) async {
+    final l10n = AppLocalizations.of(context)!;
     try {
       final apiClient = ref.read(apiClientProvider);
       final response = await apiClient.post('/api/v1/service-requests/initiate', data: {
@@ -350,7 +440,12 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     } catch (e) {
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to initiate service request')),
+          SnackBar(
+            content: Text(l10n.failedToInitiateServiceRequest),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         );
       }
     }

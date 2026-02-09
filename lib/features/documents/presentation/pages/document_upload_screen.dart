@@ -4,7 +4,9 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final requiredDocumentsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, serviceId) async {
   final apiClient = ref.read(apiClientProvider);
@@ -84,10 +86,10 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
             onPressed: () => context.pop(),
             icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Upload Documents',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              AppLocalizations.of(context)?.uploadDocuments ?? 'Upload Documents',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -103,14 +105,14 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Required Documents',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+          Text(
+            AppLocalizations.of(context)?.requiredDocuments ?? 'Required Documents',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Please upload all required documents to proceed with your service request.',
-            style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+          Text(
+            AppLocalizations.of(context)?.uploadDocumentsDescription ?? 'Please upload all required documents to proceed.',
+            style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
           ),
           const SizedBox(height: 24),
           ...documents.map((doc) => _buildDocumentCard(doc)),
@@ -145,12 +147,12 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    TranslatedText(
                       document['name'] ?? 'Document',
                       style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
                     ),
                     if (document['description'] != null)
-                      Text(
+                      TranslatedText(
                         document['description'],
                         style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
                       ),
@@ -164,7 +166,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                   borderRadius: BorderRadius.circular(4),
                 ),
                 child: Text(
-                  document['required'] == true ? 'Required' : 'Optional',
+                  document['required'] == true ? (AppLocalizations.of(context)?.required ?? 'Required') : (AppLocalizations.of(context)?.optional ?? 'Optional'),
                   style: TextStyle(
                     fontSize: 10,
                     fontWeight: FontWeight.w500,
@@ -197,7 +199,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                   ),
                   const SizedBox(height: 8),
                   Text(
-                    selectedFile != null ? selectedFile.path.split('/').last : 'Click to upload',
+                    selectedFile != null ? selectedFile.path.split('/').last : (AppLocalizations.of(context)?.clickToUpload ?? 'Click to upload'),
                     style: TextStyle(
                       fontSize: 14,
                       fontWeight: FontWeight.w500,
@@ -205,9 +207,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
                     ),
                   ),
                   if (selectedFile == null)
-                    const Text(
-                      'Camera or Gallery (JPG, PNG)',
-                      style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
+                    Text(
+                      AppLocalizations.of(context)?.cameraOrGallery ?? 'Camera or Gallery (JPG, PNG)',
+                      style: const TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
                     ),
                 ],
               ),
@@ -236,9 +238,9 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           ),
           child: _isUploading
               ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-              : const Text(
-                  'Upload Documents',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+              : Text(
+                  AppLocalizations.of(context)?.uploadDocuments ?? 'Upload Documents',
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                 ),
         ),
       ),
@@ -252,11 +254,11 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
         children: [
           const Icon(Icons.error_outline, size: 64, color: Color(0xFF9CA3AF)),
           const SizedBox(height: 16),
-          const Text('Failed to load required documents', style: TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
+          Text(AppLocalizations.of(context)?.failedToLoadDocuments ?? 'Failed to load required documents', style: const TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => ref.refresh(requiredDocumentsProvider(widget.serviceId)),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
           ),
         ],
       ),
@@ -272,7 +274,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
           children: [
             ListTile(
               leading: const Icon(Icons.camera_alt, color: Color(0xFF186ADC)),
-              title: const Text('Camera'),
+              title: Text(AppLocalizations.of(context)?.camera ?? 'Camera'),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(docId, ImageSource.camera);
@@ -280,7 +282,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
             ),
             ListTile(
               leading: const Icon(Icons.photo_library, color: Color(0xFF186ADC)),
-              title: const Text('Gallery'),
+              title: Text(AppLocalizations.of(context)?.gallery ?? 'Gallery'),
               onTap: () {
                 Navigator.pop(context);
                 _pickImage(docId, ImageSource.gallery);
@@ -304,7 +306,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
   Future<void> _uploadDocuments() async {
     if (_selectedFiles.isEmpty) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Please select at least one document')),
+        SnackBar(content: Text(AppLocalizations.of(context)?.selectAtLeastOneDocument ?? 'Please select at least one document')),
       );
       return;
     }
@@ -337,7 +339,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Documents uploaded successfully')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.documentsUploadedSuccessfully ?? 'Documents uploaded successfully')),
         );
         // Navigate to submission screen with requestId
         context.push('/request-submission?requestId=${widget.requestId}');
@@ -345,7 +347,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading documents: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)?.errorUploadingDocuments ?? 'Error uploading documents'}: $e')),
         );
       }
     } finally {

@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final subscriptionPlansProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final apiClient = ref.read(apiClientProvider);
@@ -37,8 +39,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to initiate checkout')),
+          SnackBar(content: Text(l10n?.error ?? 'Error')),
         );
       }
     } finally {
@@ -80,10 +83,10 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             onTap: () => context.pop(),
             child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Subscription Plans',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              AppLocalizations.of(context)?.plans ?? 'Plans',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -109,19 +112,20 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
   }
 
   Widget _buildHeader() {
-    return const Padding(
-      padding: EdgeInsets.all(16),
+    final l10n = AppLocalizations.of(context);
+    return Padding(
+      padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Choose your plan',
-            style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            l10n?.chooseYourPlan ?? 'Choose your plan',
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
-          SizedBox(height: 8),
+          const SizedBox(height: 8),
           Text(
-            'Select the best option for your fiscal and administrative needs.',
-            style: TextStyle(fontSize: 14, color: Color(0xFF637288)),
+            l10n?.selectBestOption ?? 'Select the best option for your needs.',
+            style: const TextStyle(fontSize: 14, color: Color(0xFF637288)),
           ),
         ],
       ),
@@ -149,7 +153,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   boxShadow: !isYearly ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
                 ),
                 child: Text(
-                  'Monthly',
+                  AppLocalizations.of(context)?.monthly ?? 'Monthly',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -171,7 +175,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   boxShadow: isYearly ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
                 ),
                 child: Text(
-                  'Yearly',
+                  AppLocalizations.of(context)?.yearly ?? 'Yearly',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -221,7 +225,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           Row(
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
-              Text(
+              TranslatedText(
                 plan['name'] ?? 'Plan',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               ),
@@ -232,9 +236,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                     color: const Color(0xFF186ADC),
                     borderRadius: BorderRadius.circular(20),
                   ),
-                  child: const Text(
-                    'MOST POPULAR',
-                    style: TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+                  child: Text(
+                    AppLocalizations.of(context)?.mostPopular.toUpperCase() ?? 'MOST POPULAR',
+                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                 ),
             ],
@@ -243,7 +247,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           if (plan['description'] != null)
             Padding(
               padding: const EdgeInsets.only(bottom: 8),
-              child: Text(
+              child: TranslatedText(
                 plan['description'],
                 style: const TextStyle(fontSize: 14, color: Color(0xFF637288)),
               ),
@@ -256,7 +260,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                 style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF111418)),
               ),
               Text(
-                '/${isYearly ? 'year' : 'mo'}',
+                '/${isYearly ? (AppLocalizations.of(context)?.year ?? 'year') : (AppLocalizations.of(context)?.month ?? 'mo')}',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF637288)),
               ),
             ],
@@ -283,7 +287,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                       ),
                     )
                   : Text(
-                      'Select ${plan['name'] ?? 'Plan'}',
+                      '${AppLocalizations.of(context)?.select ?? 'Select'} ${plan['name'] ?? 'Plan'}',
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                     ),
             ),
@@ -291,9 +295,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           const SizedBox(height: 8),
           TextButton(
             onPressed: () => context.push('/subscription-plan-details/${plan['id']}'),
-            child: const Text(
-              'View Details',
-              style: TextStyle(fontSize: 14, color: Color(0xFF186ADC)),
+            child: Text(
+              AppLocalizations.of(context)?.viewDetails ?? 'View Details',
+              style: const TextStyle(fontSize: 14, color: Color(0xFF186ADC)),
             ),
           ),
           const SizedBox(height: 20),
@@ -309,7 +313,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   ),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
+                    child: TranslatedText(
                       feature,
                       style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
                     ),
@@ -325,7 +329,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20),
                   const SizedBox(width: 12),
                   Text(
-                    '${plan['maxRequests']} requests per month',
+                    '${plan['maxRequests']} ${AppLocalizations.of(context)?.requestsPerMonth ?? 'requests per month'}',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
                   ),
                 ],
@@ -339,7 +343,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                   const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20),
                   const SizedBox(width: 12),
                   Text(
-                    '${plan['supportLevel']} support',
+                    '${plan['supportLevel']} ${AppLocalizations.of(context)?.support ?? 'support'}',
                     style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
                   ),
                 ],
@@ -351,14 +355,15 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
   }
 
   Widget _buildFAQ() {
+    final l10n = AppLocalizations.of(context);
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.all(16),
+        Padding(
+          padding: const EdgeInsets.all(16),
           child: Text(
-            'Frequently Asked Questions',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            l10n?.faq ?? 'Frequently Asked Questions',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
         ),
         Container(
@@ -370,9 +375,9 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           ),
           child: Column(
             children: [
-              _buildFAQItem('Can I change plans later?', 'Yes, you can upgrade or downgrade your plan at any time from your account settings. Changes will be reflected in your next billing cycle.'),
-              _buildFAQItem('What is \'Consulenza dedicata\'?', 'Our Premium plan offers a dedicated fiscal expert who manages your family records and provides personalized legal and administrative guidance.'),
-              _buildFAQItem('Are these prices VAT inclusive?', 'Yes, all displayed prices include relevant taxes. There are no hidden fees for the standard services included in each tier.'),
+              _buildFAQItem(l10n?.faqChangePlans ?? 'Can I change plans later?', l10n?.faqChangePlansAnswer ?? 'Yes, you can upgrade or downgrade your plan at any time.'),
+              _buildFAQItem(l10n?.faqConsulenza ?? 'What is Consulenza dedicata?', l10n?.faqConsulenzaAnswer ?? 'Our Premium plan offers a dedicated fiscal expert.'),
+              _buildFAQItem(l10n?.faqVAT ?? 'Are these prices VAT inclusive?', l10n?.faqVATAnswer ?? 'Yes, all displayed prices include relevant taxes.'),
             ],
           ),
         ),
@@ -405,7 +410,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         children: [
           const Icon(Icons.error_outline, size: 64, color: Color(0xFF9CA3AF)),
           const SizedBox(height: 16),
-          const Text('Failed to load plans', style: TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
+          Text(AppLocalizations.of(context)?.failedToLoadPlans ?? 'Failed to load plans', style: const TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => ref.refresh(subscriptionPlansProvider),
@@ -413,7 +418,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
               backgroundColor: const Color(0xFF186ADC),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
           ),
         ],
       ),

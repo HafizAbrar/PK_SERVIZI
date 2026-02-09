@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:url_launcher/url_launcher.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/services/api_service.dart';
 
@@ -49,7 +50,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       setState(() => isLoading = false);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading documents: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)?.errorLoadingDocuments ?? 'Error loading documents'}: $e')),
         );
       }
     }
@@ -62,9 +63,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Documents',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          AppLocalizations.of(context)?.documents ?? 'Documents',
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
         actions: [
           IconButton(
@@ -98,7 +99,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ),
           const SizedBox(height: AppTheme.spacingMedium),
           Text(
-            'No documents yet',
+            AppLocalizations.of(context)?.noDocumentsYet ?? 'No documents yet',
             style: TextStyle(
               fontSize: AppTheme.fontSizeXLarge,
               color: AppTheme.textSecondary,
@@ -108,7 +109,7 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           ElevatedButton(
             style: AppTheme.primaryButtonStyle,
             onPressed: () => context.push('/upload-documents'),
-            child: const Text('Upload Documents'),
+            child: Text(AppLocalizations.of(context)?.uploadDocuments ?? 'Upload Documents'),
           ),
         ],
       ),
@@ -132,9 +133,9 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
             subtitle: Text(document['status'] ?? 'Unknown'),
             trailing: PopupMenuButton(
               itemBuilder: (context) => [
-                const PopupMenuItem(value: 'view', child: Text('View')),
-                const PopupMenuItem(value: 'download', child: Text('Download')),
-                const PopupMenuItem(value: 'delete', child: Text('Delete')),
+                PopupMenuItem(value: 'view', child: Text(AppLocalizations.of(context)?.view ?? 'View')),
+                PopupMenuItem(value: 'download', child: Text(AppLocalizations.of(context)?.download ?? 'Download')),
+                PopupMenuItem(value: 'delete', child: Text(AppLocalizations.of(context)?.delete ?? 'Delete')),
               ],
               onSelected: (value) => _handleDocumentAction(value, document),
             ),
@@ -181,21 +182,21 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cannot open document preview')),
+              SnackBar(content: Text(AppLocalizations.of(context)?.cannotOpenDocument ?? 'Cannot open document preview')),
             );
           }
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Preview not available')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.previewNotAvailable ?? 'Preview not available')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error previewing document: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)?.errorPreviewingDocument ?? 'Error previewing document'}: $e')),
         );
       }
     }
@@ -211,27 +212,27 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
           await launchUrl(url, mode: LaunchMode.externalApplication);
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Download started')),
+              SnackBar(content: Text(AppLocalizations.of(context)?.downloadStarted ?? 'Download started')),
             );
           }
         } else {
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Cannot download document')),
+              SnackBar(content: Text(AppLocalizations.of(context)?.cannotDownloadDocument ?? 'Cannot download document')),
             );
           }
         }
       } else {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Download not available')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.downloadNotAvailable ?? 'Download not available')),
           );
         }
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error downloading document: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)?.errorDownloadingDocument ?? 'Error downloading document'}: $e')),
         );
       }
     }
@@ -241,17 +242,17 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Delete Document'),
-        content: Text('Are you sure you want to delete "${document['name'] ?? 'this document'}"?'),
+        title: Text(AppLocalizations.of(context)?.deleteDocument ?? 'Delete Document'),
+        content: Text('${AppLocalizations.of(context)?.confirmDeleteDocument ?? 'Are you sure you want to delete'} "${document['name'] ?? 'this document'}"?'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Cancel'),
+            child: Text(AppLocalizations.of(context)?.cancel ?? 'Cancel'),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: AppTheme.errorColor),
-            child: const Text('Delete'),
+            child: Text(AppLocalizations.of(context)?.delete ?? 'Delete'),
           ),
         ],
       ),
@@ -263,13 +264,13 @@ class _DocumentsScreenState extends ConsumerState<DocumentsScreen> {
         await _loadDocuments(); // Reload the list
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Document deleted successfully')),
+            SnackBar(content: Text(AppLocalizations.of(context)?.documentDeletedSuccessfully ?? 'Document deleted successfully')),
           );
         }
       } catch (e) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error deleting document: $e')),
+            SnackBar(content: Text('${AppLocalizations.of(context)?.errorDeletingDocument ?? 'Error deleting document'}: $e')),
           );
         }
       }

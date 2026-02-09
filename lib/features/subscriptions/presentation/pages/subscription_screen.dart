@@ -2,6 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final activeSubscriptionProvider = FutureProvider<Map<String, dynamic>?>((ref) async {
   final apiClient = ref.read(apiClientProvider);
@@ -40,6 +42,7 @@ class SubscriptionScreen extends ConsumerWidget {
   }
 
   Widget _buildAppBar(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
       decoration: const BoxDecoration(
@@ -52,10 +55,10 @@ class SubscriptionScreen extends ConsumerWidget {
             onTap: () => context.pop(),
             child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'My Active Subscription',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              l10n.mySubscriptions,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -66,13 +69,14 @@ class SubscriptionScreen extends ConsumerWidget {
   }
 
   Widget _buildNoSubscription(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.subscriptions_outlined, size: 80, color: Color(0xFF9CA3AF)),
           const SizedBox(height: 16),
-          const Text('No active subscription', style: TextStyle(fontSize: 18, color: Color(0xFF6B7280))),
+          Text(l10n.noActiveRequests, style: const TextStyle(fontSize: 18, color: Color(0xFF6B7280))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.push('/subscription-plans'),
@@ -80,7 +84,7 @@ class SubscriptionScreen extends ConsumerWidget {
               backgroundColor: const Color(0xFF186ADC),
               foregroundColor: Colors.white,
             ),
-            child: const Text('View Plans'),
+            child: Text(l10n.viewAll),
           ),
         ],
       ),
@@ -109,7 +113,7 @@ class SubscriptionScreen extends ConsumerWidget {
         mainAxisAlignment: MainAxisAlignment.spaceBetween,
         children: [
           const Text(
-            'Subscription Status',
+            'Status',
             style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           Container(
@@ -169,7 +173,7 @@ class SubscriptionScreen extends ConsumerWidget {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(
+                TranslatedText(
                   planName,
                   style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
                 ),
@@ -188,7 +192,7 @@ class SubscriptionScreen extends ConsumerWidget {
                   ),
                 ),
                 const SizedBox(height: 4),
-                Text(
+                TranslatedText(
                   description,
                   style: const TextStyle(fontSize: 14, color: Color(0xFF637288)),
                 ),
@@ -223,7 +227,7 @@ class SubscriptionScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Billing Information',
+            'Billing',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           const SizedBox(height: 12),
@@ -310,7 +314,7 @@ class SubscriptionScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Service Usage (Limits)',
+            'Usage',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           const SizedBox(height: 12),
@@ -376,7 +380,7 @@ class SubscriptionScreen extends ConsumerWidget {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           const Text(
-            'Included Features',
+            'Features',
             style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           const SizedBox(height: 8),
@@ -404,7 +408,7 @@ class SubscriptionScreen extends ConsumerWidget {
         ),
         const SizedBox(width: 12),
         Expanded(
-          child: Text(
+          child: TranslatedText(
             feature,
             style: const TextStyle(fontSize: 14, color: Color(0xFF111418)),
           ),
@@ -414,6 +418,7 @@ class SubscriptionScreen extends ConsumerWidget {
   }
 
   Widget _buildActions(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     return Consumer(
       builder: (context, ref, child) {
         return Container(
@@ -430,14 +435,14 @@ class SubscriptionScreen extends ConsumerWidget {
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
-                  child: const Row(
+                  child: Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: [
-                      Icon(Icons.payments, size: 20),
-                      SizedBox(width: 8),
+                      const Icon(Icons.payments, size: 20),
+                      const SizedBox(width: 8),
                       Text(
-                        'Manage Payment (Stripe)',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                        l10n.completePayment,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ],
                   ),
@@ -457,18 +462,18 @@ class SubscriptionScreen extends ConsumerWidget {
                       side: const BorderSide(color: Color(0xFF186ADC), width: 0.2),
                     ),
                   ),
-                  child: const Text(
-                    'Upgrade Plan',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  child: Text(
+                    l10n.plans,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                   ),
                 ),
               ),
               const SizedBox(height: 8),
               TextButton(
                 onPressed: () => _cancelSubscription(context, ref),
-                child: const Text(
-                  'Cancel Subscription',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.red),
+                child: Text(
+                  l10n.cancel,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.red),
                 ),
               ),
             ],
@@ -479,20 +484,21 @@ class SubscriptionScreen extends ConsumerWidget {
   }
 
   static Future<void> _cancelSubscription(BuildContext context, WidgetRef ref) async {
+    final l10n = AppLocalizations.of(context)!;
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Cancel Subscription'),
-        content: const Text('Are you sure you want to cancel your subscription?'),
+        title: Text(l10n.cancel),
+        content: Text(l10n.doYouWantToExit),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
-            child: const Text('Keep Subscription'),
+            child: Text(l10n.cancel),
           ),
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: const Text('Cancel'),
+            child: Text(l10n.ok),
           ),
         ],
       ),
@@ -505,13 +511,13 @@ class SubscriptionScreen extends ConsumerWidget {
         ref.invalidate(activeSubscriptionProvider);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Subscription cancelled successfully')),
+            SnackBar(content: Text(l10n.success)),
           );
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('Error cancelling subscription: $e')),
+            SnackBar(content: Text('${l10n.error}: $e')),
           );
         }
       }

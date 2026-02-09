@@ -1,8 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../providers/auth_provider.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class SignUpScreen extends ConsumerStatefulWidget {
   const SignUpScreen({super.key});
@@ -15,12 +16,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _firstNameController = TextEditingController();
-  final _lastNameController = TextEditingController();
-  final _fiscalCodeController = TextEditingController();
+  final _fullNameController = TextEditingController();
+  final _phoneController = TextEditingController();
 
-  bool gdprConsent = false;
-  bool marketingConsent = false;
   bool isButtonEnabled = false;
   bool _obscurePassword = true;
 
@@ -29,18 +27,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     super.initState();
     _emailController.addListener(_validate);
     _passwordController.addListener(_validate);
-    _firstNameController.addListener(_validate);
-    _lastNameController.addListener(_validate);
-    _fiscalCodeController.addListener(_validate);
+    _fullNameController.addListener(_validate);
+    _phoneController.addListener(_validate);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _firstNameController.dispose();
-    _lastNameController.dispose();
-    _fiscalCodeController.dispose();
+    _fullNameController.dispose();
+    _phoneController.dispose();
     super.dispose();
   }
 
@@ -48,10 +44,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     setState(() {
       isButtonEnabled = _emailController.text.isNotEmpty &&
                        _passwordController.text.isNotEmpty &&
-                       _firstNameController.text.isNotEmpty &&
-                       _lastNameController.text.isNotEmpty &&
-                       _fiscalCodeController.text.isNotEmpty &&
-                       gdprConsent;
+                       _fullNameController.text.isNotEmpty &&
+                       _phoneController.text.isNotEmpty;
     });
   }
 
@@ -61,17 +55,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     await ref.read(authStateProvider.notifier).register(
       email: _emailController.text,
       password: _passwordController.text,
-      firstName: _firstNameController.text,
-      lastName: _lastNameController.text,
-      fiscalCode: _fiscalCodeController.text,
-      phone: '',
-      dateOfBirth: '',
-      address: '',
-      city: '',
-      postalCode: '',
-      province: '',
-      gdprConsent: gdprConsent,
-      marketingConsent: marketingConsent,
+      fullName: _fullNameController.text,
+      phone: _phoneController.text,
     );
   }
 
@@ -84,14 +69,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.accountCreated)),
         );
-        context.go('/profile-completion');
+        context.go('/login');
       } else if (next is AuthStateError) {
-        String errorMessage = next.message;
-        if (errorMessage.contains('Default customer role not found')) {
-          errorMessage = 'Backend configuration error. Please contact support.';
-        }
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
+          SnackBar(content: Text(next.message)),
         );
       }
     });
@@ -99,43 +80,45 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     final authState = ref.watch(authStateProvider);
     final isLoading = authState is AuthStateLoading;
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        leading: const BackButton(color: Colors.white),
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/login'),
+        ),
         title: Text(
           l10n.createAccount,
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: Container(
-        decoration: const BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+        decoration: AppTheme.cardDecoration.copyWith(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
         child: SingleChildScrollView(
-          padding: const EdgeInsets.all(20),
+          padding: const EdgeInsets.all(AppTheme.spacingLarge),
           child: Form(
             key: _formKey,
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: 10),
+                const SizedBox(height: AppTheme.spacingSmall),
                 Text(
                   l10n.welcomeToPKServizi,
-                  style: const TextStyle(
-                    color: Color(0xFF1B5E20),
-                    fontSize: 22,
+                  style: TextStyle(
+                    color: AppTheme.primaryColor,
+                    fontSize: AppTheme.fontSizeXXLarge,
                     fontWeight: FontWeight.bold,
                   ),
                 ),
-                const SizedBox(height: 5),
+                const SizedBox(height: AppTheme.spacingXSmall),
                 Text(
                   l10n.createAccountToContinue,
-                  style: TextStyle(color: Colors.grey[600]),
+                  style: TextStyle(color: AppTheme.textSecondary),
                 ),
-                const SizedBox(height: 25),
+                const SizedBox(height: AppTheme.spacingXLarge),
                 Center(
                   child: Container(
                     width: 96,
@@ -149,7 +132,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       borderRadius: BorderRadius.circular(20),
                       boxShadow: [
                         BoxShadow(
-                          color: Colors.black.withOpacity(0.3),
+                          color: Colors.black.withValues(alpha: 0.3),
                           blurRadius: 20,
                           offset: const Offset(0, 10),
                         ),
@@ -162,7 +145,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                             gradient: LinearGradient(
                               begin: Alignment.topLeft,
                               end: Alignment.bottomRight,
-                              colors: [Colors.white.withOpacity(0.1), Colors.transparent],
+                              colors: [Colors.white.withValues(alpha: 0.1), Colors.transparent],
                             ),
                             borderRadius: BorderRadius.circular(20),
                           ),
@@ -188,24 +171,29 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   ),
                 ),
                 const SizedBox(height: 20),
-                const Text(
-                  'PK SERVIZI',
-                  style: TextStyle(
-                    fontSize: 24,
-                    fontWeight: FontWeight.w600,
-                    letterSpacing: 6,
-                    color: Color(0xFF0A1D37),
-                  ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Text(
+                      'PK SERVIZI',
+                      style: TextStyle(
+                        fontSize: 24,
+                        fontWeight: FontWeight.w600,
+                        letterSpacing: 6,
+                        color: Color(0xFF0A1D37),
+                      ),
+                    ),
+                  ],
                 ),
                 const SizedBox(height: 8),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
-                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
                     const SizedBox(width: 12),
-                    const Text(
-                      'EXCELLENCE IN FISCAL CARE',
-                      style: TextStyle(
+                    Text(
+                      l10n.excellenceInFiscalCare,
+                      style: const TextStyle(
                         fontSize: 9,
                         fontWeight: FontWeight.bold,
                         letterSpacing: 3,
@@ -213,36 +201,30 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                       ),
                     ),
                     const SizedBox(width: 12),
-                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withOpacity(0.5)),
+                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
                   ],
                 ),
-                const SizedBox(height: 30),
+                const SizedBox(height: AppTheme.spacingXLarge),
                 _buildField(
-                  controller: _firstNameController,
-                  label: l10n.firstName,
+                  controller: _fullNameController,
+                  label: l10n.fullName,
                   icon: Icons.person_outline,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spacingMedium),
                 _buildField(
-                  controller: _lastNameController,
-                  label: l10n.lastName,
-                  icon: Icons.person_outline,
+                  controller: _phoneController,
+                  label: l10n.phone,
+                  icon: Icons.phone_outlined,
+                  keyboard: TextInputType.phone,
                 ),
-                const SizedBox(height: 16),
-                _buildField(
-                  controller: _fiscalCodeController,
-                  label: l10n.fiscalCode,
-                  icon: Icons.credit_card,
-                  maxLength: 16,
-                ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spacingMedium),
                 _buildField(
                   controller: _emailController,
                   label: l10n.email,
                   icon: Icons.email_outlined,
                   keyboard: TextInputType.emailAddress,
                 ),
-                const SizedBox(height: 16),
+                const SizedBox(height: AppTheme.spacingMedium),
                 _buildField(
                   controller: _passwordController,
                   label: l10n.password,
@@ -250,69 +232,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   obscure: _obscurePassword,
                   onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
-                const SizedBox(height: 10),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: gdprConsent,
-                      activeColor: const Color(0xFF1B5E20),
-                      onChanged: (v) {
-                        setState(() {
-                          gdprConsent = v!;
-                          _validate();
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: RichText(
-                        text: TextSpan(
-                          style: TextStyle(color: Colors.grey[600]),
-                          children: [
-                            TextSpan(text: '${l10n.agreeToPrivacyPolicy} '),
-                            TextSpan(
-                              text: l10n.required,
-                              style: const TextStyle(
-                                color: Color(0xFF1B5E20),
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
-                Row(
-                  children: [
-                    Checkbox(
-                      value: marketingConsent,
-                      activeColor: const Color(0xFF1B5E20),
-                      onChanged: (v) {
-                        setState(() {
-                          marketingConsent = v!;
-                        });
-                      },
-                    ),
-                    Expanded(
-                      child: Text(
-                        l10n.agreeToMarketing,
-                        style: TextStyle(color: Colors.grey[600]),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 20),
+                const SizedBox(height: AppTheme.spacingLarge),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1B5E20),
-                      disabledBackgroundColor: Colors.grey[300],
-                      padding: const EdgeInsets.symmetric(vertical: 14),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(18),
-                      ),
-                    ),
+                    style: AppTheme.primaryButtonStyle,
                     onPressed: isButtonEnabled && !isLoading ? _registerUser : null,
                     child: isLoading
                         ? const SizedBox(
@@ -326,25 +250,23 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                         : Text(
                             l10n.signUp,
                             style: const TextStyle(
-                              fontSize: 18,
+                              fontSize: AppTheme.fontSizeRegular,
                               fontWeight: FontWeight.bold,
                               color: Colors.white,
                             ),
                           ),
                   ),
                 ),
-                const SizedBox(height: 15),
+                const SizedBox(height: AppTheme.spacingSmall),
                 Row(
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(l10n.alreadyHaveAccount),
                     TextButton(
-                      onPressed: () {
-                        context.go('/login');
-                      },
+                      onPressed: () => context.go('/login'),
                       child: Text(
                         l10n.signIn,
-                        style: const TextStyle(color: Color(0xFF1B5E20)),
+                        style: TextStyle(color: AppTheme.primaryColor),
                       ),
                     )
                   ],
@@ -363,8 +285,6 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     required IconData icon,
     bool obscure = false,
     TextInputType keyboard = TextInputType.text,
-    int? maxLength,
-    String? hint,
     VoidCallback? onToggleVisibility,
   }) {
     final l10n = AppLocalizations.of(context)!;
@@ -373,39 +293,22 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       controller: controller,
       obscureText: obscure,
       keyboardType: keyboard,
-      maxLength: maxLength,
-      textCapitalization: label == l10n.fiscalCode ? TextCapitalization.characters : TextCapitalization.none,
-      decoration: InputDecoration(
-        labelText: label,
-        hintText: hint,
-        prefixIcon: Icon(icon, color: const Color(0xFF1B5E20)),
+      decoration: AppTheme.inputDecoration(label).copyWith(
+        prefixIcon: Icon(icon, color: AppTheme.primaryColor),
         suffixIcon: onToggleVisibility != null
             ? IconButton(
                 icon: Icon(
                   obscure ? Icons.visibility : Icons.visibility_off,
-                  color: const Color(0xFF1B5E20),
+                  color: AppTheme.primaryColor,
                 ),
                 onPressed: onToggleVisibility,
               )
             : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(18),
-          borderSide: const BorderSide(color: Color(0xFF1B5E20)),
-        ),
       ),
       validator: (v) {
         if (v!.isEmpty) return l10n.requiredField;
         if (label == l10n.email && !v.contains('@')) {
           return l10n.enterValidEmail;
-        }
-        if (label == l10n.fiscalCode) {
-          if (v.length != 16) return l10n.fiscalCodeLength;
-          if (!RegExp(r'^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$').hasMatch(v.toUpperCase())) {
-            return l10n.invalidFiscalCode;
-          }
         }
         if (label == l10n.password && v.length < 6) {
           return l10n.passwordMinLength;

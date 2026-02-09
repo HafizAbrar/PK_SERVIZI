@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/services/api_service.dart';
 
 final notificationsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
@@ -21,19 +22,20 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F8),
       body: Column(
         children: [
-          _buildHeader(),
-          _buildFilterTabs(),
+          _buildHeader(l10n),
+          _buildFilterTabs(l10n),
           Expanded(
             child: notificationsAsync.when(
-              data: (notifications) => _buildNotificationsList(notifications),
+              data: (notifications) => _buildNotificationsList(notifications, l10n),
               loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC))),
-              error: (error, stack) => Center(child: Text('Error: $error')),
+              error: (error, stack) => Center(child: Text('${l10n.error}: $error')),
             ),
           ),
         ],
@@ -41,7 +43,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  Widget _buildHeader() {
+  Widget _buildHeader(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
       decoration: const BoxDecoration(
@@ -55,19 +57,19 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             onTap: () => context.go('/home'),
             child: const Icon(Icons.arrow_back_ios, size: 24, color: Color(0xFF111418)),
           ),
-          const Text(
-            'Notifications',
-            style: TextStyle(
+          Text(
+            l10n.notifications,
+            style: const TextStyle(
               color: Color(0xFF111418),
               fontSize: 24,
               fontWeight: FontWeight.bold,
             ),
           ),
           TextButton(
-            onPressed: _markAllAsRead,
-            child: const Text(
-              'Mark all as read',
-              style: TextStyle(
+            onPressed: () => _markAllAsRead(l10n),
+            child: Text(
+              l10n.markAllAsRead,
+              style: const TextStyle(
                 color: Color(0xFF186ADC),
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
@@ -79,7 +81,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  Widget _buildFilterTabs() {
+  Widget _buildFilterTabs(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.all(16),
       color: Colors.white,
@@ -92,16 +94,16 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         ),
         child: Row(
           children: [
-            _buildFilterTab('All'),
-            _buildFilterTab('Requests'),
-            _buildFilterTab('Payments'),
+            _buildFilterTab(l10n.all, l10n),
+            _buildFilterTab(l10n.requests, l10n),
+            _buildFilterTab(l10n.payments, l10n),
           ],
         ),
       ),
     );
   }
 
-  Widget _buildFilterTab(String filter) {
+  Widget _buildFilterTab(String filter, AppLocalizations l10n) {
     final isSelected = selectedFilter == filter;
     return Expanded(
       child: GestureDetector(
@@ -128,17 +130,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  Widget _buildNotificationsList(List<Map<String, dynamic>> notifications) {
-    final filteredNotifications = _filterNotifications(notifications);
+  Widget _buildNotificationsList(List<Map<String, dynamic>> notifications, AppLocalizations l10n) {
+    final filteredNotifications = _filterNotifications(notifications, l10n);
     
     if (filteredNotifications.isEmpty) {
-      return const Center(
+      return Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.notifications_none, size: 64, color: Color(0xFF9CA3AF)),
-            SizedBox(height: 16),
-            Text('No notifications', style: TextStyle(fontSize: 18, color: Color(0xFF6B7280))),
+            const Icon(Icons.notifications_none, size: 64, color: Color(0xFF9CA3AF)),
+            const SizedBox(height: 16),
+            Text(l10n.noNotifications, style: const TextStyle(fontSize: 18, color: Color(0xFF6B7280))),
           ],
         ),
       );
@@ -147,11 +149,11 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     return ListView.builder(
       padding: EdgeInsets.zero,
       itemCount: filteredNotifications.length,
-      itemBuilder: (context, index) => _buildNotificationItem(filteredNotifications[index]),
+      itemBuilder: (context, index) => _buildNotificationItem(filteredNotifications[index], l10n),
     );
   }
 
-  Widget _buildNotificationItem(Map<String, dynamic> notification) {
+  Widget _buildNotificationItem(Map<String, dynamic> notification, AppLocalizations l10n) {
     final isUnread = !(notification['isRead'] ?? false);
     final type = notification['type'] ?? 'info';
     
@@ -210,9 +212,9 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                                 color: const Color(0xFF186ADC),
                                 borderRadius: BorderRadius.circular(4),
                               ),
-                              child: const Text(
-                                'NEW',
-                                style: TextStyle(
+                              child: Text(
+                                l10n.newLabel,
+                                style: const TextStyle(
                                   color: Colors.white,
                                   fontSize: 10,
                                   fontWeight: FontWeight.bold,
@@ -234,7 +236,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                       ),
                       const SizedBox(height: 8),
                       Text(
-                        _formatDate(notification['createdAt']),
+                        _formatDate(notification['createdAt'], l10n),
                         style: const TextStyle(
                           color: Color(0xFF637288),
                           fontSize: 12,
@@ -290,19 +292,17 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     );
   }
 
-  List<Map<String, dynamic>> _filterNotifications(List<Map<String, dynamic>> notifications) {
-    if (selectedFilter == 'All') return notifications;
+  List<Map<String, dynamic>> _filterNotifications(List<Map<String, dynamic>> notifications, AppLocalizations l10n) {
+    if (selectedFilter == l10n.all) return notifications;
     
     return notifications.where((notification) {
       final message = notification['message']?.toString().toLowerCase() ?? '';
-      switch (selectedFilter) {
-        case 'Requests':
-          return message.contains('questionnaire') || message.contains('document');
-        case 'Payments':
-          return message.contains('payment') || message.contains('€');
-        default:
-          return true;
+      if (selectedFilter == l10n.requests) {
+        return message.contains('questionnaire') || message.contains('document');
+      } else if (selectedFilter == l10n.payments) {
+        return message.contains('payment') || message.contains('€');
       }
+      return true;
     }).toList();
   }
 
@@ -310,37 +310,37 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     return title.replaceAll(RegExp(r'[🎉✅💳📋]'), '').trim();
   }
 
-  String _formatDate(String? dateString) {
+  String _formatDate(String? dateString, AppLocalizations l10n) {
     if (dateString == null) return '';
     try {
       final date = DateTime.parse(dateString);
       final now = DateTime.now();
       final difference = now.difference(date);
       
-      if (difference.inMinutes < 1) return 'Just now';
-      if (difference.inMinutes < 60) return '${difference.inMinutes}m ago';
-      if (difference.inHours < 24) return '${difference.inHours}h ago';
-      if (difference.inDays == 1) return 'Yesterday';
-      if (difference.inDays < 7) return '${difference.inDays} days ago';
+      if (difference.inMinutes < 1) return l10n.justNow;
+      if (difference.inMinutes < 60) return '${difference.inMinutes}${l10n.minutesAgo}';
+      if (difference.inHours < 24) return '${difference.inHours}${l10n.hoursAgo}';
+      if (difference.inDays == 1) return l10n.yesterday;
+      if (difference.inDays < 7) return '${difference.inDays} ${l10n.daysAgo}';
       return '${date.day}/${date.month}/${date.year}';
     } catch (e) {
       return dateString;
     }
   }
 
-  Future<void> _markAllAsRead() async {
+  Future<void> _markAllAsRead(AppLocalizations l10n) async {
     try {
       await ApiServiceFactory.customer.markAllNotificationsAsRead();
       final _ = ref.refresh(notificationsProvider);
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('All notifications marked as read')),
+          SnackBar(content: Text(l10n.allNotificationsMarkedAsRead)),
         );
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error: $e')),
+          SnackBar(content: Text('${l10n.error}: $e')),
         );
       }
     }

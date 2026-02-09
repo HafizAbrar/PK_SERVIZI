@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/api_client.dart';
 import '../providers/profile_provider.dart';
@@ -63,8 +64,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       await apiClient.post('/api/v1/users/avatar', data: formData);
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error uploading avatar: $e')),
+          SnackBar(content: Text('${l10n.errorUploadingAvatar}: $e')),
         );
       }
     }
@@ -86,8 +88,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } catch (e) {
       setState(() => isLoadingProfile = false);
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error loading profile: $e')),
+          SnackBar(content: Text('${l10n.errorLoadingProfile}: $e')),
         );
       }
     }
@@ -115,16 +118,18 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       await apiClient.put('/api/v1/users/profile', data: profileData);
       
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ref.invalidate(profileProvider);
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Profile updated successfully')),
+          SnackBar(content: Text(l10n.profileUpdatedSuccessfully)),
         );
         context.pop();
       }
     } catch (e) {
       if (mounted) {
+        final l10n = AppLocalizations.of(context)!;
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error updating profile: $e')),
+          SnackBar(content: Text('${l10n.errorUpdatingProfile}: $e')),
         );
       }
     } finally {
@@ -134,14 +139,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
-        title: const Text(
-          'Edit Profile',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        title: Text(
+          l10n.editProfile,
+          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
       body: Container(
@@ -159,7 +166,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                     children: [
                       const SizedBox(height: AppTheme.spacingSmall),
                       Text(
-                        'Update Your Profile',
+                        l10n.updateYourProfile,
                         style: TextStyle(
                           color: AppTheme.primaryColor,
                           fontSize: AppTheme.fontSizeXXLarge,
@@ -168,7 +175,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       ),
                       const SizedBox(height: AppTheme.spacingXSmall),
                       Text(
-                        'Keep your information up to date',
+                        l10n.keepYourInformationUpToDate,
                         style: TextStyle(color: AppTheme.textSecondary),
                       ),
                       const SizedBox(height: AppTheme.spacingXLarge),
@@ -199,27 +206,27 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       const SizedBox(height: AppTheme.spacingXLarge),
                       _buildField(
                         controller: _nameController,
-                        label: 'Full Name',
+                        label: l10n.fullName,
                         icon: Icons.person_outline,
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
                       _buildField(
                         controller: _emailController,
-                        label: 'Email',
+                        label: l10n.email,
                         icon: Icons.email_outlined,
                         keyboard: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
                       _buildField(
                         controller: _phoneController,
-                        label: 'Phone Number',
+                        label: l10n.phoneNumber,
                         icon: Icons.phone_outlined,
                         keyboard: TextInputType.phone,
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
                       _buildField(
                         controller: _fiscalCodeController,
-                        label: 'Fiscal Code',
+                        label: l10n.fiscalCode,
                         icon: Icons.badge_outlined,
                       ),
                       const SizedBox(height: AppTheme.spacingXLarge),
@@ -237,9 +244,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                     valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                                   ),
                                 )
-                              : const Text(
-                                  'Update Profile',
-                                  style: TextStyle(
+                              : Text(
+                                  l10n.updateProfile,
+                                  style: const TextStyle(
                                     fontSize: AppTheme.fontSizeRegular,
                                     fontWeight: FontWeight.bold,
                                     color: Colors.white,
@@ -262,6 +269,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     TextInputType keyboard = TextInputType.text,
     int maxLines = 1,
   }) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return TextFormField(
       controller: controller,
       keyboardType: keyboard,
@@ -270,9 +279,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         prefixIcon: Icon(icon, color: AppTheme.primaryColor),
       ),
       validator: (v) {
-        if (v!.isEmpty) return 'This field is required';
-        if (label == 'Email' && !v.contains('@')) {
-          return 'Enter a valid email';
+        if (v!.isEmpty) return l10n.thisFieldIsRequired;
+        if (label == l10n.email && !v.contains('@')) {
+          return l10n.enterAValidEmail;
         }
         return null;
       },

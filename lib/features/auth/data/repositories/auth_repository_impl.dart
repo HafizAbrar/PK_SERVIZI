@@ -13,33 +13,15 @@ class AuthRepositoryImpl implements AuthRepository {
   Future<Result<void>> register({
     required String email,
     required String password,
-    required String firstName,
-    required String lastName,
-    required String fiscalCode,
+    required String fullName,
     required String phone,
-    required String dateOfBirth,
-    required String address,
-    required String city,
-    required String postalCode,
-    required String province,
-    required bool gdprConsent,
-    required bool marketingConsent,
   }) async {
     try {
       final request = RegisterRequestDto(
         email: email,
         password: password,
-        firstName: firstName,
-        lastName: lastName,
-        fiscalCode: fiscalCode,
+        fullName: fullName,
         phone: phone,
-        dateOfBirth: dateOfBirth,
-        address: address,
-        city: city,
-        postalCode: postalCode,
-        province: province,
-        gdprConsent: gdprConsent,
-        marketingConsent: marketingConsent,
       );
 
       await _remoteDataSource.register(request);

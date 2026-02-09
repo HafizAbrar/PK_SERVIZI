@@ -1,7 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import '../../../../l10n/app_localizations.dart';
+import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class ProfileCompletionScreen extends ConsumerStatefulWidget {
   const ProfileCompletionScreen({super.key});
@@ -30,7 +31,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         elevation: 0,
@@ -57,7 +58,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B5E20),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -65,7 +66,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   controller: _birthDateController,
                   label: l10n.birthDate,
                   icon: Icons.calendar_today,
-                  hint: 'YYYY-MM-DD',
+                  hint: l10n.dateFormatHint,
                 ),
                 const SizedBox(height: 16),
                 _buildField(
@@ -105,7 +106,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B5E20),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -113,7 +114,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   controller: _fiscalCodeController,
                   label: l10n.fiscalCode,
                   icon: Icons.badge,
-                  hint: 'RSSMRA85M01H501Z',
+                  hint: l10n.fiscalCodeHint,
                 ),
                 const SizedBox(height: 16),
                 _buildField(
@@ -127,7 +128,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B5E20),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -149,7 +150,7 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   style: const TextStyle(
                     fontSize: 20,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF1B5E20),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -157,25 +158,19 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
                   value: gdprConsent,
                   onChanged: (value) => setState(() => gdprConsent = value!),
                   title: Text(l10n.agreeToGDPR),
-                  activeColor: const Color(0xFF1B5E20),
+                  activeColor: AppTheme.primaryColor,
                 ),
                 CheckboxListTile(
                   value: marketingConsent,
                   onChanged: (value) => setState(() => marketingConsent = value!),
                   title: Text(l10n.agreeToMarketing),
-                  activeColor: const Color(0xFF1B5E20),
+                  activeColor: AppTheme.primaryColor,
                 ),
                 const SizedBox(height: 30),
                 SizedBox(
                   width: double.infinity,
                   child: ElevatedButton(
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFF1B5E20),
-                      padding: const EdgeInsets.symmetric(vertical: 16),
-                      shape: RoundedRectangleBorder(
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                    ),
+                    style: AppTheme.primaryButtonStyle,
                     onPressed: gdprConsent ? _completeProfile : null,
                     child: Text(
                       l10n.completeProfile,
@@ -210,13 +205,14 @@ class _ProfileCompletionScreenState extends ConsumerState<ProfileCompletionScree
       decoration: InputDecoration(
         labelText: label,
         hintText: hint,
-        prefixIcon: Icon(icon, color: const Color(0xFF1B5E20)),
+        prefixIcon: Icon(icon, color: AppTheme.primaryColor),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
+          borderSide: const BorderSide(color: Color(0xFFE2E8F0)),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(12),
-          borderSide: const BorderSide(color: Color(0xFF1B5E20)),
+          borderSide: BorderSide(color: AppTheme.goldLight.withValues(alpha: 0.4)),
         ),
       ),
       validator: (v) => v!.isEmpty ? l10n.requiredField : null,

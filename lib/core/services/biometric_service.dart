@@ -1,6 +1,5 @@
 import 'package:local_auth/local_auth.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:flutter/services.dart';
 
 class BiometricService {
   final LocalAuthentication _auth = LocalAuthentication();
@@ -12,38 +11,13 @@ class BiometricService {
       final isDeviceSupported = await _auth.isDeviceSupported();
       return canCheck && isDeviceSupported;
     } catch (e) {
-      print('Error checking biometric: $e');
-      return false;
-    }
-  }
-
-  Future<bool> authenticate() async {
-    try {
-      final isAvailable = await canUseBiometric();
-      if (!isAvailable) {
-        print('Biometric not available');
-        return false;
-      }
-
-      return await _auth.authenticate(
-        localizedReason: 'Authenticate to access your account',
-        options: const AuthenticationOptions(
-          stickyAuth: true,
-          biometricOnly: false,
-        ),
-      );
-    } on PlatformException catch (e) {
-      print('Platform exception: ${e.code} - ${e.message}');
-      return false;
-    } catch (e) {
-      print('Error authenticating: $e');
+      // Error checking biometric: $e
       return false;
     }
   }
 
   Future<bool> isUserRegistered() async {
     final email = await _storage.read(key: 'saved_email');
-    print('User registered check: ${email != null}');
     return email != null;
   }
 
@@ -51,11 +25,23 @@ class BiometricService {
     final email = await _storage.read(key: 'saved_email');
     final password = await _storage.read(key: 'saved_password');
     
-    print('Saved credentials - Email: ${email != null}, Password: ${password != null}');
-    
     if (email != null && password != null) {
       return {'email': email, 'password': password};
     }
     return null;
+  }
+
+  Future<bool> authenticate({required String localizedReason}) async {
+    try {
+      return await _auth.authenticate(
+        localizedReason: localizedReason,
+        options: const AuthenticationOptions(
+          stickyAuth: true,
+        ),
+      );
+    } catch (e) {
+      // Error authenticating: $e
+      return false;
+    }
   }
 }

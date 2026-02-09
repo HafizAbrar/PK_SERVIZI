@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class BookAppointmentScreen extends ConsumerStatefulWidget {
   final String? serviceTypeId;
@@ -18,21 +19,23 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: Colors.white,
       body: Column(
         children: [
-          _buildAppBar(),
+          _buildAppBar(l10n),
           Expanded(
             child: SingleChildScrollView(
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildDateSection(),
+                  _buildDateSection(l10n),
                   _buildCalendar(),
-                  _buildConsultationType(),
-                  _buildAvailableTimes(),
-                  _buildInfoCard(),
+                  _buildConsultationType(l10n),
+                  _buildAvailableTimes(l10n),
+                  _buildInfoCard(l10n),
                   const SizedBox(height: 100),
                 ],
               ),
@@ -40,11 +43,11 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
           ),
         ],
       ),
-      bottomSheet: _buildBottomAction(),
+      bottomSheet: _buildBottomAction(l10n),
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
       decoration: const BoxDecoration(
@@ -57,10 +60,10 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
             onTap: () => context.pop(),
             child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Book Appointment',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              l10n.bookAppointment,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -70,12 +73,12 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 
-  Widget _buildDateSection() {
-    return const Padding(
-      padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+  Widget _buildDateSection(AppLocalizations l10n) {
+    return Padding(
+      padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
       child: Text(
-        'Select Date',
-        style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+        l10n.selectDate,
+        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
       ),
     );
   }
@@ -167,15 +170,15 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 
-  Widget _buildConsultationType() {
+  Widget _buildConsultationType(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
-            'Consultation Type',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            l10n.consultationType,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
         ),
         Container(
@@ -207,7 +210,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'In-person',
+                          l10n.inPerson,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -239,7 +242,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
                         ),
                         const SizedBox(width: 8),
                         Text(
-                          'Video Call',
+                          l10n.videoCall,
                           style: TextStyle(
                             fontSize: 14,
                             fontWeight: FontWeight.w600,
@@ -258,7 +261,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 
-  Widget _buildAvailableTimes() {
+  Widget _buildAvailableTimes(AppLocalizations l10n) {
     final times = [
       {'time': '09:00', 'period': 'AM', 'available': true},
       {'time': '10:30', 'period': 'AM', 'available': true},
@@ -271,11 +274,11 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
-            'Available Times',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            l10n.availableTimes,
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
         ),
         Padding(
@@ -341,7 +344,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 
-  Widget _buildInfoCard() {
+  Widget _buildInfoCard(AppLocalizations l10n) {
     return Container(
       margin: const EdgeInsets.all(16),
       padding: const EdgeInsets.all(16),
@@ -349,23 +352,23 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
         color: const Color(0xFF186ADC).withValues(alpha: 0.1),
         borderRadius: BorderRadius.circular(12),
       ),
-      child: const Row(
+      child: Row(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Icon(Icons.info, color: Color(0xFF186ADC), size: 20),
-          SizedBox(width: 16),
+          const Icon(Icons.info, color: Color(0xFF186ADC), size: 20),
+          const SizedBox(width: 16),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Fiscal Documentation',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF186ADC)),
+                  l10n.fiscalDocumentation,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF186ADC)),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'Please bring your tax identification number and previous year\'s tax returns for this session.',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF111418), height: 1.4),
+                  l10n.bringTaxDocuments,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF111418), height: 1.4),
                 ),
               ],
             ),
@@ -375,7 +378,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
     );
   }
 
-  Widget _buildBottomAction() {
+  Widget _buildBottomAction(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 16, 16, 32),
       decoration: BoxDecoration(
@@ -387,7 +390,7 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
         child: ElevatedButton(
           onPressed: () {
             ScaffoldMessenger.of(context).showSnackBar(
-              const SnackBar(content: Text('Appointment confirmed!')),
+              SnackBar(content: Text(l10n.appointmentConfirmed)),
             );
             context.pop();
           },
@@ -398,15 +401,15 @@ class _BookAppointmentScreenState extends ConsumerState<BookAppointmentScreen> {
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
           ),
-          child: const Row(
+          child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
             children: [
               Text(
-                'Confirm Appointment',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                l10n.confirmAppointment,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
               ),
-              SizedBox(width: 8),
-              Icon(Icons.calendar_today, size: 18),
+              const SizedBox(width: 8),
+              const Icon(Icons.calendar_today, size: 18),
             ],
           ),
         ),

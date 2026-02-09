@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class AppointmentsScreen extends ConsumerStatefulWidget {
   const AppointmentsScreen({super.key});
@@ -14,38 +15,42 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
       backgroundColor: const Color(0xFFF6F7F8),
       body: Column(
         children: [
-          _buildAppBar(),
-          _buildFilterToggle(),
+          _buildAppBar(l10n),
+          _buildFilterToggle(l10n),
           Expanded(
             child: SingleChildScrollView(
               padding: const EdgeInsets.all(16),
               child: Column(
                 children: [
                   _buildAppointmentCard(
+                    l10n: l10n,
                     title: 'ISEE Consultation',
                     date: 'Oct 24, 2023 - 10:00 AM',
                     consultant: 'Marco Rossi',
                     type: 'Video Call',
                     icon: Icons.videocam,
-                    buttonText: 'Join Meeting',
+                    buttonText: l10n.joinMeeting,
                     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDVhK9BxiZbnvzSj4MAPQZUpCpvtLLHRRHqlTSvhM9iZ9xRSboRCd8sf1T7gOXXZG14FnviMNWK-p9domZwL5Cp-5S117H82aOg4Z0-wlWKLFkio7GIr4Wa7p_SyNLFrFCFf2P7JgVFHe6yn_xVtUTVeoMA40lBl5I-OnOTxZ9NaQFv1d_Nd3hgDRG0m1OSivGSchY7k157s0sYj369nc_vIe6CpOXaTsc8cXZPOUZGHWMiNeI-zSA87lI3zDUSJZzXxfkytIM11Q',
                   ),
                   const SizedBox(height: 16),
                   _buildAppointmentCard(
+                    l10n: l10n,
                     title: 'VAT Opening Support',
                     date: 'Nov 02, 2023 - 03:30 PM',
                     consultant: 'Elena Bianchi',
                     type: 'In-Person • Rome Office',
                     icon: Icons.location_on,
-                    buttonText: 'View Location',
+                    buttonText: l10n.viewLocation,
                     imageUrl: 'https://lh3.googleusercontent.com/aida-public/AB6AXuDuzv-Xa7HPA7LUAhYxXR_h1WOL2OXQbasL2Bu-0WlgVO9zE8eMlhu4v1xQjL6mj4PkqcDYKOy_-emzTjntA2ej87KSK6QkAn1xnfRmKt4WCE3KVy2sUESINiuSeAh1zFnTK2hpXtFv9uGLNP3_EE-_4UDHKR8X0nzwJpYV530zutjzMXD7hXbr7Febi9ykeCgqNvYoOOXIYNTkJifQYxltB8Q6cZgSgGUUTmiby69B3kzmHCbCV92j1Zs7tj-3EMfWUF0e5pq_7w',
                   ),
                   const SizedBox(height: 32),
-                  _buildQuickActions(),
+                  _buildQuickActions(l10n),
                   const SizedBox(height: 80),
                 ],
               ),
@@ -56,7 +61,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(AppLocalizations l10n) {
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
       decoration: const BoxDecoration(
@@ -69,10 +74,10 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
             onTap: () => context.pop(),
             child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'My Booked Appointments',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              l10n.myBookedAppointments,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -82,7 +87,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     );
   }
 
-  Widget _buildFilterToggle() {
+  Widget _buildFilterToggle(AppLocalizations l10n) {
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.all(16),
@@ -105,7 +110,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                     boxShadow: selectedFilter == 'Upcoming' ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
                   ),
                   child: Text(
-                    'Upcoming',
+                    l10n.upcoming,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -127,7 +132,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                     boxShadow: selectedFilter == 'Past' ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
                   ),
                   child: Text(
-                    'Past',
+                    l10n.past,
                     textAlign: TextAlign.center,
                     style: TextStyle(
                       fontSize: 14,
@@ -145,6 +150,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
   }
 
   Widget _buildAppointmentCard({
+    required AppLocalizations l10n,
     required String title,
     required String date,
     required String consultant,
@@ -205,7 +211,7 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
                         const Icon(Icons.person, size: 18, color: Color(0xFF637288)),
                         const SizedBox(width: 8),
                         Text(
-                          'Consultant: $consultant',
+                          '${l10n.consultant}: $consultant',
                           style: const TextStyle(fontSize: 14, color: Color(0xFF637288)),
                         ),
                       ],
@@ -249,15 +255,15 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
     );
   }
 
-  Widget _buildQuickActions() {
+  Widget _buildQuickActions(AppLocalizations l10n) {
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.only(left: 8, bottom: 8),
+        Padding(
+          padding: const EdgeInsets.only(left: 8, bottom: 8),
           child: Text(
-            'QUICK ACTIONS',
-            style: TextStyle(
+            l10n.quickActions,
+            style: const TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
               color: Color(0xFF637288),
@@ -283,13 +289,13 @@ class _AppointmentsScreenState extends ConsumerState<AppointmentsScreen> {
               ),
               child: const Icon(Icons.event_repeat, color: Color(0xFF186ADC)),
             ),
-            title: const Text(
-              'Reschedule Appointment',
-              style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111418)),
+            title: Text(
+              l10n.rescheduleAppointment,
+              style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111418)),
             ),
-            subtitle: const Text(
-              'Need to change time? Modify here.',
-              style: TextStyle(fontSize: 14, color: Color(0xFF637288)),
+            subtitle: Text(
+              l10n.needToChangeTime,
+              style: const TextStyle(fontSize: 14, color: Color(0xFF637288)),
             ),
             trailing: const Icon(Icons.chevron_right, color: Color(0xFF111418)),
             onTap: () {},

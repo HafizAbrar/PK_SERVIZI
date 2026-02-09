@@ -1,7 +1,9 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final planDetailsProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, planId) async {
   final apiClient = ref.read(apiClientProvider);
@@ -40,7 +42,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Failed to initiate checkout')),
+          SnackBar(content: Text(AppLocalizations.of(context)?.error ?? 'Error')),
         );
       }
     } finally {
@@ -100,10 +102,10 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             onTap: () => context.pop(),
             child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Dettagli Piano',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              AppLocalizations.of(context)?.planDetails ?? 'Plan Details',
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -132,14 +134,14 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             ),
           ),
           const SizedBox(height: 16),
-          Text(
+          TranslatedText(
             plan['name'] ?? 'Professional',
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
-          Text(
-            plan['description'] ?? 'Piano professionale per utenti con esigenze avanzate',
+          TranslatedText(
+            plan['description'] ?? '',
             style: const TextStyle(fontSize: 16, color: Color(0xFF637288)),
             textAlign: TextAlign.center,
           ),
@@ -169,7 +171,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                   boxShadow: !isYearly ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
                 ),
                 child: Text(
-                  'Mensile',
+                  AppLocalizations.of(context)?.monthly ?? 'Monthly',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -191,7 +193,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                   boxShadow: isYearly ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
                 ),
                 child: Text(
-                  'Annuale (-17%)',
+                  AppLocalizations.of(context)?.yearlyDiscount ?? 'Yearly (-17%)',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
@@ -223,7 +225,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               ),
             ),
             TextSpan(
-              text: isYearly ? '/anno' : '/mese',
+              text: isYearly ? '/${AppLocalizations.of(context)?.year ?? 'year'}' : '/${AppLocalizations.of(context)?.month ?? 'month'}',
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.normal,
@@ -248,11 +250,11 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 16, 16, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
           child: Text(
-            'Caratteristiche del piano',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            AppLocalizations.of(context)?.planFeatures ?? 'Plan Features',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
         ),
         Padding(
@@ -265,7 +267,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                   const Icon(Icons.check_circle, color: Color(0xFF186ADC), size: 24),
                   const SizedBox(width: 12),
                   Expanded(
-                    child: Text(
+                    child: TranslatedText(
                       feature.toString(),
                       style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
                     ),
@@ -283,11 +285,11 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        const Padding(
-          padding: EdgeInsets.fromLTRB(16, 24, 16, 8),
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
           child: Text(
-            'Limiti di utilizzo servizi',
-            style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            AppLocalizations.of(context)?.usageLimits ?? 'Usage Limits',
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
         ),
         Padding(
@@ -319,7 +321,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
             ),
             Text(
-              '$remaining / $total rimaste',
+              '$remaining / $total ${AppLocalizations.of(context)?.remaining ?? 'remaining'}',
               style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF186ADC)),
             ),
           ],
@@ -376,15 +378,15 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                         valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
                       ),
                     )
-                  : const Row(
+                  : Row(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text(
-                          'Abbonati Ora',
-                          style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                          AppLocalizations.of(context)?.subscribeNow ?? 'Subscribe Now',
+                          style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                         ),
-                        SizedBox(width: 8),
-                        Icon(Icons.bolt, size: 20),
+                        const SizedBox(width: 8),
+                        const Icon(Icons.bolt, size: 20),
                       ],
                     ),
             ),
@@ -432,7 +434,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
         children: [
           const Icon(Icons.error_outline, size: 64, color: Color(0xFF9CA3AF)),
           const SizedBox(height: 16),
-          const Text('Failed to load plan details', style: TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
+          Text(AppLocalizations.of(context)?.failedToLoadPlanDetails ?? 'Failed to load plan details', style: const TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => ref.refresh(planDetailsProvider(widget.planId)),
@@ -440,7 +442,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               backgroundColor: const Color(0xFF186ADC),
               foregroundColor: Colors.white,
             ),
-            child: const Text('Retry'),
+            child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
           ),
         ],
       ),

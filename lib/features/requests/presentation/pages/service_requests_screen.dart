@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 final serviceRequestsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final response = await ApiServiceFactory.customer.getMyServiceRequests();
@@ -22,275 +23,263 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
     final requestsAsync = ref.watch(serviceRequestsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F8),
-      body: SafeArea(
-        child: Column(
-          children: [
-            _buildHeader(),
-            Expanded(
+      backgroundColor: const Color(0xFFF8F9FA),
+      body: Column(
+        children: [
+          _buildHeader(l10n),
+          Expanded(
+            child: requestsAsync.when(
+              data: (requests) => RefreshIndicator(
+                color: const Color(0xFFF2D00D),
+                onRefresh: () async => ref.invalidate(serviceRequestsProvider),
+                child: SingleChildScrollView(
+                  physics: const AlwaysScrollableScrollPhysics(),
+                  child: Column(
+                    children: [
+                      _buildSummaryStats(requests, l10n),
+                      _buildSearchBar(l10n),
+                      _buildFilterChips(l10n),
+                      _buildRequestsList(requests, l10n),
+                      const SizedBox(height: 100),
+                    ],
+                  ),
+                ),
+              ),
+              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+              error: (_, __) => _buildError(l10n),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildHeader(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      child: Row(
+        children: [
+          Text(
+            l10n.myRequests,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+          ),
+          const Spacer(),
+          Container(
+            padding: const EdgeInsets.all(8),
+            decoration: BoxDecoration(
+              color: Colors.white.withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(12),
+            ),
+            child: const Icon(Icons.filter_list, color: Colors.white, size: 24),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSummaryStats(List<Map<String, dynamic>> requests, AppLocalizations l10n) {
+    final activeCount = requests.where((r) => r['status'] != 'completed').length;
+    final attentionCount = requests.where((r) => r['status'] == 'awaiting_documents').length;
+
+    return Container(
+      padding: const EdgeInsets.all(20),
+      transform: Matrix4.translationValues(0, -24, 0),
+      child: Row(
+        children: [
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
               child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSummaryStats(),
-                  _buildSearchBar(),
-                  _buildFilterChips(),
-                  _buildSectionHeader(),
-                  Expanded(
-                    child: requestsAsync.when(
-                      data: (requests) => _buildRequestsList(requests),
-                      loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC))),
-                      error: (error, stack) => Center(child: Text('Error: $error')),
+                  Text(
+                    l10n.active,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.baseline,
+                    textBaseline: TextBaseline.alphabetic,
+                    children: [
+                      Text(
+                        activeCount.toString(),
+                        style: const TextStyle(
+                          fontSize: 32,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A192F),
+                        ),
+                      ),
+                      const SizedBox(width: 8),
+                      Container(
+                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                        decoration: BoxDecoration(
+                          color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                          borderRadius: BorderRadius.circular(8),
+                        ),
+                        child: const Text(
+                          '+1',
+                          style: TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.bold,
+                            color: Color(0xFF10B981),
+                          ),
+                        ),
+                      ),
+                    ],
+                  ),
+                ],
+              ),
+            ),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: Container(
+              padding: const EdgeInsets.all(20),
+              decoration: BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.circular(16),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.08),
+                    blurRadius: 12,
+                  ),
+                ],
+              ),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    l10n.attention,
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Colors.grey[600],
+                      letterSpacing: 1.5,
+                    ),
+                  ),
+                  const SizedBox(height: 8),
+                  Text(
+                    attentionCount.toString(),
+                    style: const TextStyle(
+                      fontSize: 32,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFEF4444),
                     ),
                   ),
                 ],
               ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildSearchBar(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      margin: const EdgeInsets.only(bottom: 16),
+      child: Container(
+        height: 56,
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
             ),
           ],
         ),
-      ),
-    );
-  }
-
-  Widget _buildHeader() {
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: const Color(0xFFF6F7F8).withValues(alpha: 0.8),
-        border: const Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
-      ),
-      child: Row(
-        children: [
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: GestureDetector(
-              onTap: () => context.pop(),
-              child: const Icon(Icons.arrow_back_ios, size: 24),
-            ),
-          ),
-          const Expanded(
-            child: Text(
-              'My Requests',
-              style: TextStyle(
-                fontSize: 18,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF111418),
-              ),
-              textAlign: TextAlign.center,
-            ),
-          ),
-          SizedBox(
-            width: 40,
-            height: 40,
-            child: IconButton(
-              onPressed: () {},
-              icon: const Icon(Icons.filter_list, size: 24),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSummaryStats() {
-    return Padding(
-      padding: const EdgeInsets.all(16),
-      child: Row(
-        children: [
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'ACTIVE',
-                    style: TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Consumer(builder: (context, ref, child) {
-                    final requestsAsync = ref.watch(serviceRequestsProvider);
-                    return requestsAsync.when(
-                      data: (requests) {
-                        final activeCount = requests.where((r) => r['status'] != 'completed').length;
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              activeCount.toString(),
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFF111418),
-                                height: 1.0,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              '+1',
-                              style: TextStyle(
-                                color: Color(0xFF07883B),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w600,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                      loading: () => const Text('...', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                      error: (_, __) => const Text('0', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold)),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Container(
-              padding: const EdgeInsets.all(16),
-              decoration: BoxDecoration(
-                color: Colors.white,
-                borderRadius: BorderRadius.circular(12),
-                border: Border.all(color: const Color(0xFFE5E7EB)),
-                boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  const Text(
-                    'ATTENTION',
-                    style: TextStyle(
-                      color: Color(0xFF6B7280),
-                      fontSize: 12,
-                      fontWeight: FontWeight.w500,
-                      letterSpacing: 1.5,
-                    ),
-                  ),
-                  const SizedBox(height: 4),
-                  Consumer(builder: (context, ref, child) {
-                    final requestsAsync = ref.watch(serviceRequestsProvider);
-                    return requestsAsync.when(
-                      data: (requests) {
-                        final attentionCount = requests.where((r) => r['status'] == 'awaiting_documents').length;
-                        return Row(
-                          crossAxisAlignment: CrossAxisAlignment.baseline,
-                          textBaseline: TextBaseline.alphabetic,
-                          children: [
-                            Text(
-                              attentionCount.toString(),
-                              style: const TextStyle(
-                                fontSize: 32,
-                                fontWeight: FontWeight.bold,
-                                color: Color(0xFFEF4444),
-                                height: 1.0,
-                              ),
-                            ),
-                            const SizedBox(width: 8),
-                            const Text(
-                              '0',
-                              style: TextStyle(
-                                color: Color(0xFF9CA3AF),
-                                fontSize: 12,
-                                fontWeight: FontWeight.w500,
-                              ),
-                            ),
-                          ],
-                        );
-                      },
-                      loading: () => const Text('...', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFFEF4444))),
-                      error: (_, __) => const Text('0', style: TextStyle(fontSize: 32, fontWeight: FontWeight.bold, color: Color(0xFFEF4444))),
-                    );
-                  }),
-                ],
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
-  }
-
-  Widget _buildSearchBar() {
-    return Padding(
-      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-      child: Container(
-        height: 48,
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
-        ),
         child: TextField(
           onChanged: (value) => setState(() => searchQuery = value),
-          decoration: const InputDecoration(
-            hintText: 'Search ID or service type...',
-            hintStyle: TextStyle(color: Color(0xFF9CA3AF)),
-            prefixIcon: Icon(Icons.search, color: Color(0xFF9CA3AF)),
+          decoration: InputDecoration(
+            hintText: l10n.searchIdOrServiceType,
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            prefixIcon: Icon(Icons.search, color: Colors.grey[400], size: 24),
             border: InputBorder.none,
-            contentPadding: EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            contentPadding: const EdgeInsets.symmetric(vertical: 16),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildFilterChips() {
-    final filters = ['All', 'Pending', 'Processing', 'Completed'];
+  Widget _buildFilterChips(AppLocalizations l10n) {
+    final filters = [l10n.all, l10n.pending, l10n.processing, l10n.completed];
     
     return Container(
-      height: 60,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      height: 50,
+      padding: const EdgeInsets.only(left: 20, bottom: 16),
       child: ListView.builder(
         scrollDirection: Axis.horizontal,
         itemCount: filters.length,
         itemBuilder: (context, index) {
           final filter = filters[index];
-          final isSelected = selectedFilter == filter;
+          final isSelected = selectedFilter == _getFilterKey(index);
           
           return Padding(
-            padding: const EdgeInsets.only(right: 8),
+            padding: const EdgeInsets.only(right: 12),
             child: GestureDetector(
-              onTap: () => setState(() => selectedFilter = filter),
+              onTap: () => setState(() => selectedFilter = _getFilterKey(index)),
               child: Container(
-                height: 36,
-                padding: const EdgeInsets.symmetric(horizontal: 16),
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF186ADC) : Colors.white,
-                  borderRadius: BorderRadius.circular(18),
+                  color: isSelected ? const Color(0xFF0A192F) : Colors.white,
+                  borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF186ADC) : const Color(0xFFE5E7EB),
+                    color: isSelected ? const Color(0xFF0A192F) : Colors.grey[300]!,
                   ),
                   boxShadow: isSelected ? [
                     BoxShadow(
-                      color: const Color(0xFF186ADC).withValues(alpha: 0.2),
+                      color: const Color(0xFF0A192F).withValues(alpha: 0.2),
                       blurRadius: 8,
                     ),
                   ] : null,
                 ),
-                child: Center(
-                  child: Text(
-                    filter,
-                    style: TextStyle(
-                      color: isSelected ? Colors.white : const Color(0xFF111418),
-                      fontSize: 14,
-                      fontWeight: isSelected ? FontWeight.w600 : FontWeight.w500,
-                    ),
+                child: Text(
+                  filter,
+                  style: TextStyle(
+                    color: isSelected ? Colors.white : const Color(0xFF0A192F),
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
                   ),
                 ),
               ),
@@ -301,63 +290,92 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
     );
   }
 
-  Widget _buildSectionHeader() {
-    return Padding(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 16),
-      child: Row(
-        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-        children: [
-          const Text(
-            'Recent Activity',
-            style: TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: Color(0xFF111418),
-            ),
-          ),
-          TextButton(
-            onPressed: () {},
-            child: const Text(
-              'Mark all read',
-              style: TextStyle(
-                color: Color(0xFF186ADC),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
-        ],
-      ),
-    );
+  String _getFilterKey(int index) {
+    switch (index) {
+      case 0: return 'All';
+      case 1: return 'Pending';
+      case 2: return 'Processing';
+      case 3: return 'Completed';
+      default: return 'All';
+    }
   }
 
-  Widget _buildRequestsList(List<Map<String, dynamic>> requests) {
+  Widget _buildRequestsList(List<Map<String, dynamic>> requests, AppLocalizations l10n) {
     final filteredRequests = _filterRequests(requests);
     
     if (filteredRequests.isEmpty) {
-      return const Center(
+      return Container(
+        padding: const EdgeInsets.all(40),
         child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            Icon(Icons.assignment_outlined, size: 64, color: Color(0xFF9CA3AF)),
-            SizedBox(height: 16),
-            Text('No service requests', style: TextStyle(fontSize: 18, color: Color(0xFF6B7280))),
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(
+                Icons.assignment_outlined,
+                size: 64,
+                color: Color(0xFF0A192F),
+              ),
+            ),
+            const SizedBox(height: 20),
+            Text(
+              l10n.noServiceRequests,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF0A192F),
+              ),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              l10n.yourRequestsWillAppearHere,
+              style: TextStyle(
+                fontSize: 14,
+                color: Colors.grey[600],
+              ),
+            ),
           ],
         ),
       );
     }
 
-    return ListView.builder(
-      padding: const EdgeInsets.symmetric(horizontal: 16),
-      itemCount: filteredRequests.length,
-      itemBuilder: (context, index) => _buildRequestCard(filteredRequests[index]),
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            l10n.recentActivity,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0A192F),
+            ),
+          ),
+          const SizedBox(height: 16),
+          ...filteredRequests.map((request) => _buildRequestCard(request, l10n)),
+        ],
+      ),
     );
   }
 
   List<Map<String, dynamic>> _filterRequests(List<Map<String, dynamic>> requests) {
-    if (selectedFilter == 'All') return requests;
+    var filtered = requests;
     
-    return requests.where((request) {
+    if (searchQuery.isNotEmpty) {
+      filtered = filtered.where((request) {
+        final id = request['id']?.toString().toLowerCase() ?? '';
+        final serviceName = request['service']?['name']?.toString().toLowerCase() ?? '';
+        return id.contains(searchQuery.toLowerCase()) || serviceName.contains(searchQuery.toLowerCase());
+      }).toList();
+    }
+    
+    if (selectedFilter == 'All') return filtered;
+    
+    return filtered.where((request) {
       final status = request['status'] ?? '';
       switch (selectedFilter) {
         case 'Pending':
@@ -372,298 +390,249 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
     }).toList();
   }
 
-  Widget _buildRequestCard(Map<String, dynamic> request) {
+  Widget _buildRequestCard(Map<String, dynamic> request, AppLocalizations l10n) {
     final status = request['status'] ?? 'pending';
     final needsAttention = status == 'awaiting_documents' || status == 'rejected';
     
     return GestureDetector(
       onTap: () => context.push('/service-requests/${request['id']}'),
       child: Container(
-        margin: const EdgeInsets.only(bottom: 12),
-        padding: const EdgeInsets.all(16),
+        margin: const EdgeInsets.only(bottom: 16),
+        padding: const EdgeInsets.all(20),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(12),
-          border: Border.all(color: const Color(0xFFE5E7EB)),
-          boxShadow: [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 4)],
+          borderRadius: BorderRadius.circular(16),
+          border: Border(
+            left: BorderSide(
+              color: needsAttention ? const Color(0xFFEF4444) : const Color(0xFFF2D00D),
+              width: 4,
+            ),
+          ),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+            ),
+          ],
         ),
         child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Expanded(
-                child: Column(
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    Text(
-                      'REF: #${request['id']?.toString().toUpperCase().substring(0, 8) ?? 'N/A'}',
-                      style: const TextStyle(
-                        fontSize: 10,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF9CA3AF),
-                        letterSpacing: 2.0,
-                      ),
-                    ),
-                    const SizedBox(height: 2),
-                    Text(
-                      request['service']?['name'] ?? 'Income Tax Return 2023',
-                      style: const TextStyle(
-                        fontSize: 16,
-                        fontWeight: FontWeight.bold,
-                        color: Color(0xFF111418),
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-              Container(
-                height: 28,
-                padding: const EdgeInsets.symmetric(horizontal: 12),
-                decoration: BoxDecoration(
-                  color: _getStatusBackgroundColor(status),
-                  borderRadius: BorderRadius.circular(14),
-                  border: Border.all(color: _getStatusBorderColor(status)),
-                ),
-                child: Center(
-                  child: Text(
-                    _getStatusText(status),
-                    style: TextStyle(
-                      color: _getStatusTextColor(status),
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                    ),
-                  ),
-                ),
-              ),
-            ],
-          ),
-          const SizedBox(height: 12),
-          Row(
-            children: [
-              const Icon(Icons.calendar_today_outlined, size: 18, color: Color(0xFF9CA3AF)),
-              const SizedBox(width: 8),
-              Text(
-                'Submitted on ${_formatDate(request['createdAt'])}',
-                style: const TextStyle(
-                  color: Color(0xFF6B7280),
-                  fontSize: 12,
-                ),
-              ),
-            ],
-          ),
-          if (needsAttention) ..._buildNeedsAttentionSection(status),
-          if (status == 'processing') ..._buildProcessingSection(),
-          if (status == 'completed') ..._buildCompletedSection(),
-          if (status == 'payment_pending') ..._buildPendingSection(),
-        ],
-      ),
-      ),
-    );
-  }
-
-  List<Widget> _buildNeedsAttentionSection(String status) {
-    return [
-      const SizedBox(height: 16),
-      Container(
-        padding: const EdgeInsets.only(top: 16),
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
-        ),
-        child: Row(
-          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
-              children: [
-                _buildTimelineDot(true, false),
-                _buildTimelineDot(true, false),
-                _buildTimelineDot(false, true),
-                _buildTimelineDot(false, false, showNumber: '4'),
-              ],
-            ),
-            const Row(
-              children: [
-                Text(
-                  'View Details',
-                  style: TextStyle(
-                    color: Color(0xFF186ADC),
-                    fontSize: 12,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                SizedBox(width: 4),
-                Icon(Icons.chevron_right, size: 14, color: Color(0xFF186ADC)),
-              ],
-            ),
-          ],
-        ),
-      ),
-    ];
-  }
-
-  List<Widget> _buildProcessingSection() {
-    return [
-      const SizedBox(height: 16),
-      Container(
-        padding: const EdgeInsets.only(top: 16),
-        decoration: const BoxDecoration(
-          border: Border(top: BorderSide(color: Color(0xFFF3F4F6))),
-        ),
-        child: Column(
-          children: [
-            Container(
-              width: double.infinity,
-              height: 6,
-              decoration: BoxDecoration(
-                color: const Color(0xFFF3F4F6),
-                borderRadius: BorderRadius.circular(3),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: 0.65,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: const Color(0xFF186ADC),
-                    borderRadius: BorderRadius.circular(3),
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(height: 8),
-            const Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  'Reviewing documents...',
-                  style: TextStyle(
-                    color: Color(0xFF9CA3AF),
-                    fontSize: 10,
-                    fontWeight: FontWeight.w500,
-                    fontStyle: FontStyle.italic,
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      Text(
+                        'REF: #${request['id']?.toString().toUpperCase().substring(0, 8) ?? 'N/A'}',
+                        style: TextStyle(
+                          fontSize: 10,
+                          fontWeight: FontWeight.bold,
+                          color: Colors.grey[500],
+                          letterSpacing: 1.5,
+                        ),
+                      ),
+                      const SizedBox(height: 4),
+                      Text(
+                        request['service']?['name'] ?? l10n.serviceRequest,
+                        style: const TextStyle(
+                          fontSize: 16,
+                          fontWeight: FontWeight.bold,
+                          color: Color(0xFF0A192F),
+                        ),
+                      ),
+                    ],
                   ),
                 ),
-                Text(
-                  '65%',
-                  style: TextStyle(
-                    color: Color(0xFF186ADC),
-                    fontSize: 10,
-                    fontWeight: FontWeight.bold,
+                Container(
+                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                  decoration: BoxDecoration(
+                    color: _getStatusBackgroundColor(status),
+                    borderRadius: BorderRadius.circular(12),
+                  ),
+                  child: Text(
+                    _getStatusText(status, l10n),
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: _getStatusTextColor(status),
+                    ),
                   ),
                 ),
               ],
             ),
+            const SizedBox(height: 12),
+            Row(
+              children: [
+                Icon(Icons.calendar_today, size: 16, color: Colors.grey[400]),
+                const SizedBox(width: 8),
+                Text(
+                  '${l10n.submittedOn} ${_formatDate(request['createdAt'])}',
+                  style: TextStyle(
+                    fontSize: 12,
+                    color: Colors.grey[600],
+                  ),
+                ),
+              ],
+            ),
+            if (status == 'processing') ...[
+              const SizedBox(height: 16),
+              Container(
+                width: double.infinity,
+                height: 8,
+                decoration: BoxDecoration(
+                  color: Colors.grey[100],
+                  borderRadius: BorderRadius.circular(4),
+                ),
+                child: FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: 0.65,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2D00D),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 8),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                children: [
+                  Text(
+                    l10n.reviewingDocuments,
+                    style: TextStyle(
+                      fontSize: 11,
+                      color: Colors.grey[500],
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                  const Text(
+                    '65%',
+                    style: TextStyle(
+                      fontSize: 11,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFF2D00D),
+                    ),
+                  ),
+                ],
+              ),
+            ],
+            if (needsAttention) ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.warning_amber_rounded, size: 18, color: Color(0xFFEF4444)),
+                  const SizedBox(width: 8),
+                  Expanded(
+                    child: Text(
+                      l10n.actionRequired,
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFEF4444),
+                      ),
+                    ),
+                  ),
+                  Text(
+                    l10n.viewDetails,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.bold,
+                      color: Color(0xFFF2D00D),
+                    ),
+                  ),
+                  const SizedBox(width: 4),
+                  const Icon(Icons.chevron_right, size: 16, color: Color(0xFFF2D00D)),
+                ],
+              ),
+            ],
+            if (status == 'completed') ...[
+              const SizedBox(height: 16),
+              Row(
+                children: [
+                  const Icon(Icons.check_circle, size: 18, color: Color(0xFF10B981)),
+                  const SizedBox(width: 8),
+                  Text(
+                    l10n.requestCompletedSuccessfully,
+                    style: const TextStyle(
+                      fontSize: 12,
+                      fontWeight: FontWeight.w600,
+                      color: Color(0xFF10B981),
+                    ),
+                  ),
+                ],
+              ),
+            ],
           ],
         ),
       ),
-    ];
-  }
-
-  List<Widget> _buildCompletedSection() {
-    return [
-      const SizedBox(height: 16),
-      const Row(
-        children: [
-          Icon(Icons.verified, size: 18, color: Color(0xFF10B981)),
-          SizedBox(width: 8),
-          Text(
-            'Finalized on Oct 15, 2023',
-            style: TextStyle(
-              color: Color(0xFF6B7280),
-              fontSize: 12,
-              fontWeight: FontWeight.w500,
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  List<Widget> _buildPendingSection() {
-    return [
-      const SizedBox(height: 16),
-      const Row(
-        children: [
-          Icon(Icons.history, size: 18, color: Color(0xFF9CA3AF)),
-          SizedBox(width: 8),
-          Text(
-            'Awaiting initial verification',
-            style: TextStyle(
-              color: Color(0xFF6B7280),
-              fontSize: 12,
-              fontStyle: FontStyle.italic,
-            ),
-          ),
-        ],
-      ),
-    ];
-  }
-
-  Widget _buildTimelineDot(bool isCompleted, bool needsAttention, {String? showNumber}) {
-    return Container(
-      width: 24,
-      height: 24,
-      margin: const EdgeInsets.only(right: 4),
-      decoration: BoxDecoration(
-        color: needsAttention 
-            ? const Color(0xFFEF4444)
-            : isCompleted 
-                ? const Color(0xFF186ADC)
-                : const Color(0xFFE5E7EB),
-        shape: BoxShape.circle,
-        border: Border.all(color: Colors.white, width: 2),
-      ),
-      child: showNumber != null
-          ? Center(
-              child: Text(
-                showNumber,
-                style: const TextStyle(
-                  color: Color(0xFF9CA3AF),
-                  fontSize: 10,
-                  fontWeight: FontWeight.bold,
-                ),
-              ),
-            )
-          : Icon(
-              needsAttention 
-                  ? Icons.priority_high
-                  : Icons.check,
-              size: 12,
-              color: Colors.white,
-            ),
     );
   }
 
-
+  Widget _buildError(AppLocalizations l10n) {
+    return Center(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.center,
+        children: [
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(
+              Icons.error_outline,
+              size: 64,
+              color: Color(0xFFEF4444),
+            ),
+          ),
+          const SizedBox(height: 20),
+          Text(
+            l10n.failedToLoadRequests,
+            style: const TextStyle(
+              fontSize: 18,
+              fontWeight: FontWeight.bold,
+              color: Color(0xFF0A192F),
+            ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            l10n.pleaseTryAgain,
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+          ),
+          const SizedBox(height: 20),
+          ElevatedButton(
+            onPressed: () => ref.refresh(serviceRequestsProvider),
+            style: ElevatedButton.styleFrom(
+              backgroundColor: const Color(0xFFF2D00D),
+              foregroundColor: const Color(0xFF0A192F),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+            child: Text(l10n.retry, style: const TextStyle(fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
 
   Color _getStatusBackgroundColor(String status) {
     switch (status) {
       case 'awaiting_documents':
       case 'rejected':
-        return const Color(0xFFFEE2E2);
+        return const Color(0xFFEF4444).withValues(alpha: 0.1);
       case 'processing':
-      case 'awaiting_form':
-        return const Color(0xFFDCEFFF);
+        return const Color(0xFFF2D00D).withValues(alpha: 0.2);
       case 'completed':
-        return const Color(0xFFDCFCE7);
+        return const Color(0xFF10B981).withValues(alpha: 0.1);
       default:
-        return const Color(0xFFF3F4F6);
-    }
-  }
-
-  Color _getStatusBorderColor(String status) {
-    switch (status) {
-      case 'awaiting_documents':
-      case 'rejected':
-        return const Color(0xFFFECACA);
-      case 'processing':
-      case 'awaiting_form':
-        return const Color(0xFFBFDBFE);
-      case 'completed':
-        return const Color(0xFFBBF7D0);
-      default:
-        return const Color(0xFFE5E7EB);
+        return Colors.grey[100]!;
     }
   }
 
@@ -671,31 +640,34 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
     switch (status) {
       case 'awaiting_documents':
       case 'rejected':
-        return const Color(0xFFDC2626);
+        return const Color(0xFFEF4444);
       case 'processing':
-      case 'awaiting_form':
-        return const Color(0xFF186ADC);
+        return const Color(0xFF0A192F);
       case 'completed':
-        return const Color(0xFF059669);
+        return const Color(0xFF10B981);
       default:
-        return const Color(0xFF6B7280);
+        return Colors.grey[700]!;
     }
   }
 
-  String _getStatusText(String status) {
+  String _getStatusText(String status, AppLocalizations l10n) {
     switch (status) {
       case 'awaiting_documents':
-        return 'Needs Attention';
+        return l10n.awaitingDocuments;
       case 'awaiting_form':
-        return 'Pending';
+        return l10n.awaitingForm;
       case 'processing':
-        return 'Processing';
+        return l10n.processing;
       case 'completed':
-        return 'Completed';
+        return l10n.completed;
       case 'rejected':
-        return 'Rejected';
+        return l10n.rejected;
+      case 'payment_pending':
+        return l10n.paymentPending;
+      case 'ready_to_submit':
+        return l10n.readyToSubmit;
       default:
-        return 'Pending';
+        return status.toUpperCase().replaceAll('_', ' ');
     }
   }
 

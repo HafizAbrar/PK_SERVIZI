@@ -1,7 +1,8 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
-import '../../../../core/network/api_client.dart';
+import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/services/api_service.dart';
 
 class RequestSubmissionScreen extends ConsumerStatefulWidget {
   final String requestId;
@@ -20,95 +21,238 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F8),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
-          _buildAppBar(),
-          Expanded(child: _buildContent()),
-          _buildBottomActions(),
+          _buildHeader(l10n),
+          Expanded(child: _buildContent(l10n)),
+          _buildBottomActions(l10n),
         ],
       ),
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildHeader(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 50, 16, 8),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           IconButton(
             onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+            padding: EdgeInsets.zero,
           ),
-          const Expanded(
-            child: Text(
-              'Submit Request',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
-              textAlign: TextAlign.center,
+          const SizedBox(width: 12),
+          Text(
+            l10n.submitRequest,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
           ),
-          const SizedBox(width: 48),
         ],
       ),
     );
   }
 
-  Widget _buildContent() {
+  Widget _buildContent(AppLocalizations l10n) {
     return SingleChildScrollView(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Container(
             width: double.infinity,
-            padding: const EdgeInsets.all(20),
+            padding: const EdgeInsets.all(32),
             decoration: BoxDecoration(
               color: Colors.white,
-              borderRadius: BorderRadius.circular(12),
-              border: Border.all(color: const Color(0xFFE2E8F0)),
+              borderRadius: BorderRadius.circular(24),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.08),
+                  blurRadius: 20,
+                ),
+              ],
             ),
             child: Column(
               children: [
-                const Icon(
-                  Icons.check_circle,
-                  size: 64,
-                  color: Color(0xFF10B981),
-                ),
-                const SizedBox(height: 16),
-                const Text(
-                  'Documents Uploaded Successfully',
-                  style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 8),
-                const Text(
-                  'All required documents have been uploaded. You can now submit your service request for processing.',
-                  style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
-                  textAlign: TextAlign.center,
-                ),
-                const SizedBox(height: 20),
                 Container(
-                  padding: const EdgeInsets.all(12),
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF3F4F6),
-                    borderRadius: BorderRadius.circular(8),
+                    color: const Color(0xFF10B981).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(20),
+                  ),
+                  child: const Icon(
+                    Icons.check_circle,
+                    size: 80,
+                    color: Color(0xFF10B981),
+                  ),
+                ),
+                const SizedBox(height: 24),
+                Text(
+                  l10n.documentsUploadedSuccessfully,
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0A192F),
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 12),
+                Text(
+                  l10n.allRequiredDocumentsUploaded,
+                  style: TextStyle(
+                    fontSize: 15,
+                    color: Colors.grey[600],
+                    height: 1.5,
+                  ),
+                  textAlign: TextAlign.center,
+                ),
+                const SizedBox(height: 24),
+                Container(
+                  padding: const EdgeInsets.all(16),
+                  decoration: BoxDecoration(
+                    color: const Color(0xFFF2D00D).withValues(alpha: 0.1),
+                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(
+                      color: const Color(0xFFF2D00D).withValues(alpha: 0.3),
+                    ),
                   ),
                   child: Row(
                     children: [
-                      const Icon(Icons.info_outline, color: Color(0xFF6B7280), size: 20),
-                      const SizedBox(width: 8),
+                      const Icon(
+                        Icons.info_outline,
+                        color: Color(0xFF0A192F),
+                        size: 24,
+                      ),
+                      const SizedBox(width: 12),
                       Expanded(
-                        child: Text(
-                          'Request ID: ${widget.requestId}',
-                          style: const TextStyle(fontSize: 12, color: Color(0xFF6B7280)),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              l10n.requestId,
+                              style: const TextStyle(
+                                fontSize: 11,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0A192F),
+                                letterSpacing: 1,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            Text(
+                              '#${widget.requestId.toUpperCase().substring(0, 8)}',
+                              style: const TextStyle(
+                                fontSize: 16,
+                                fontWeight: FontWeight.bold,
+                                color: Color(0xFF0A192F),
+                              ),
+                            ),
+                          ],
                         ),
                       ),
                     ],
+                  ),
+                ),
+              ],
+            ),
+          ),
+          const SizedBox(height: 24),
+          Container(
+            padding: const EdgeInsets.all(20),
+            decoration: BoxDecoration(
+              color: Colors.white,
+              borderRadius: BorderRadius.circular(16),
+              boxShadow: [
+                BoxShadow(
+                  color: Colors.black.withValues(alpha: 0.05),
+                  blurRadius: 10,
+                ),
+              ],
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  l10n.whatHappensNext,
+                  style: const TextStyle(
+                    fontSize: 18,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0A192F),
+                  ),
+                ),
+                const SizedBox(height: 16),
+                _buildStep(1, l10n.review, l10n.ourTeamWillReview, l10n),
+                _buildStep(2, l10n.processing, l10n.weWillProcess, l10n),
+                _buildStep(3, l10n.notification, l10n.youWillReceiveUpdates, l10n, isLast: true),
+              ],
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildStep(int number, String title, String description, AppLocalizations l10n, {bool isLast = false}) {
+    return Padding(
+      padding: EdgeInsets.only(bottom: isLast ? 0 : 16),
+      child: Row(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Container(
+            width: 32,
+            height: 32,
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A192F),
+              borderRadius: BorderRadius.circular(16),
+            ),
+            child: Center(
+              child: Text(
+                number.toString(),
+                style: const TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Color(0xFFF2D00D),
+                ),
+              ),
+            ),
+          ),
+          const SizedBox(width: 12),
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  title,
+                  style: const TextStyle(
+                    fontSize: 15,
+                    fontWeight: FontWeight.bold,
+                    color: Color(0xFF0A192F),
+                  ),
+                ),
+                const SizedBox(height: 4),
+                Text(
+                  description,
+                  style: TextStyle(
+                    fontSize: 13,
+                    color: Colors.grey[600],
                   ),
                 ),
               ],
@@ -119,12 +263,18 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
     );
   }
 
-  Widget _buildBottomActions() {
+  Widget _buildBottomActions(AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+            offset: const Offset(0, -2),
+          ),
+        ],
       ),
       child: Column(
         mainAxisSize: MainAxisSize.min,
@@ -132,17 +282,30 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
           SizedBox(
             width: double.infinity,
             child: ElevatedButton(
-              onPressed: _isSubmitting ? null : _submitRequest,
+              onPressed: _isSubmitting ? null : () => _submitRequest(l10n),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF186ADC),
+                backgroundColor: const Color(0xFFF2D00D),
+                foregroundColor: const Color(0xFF0A192F),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                elevation: 0,
               ),
               child: _isSubmitting
-                  ? const CircularProgressIndicator(color: Colors.white, strokeWidth: 2)
-                  : const Text(
-                      'Submit Now',
-                      style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
+                  ? const SizedBox(
+                      height: 20,
+                      width: 20,
+                      child: CircularProgressIndicator(
+                        color: Color(0xFF0A192F),
+                        strokeWidth: 2,
+                      ),
+                    )
+                  : Text(
+                      l10n.submitNow,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
                     ),
             ),
           ),
@@ -152,13 +315,18 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
             child: OutlinedButton(
               onPressed: _isSubmitting ? null : _submitLater,
               style: OutlinedButton.styleFrom(
-                side: const BorderSide(color: Color(0xFF186ADC)),
+                side: BorderSide(color: Colors.grey[300]!),
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text(
-                'Submit Later',
-                style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF186ADC)),
+              child: Text(
+                l10n.submitLater,
+                style: TextStyle(
+                  fontSize: 14,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.grey[700],
+                  letterSpacing: 1,
+                ),
               ),
             ),
           ),
@@ -167,27 +335,32 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
     );
   }
 
-  Future<void> _submitRequest() async {
+  Future<void> _submitRequest(AppLocalizations l10n) async {
     setState(() => _isSubmitting = true);
 
     try {
-      final apiClient = ref.read(apiClientProvider);
-      
-      await apiClient.post(
-        '/api/v1/service-requests/${widget.requestId}/submit',
-        data: {'notes': 'All required documents have been uploaded and the request is ready for processing'},
-      );
+      await ApiServiceFactory.customer.submitServiceRequest(widget.requestId);
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Request submitted successfully')),
+          SnackBar(
+            content: Text(l10n.requestSubmittedSuccessfully),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         );
         context.go('/service-requests');
       }
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting request: $e')),
+          SnackBar(
+            content: Text('${l10n.error}: ${e.toString()}'),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         );
       }
     } finally {

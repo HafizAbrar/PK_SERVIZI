@@ -7,6 +7,7 @@ import '../../features/auth/presentation/pages/signup_screen.dart';
 import '../../features/auth/presentation/pages/forgot_password_screen.dart';
 import '../../features/auth/presentation/pages/reset_password_screen.dart';
 import '../../features/auth/presentation/pages/change_password_screen.dart';
+import '../../features/auth/presentation/pages/security_success_screen.dart';
 import '../../features/home/presentation/pages/main_navigation_screen.dart';
 import '../../features/profile/presentation/pages/profile_screen.dart';
 import '../../features/profile/presentation/pages/edit_profile_screen.dart';
@@ -16,7 +17,6 @@ import '../../features/documents/presentation/pages/documents_screen.dart';
 import '../../features/documents/presentation/pages/document_upload_screen.dart';
 import '../../features/requests/presentation/pages/service_request_detail_screen.dart';
 import '../../features/requests/presentation/pages/service_requests_screen.dart';
-import '../../features/requests/presentation/pages/create_service_request_screen.dart';
 import '../../features/requests/presentation/pages/request_submission_screen.dart';
 import '../../features/notifications/presentation/pages/notifications_screen.dart';
 import '../../features/payments/presentation/pages/payments_screen.dart';
@@ -26,12 +26,12 @@ import '../../features/payments/presentation/pages/payment_success_screen.dart';
 import '../../features/subscriptions/presentation/pages/subscription_screen.dart';
 import '../../features/subscriptions/presentation/pages/subscription_plans_screen.dart';
 import '../../features/subscriptions/presentation/pages/subscription_plan_details_screen.dart';
-import '../../features/courses/presentation/pages/courses_screen.dart';
 import '../../features/services/presentation/pages/services_screen.dart';
 import '../../features/services/presentation/pages/service_detail_screen.dart';
-import '../../features/services/presentation/pages/services_by_type_screen.dart';
 import '../../features/services/presentation/pages/service_request_form_screen.dart';
 
+
+import '../../features/settings/presentation/pages/language_selection_screen.dart';
 
 class RoutePaths {
   // Public routes
@@ -124,6 +124,7 @@ class AppRouter {
     routes: [
       // Public routes
       GoRoute(path: RoutePaths.splash, name: 'splash', builder: (context, state) => const SplashScreen()),
+      GoRoute(path: '/language-selection', name: 'language-selection', builder: (context, state) => const LanguageSelectionScreen(isFirstTime: true)),
       GoRoute(path: RoutePaths.onboarding, name: 'onboarding', builder: (context, state) => const OnboardingScreen()),
       GoRoute(path: RoutePaths.login, name: 'login', builder: (context, state) => const SignInScreen()),
       GoRoute(path: '/signin', name: 'signin', builder: (context, state) => const SignInScreen()), // Alias for login
@@ -149,7 +150,7 @@ class AppRouter {
       GoRoute(path: RoutePaths.profile, name: 'profile', builder: (context, state) => const ProfileScreen(), redirect: _authGuard),
       GoRoute(path: RoutePaths.editProfile, name: 'edit-profile', builder: (context, state) => const EditProfileScreen(), redirect: _authGuard),
       GoRoute(path: RoutePaths.changePassword, name: 'change-password', builder: (context, state) => const ChangePasswordScreen(), redirect: _authGuard),
-      GoRoute(path: RoutePaths.securitySuccess, name: 'security-success', builder: (context, state) => const SecuritySuccessScreen(), redirect: _authGuard),
+      GoRoute(path: RoutePaths.securitySuccess, name: 'security-success', builder: (context, state) => const SecuritySuccessScreen()),
       GoRoute(path: RoutePaths.gdprSettings, name: 'gdpr-settings', builder: (context, state) => const GdprSettingsScreen(), redirect: _authGuard),
       
       // Family members
@@ -160,7 +161,6 @@ class AppRouter {
       
       // Service requests
       GoRoute(path: RoutePaths.serviceRequests, name: 'service-requests', builder: (context, state) => const ServiceRequestsScreen(), redirect: _authGuard),
-      GoRoute(path: RoutePaths.createServiceRequest, name: 'create-service-request', builder: (context, state) => CreateServiceRequestScreen(serviceId: state.uri.queryParameters['serviceId']), redirect: _authGuard),
       GoRoute(path: RoutePaths.serviceRequestDetail, name: 'service-request-detail', builder: (context, state) => ServiceRequestDetailScreenNew(requestId: state.pathParameters['id']!), redirect: _authGuard),
       GoRoute(path: RoutePaths.editServiceRequest, name: 'edit-service-request', builder: (context, state) => EditServiceRequestScreen(requestId: state.pathParameters['id']!), redirect: _authGuard),
       
@@ -207,15 +207,13 @@ class AppRouter {
         serviceId: state.pathParameters['serviceId']!,
         serviceRequestId: state.uri.queryParameters['serviceRequestId'],
       )),
-      GoRoute(path: RoutePaths.servicesByType, name: 'services-by-type', builder: (context, state) => ServicesByTypeScreen(serviceTypeId: state.pathParameters['serviceTypeId']!)),
       
       // Courses
-      GoRoute(path: RoutePaths.courses, name: 'courses', builder: (context, state) => const CoursesScreen(), redirect: _authGuard),
       GoRoute(path: RoutePaths.courseDetail, name: 'course-detail', builder: (context, state) => CourseDetailScreen(courseId: state.pathParameters['id']!), redirect: _authGuard),
       GoRoute(path: RoutePaths.myEnrollments, name: 'my-enrollments', builder: (context, state) => const MyEnrollmentsScreen(), redirect: _authGuard),
       
       // Settings
-      GoRoute(path: RoutePaths.settings, name: 'settings', builder: (context, state) => const SettingsScreen(), redirect: _authGuard),
+      GoRoute(path: RoutePaths.settings, name: 'settings', builder: (context, state) => const LanguageSelectionScreen(), redirect: _authGuard),
     ],
     errorBuilder: (context, state) => ErrorScreen(error: state.error),
   );
@@ -272,39 +270,6 @@ class OnboardingScreen extends StatelessWidget {
   const OnboardingScreen({super.key});
   @override
   Widget build(BuildContext context) => const Scaffold(body: Center(child: Text('Onboarding Screen')));
-}
-
-class SecuritySuccessScreen extends StatefulWidget {
-  const SecuritySuccessScreen({super.key});
-  @override
-  State<SecuritySuccessScreen> createState() => _SecuritySuccessScreenState();
-}
-
-class _SecuritySuccessScreenState extends State<SecuritySuccessScreen> {
-  @override
-  void initState() {
-    super.initState();
-    Future.delayed(const Duration(seconds: 2), () {
-      if (mounted) {
-        context.go('/profile');
-      }
-    });
-  }
-
-  @override
-  Widget build(BuildContext context) => Scaffold(
-    appBar: AppBar(title: const Text('Success')),
-    body: const Center(
-      child: Column(
-        mainAxisAlignment: MainAxisAlignment.center,
-        children: [
-          Icon(Icons.check_circle, color: Colors.green, size: 64),
-          SizedBox(height: 16),
-          Text('Password changed successfully!', style: TextStyle(fontSize: 18)),
-        ],
-      ),
-    ),
-  );
 }
 
 class GdprSettingsScreen extends StatelessWidget {

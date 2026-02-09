@@ -4,6 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import '../../../../core/network/api_client.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 import '../../data/models/service.dart' as service_models;
 
 final serviceFormProvider = FutureProvider.family<service_models.FormSchema, String>((ref, serviceId) async {
@@ -91,6 +92,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildAppBar() {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.fromLTRB(16, 50, 16, 8),
       decoration: const BoxDecoration(
@@ -103,10 +105,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             onPressed: () => context.pop(),
             icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
-          const Expanded(
+          Expanded(
             child: Text(
-              'Service Request',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              l10n.serviceRequest,
+              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
               textAlign: TextAlign.center,
             ),
           ),
@@ -117,6 +119,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildProgressBar(int totalSteps) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       color: Colors.white,
       padding: const EdgeInsets.all(16),
@@ -126,11 +129,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             mainAxisAlignment: MainAxisAlignment.spaceBetween,
             children: [
               Text(
-                'Step ${_currentStep + 1}: ${_getSectionTitle(_currentStep)}',
+                '${l10n.step} ${_currentStep + 1}: ${_getSectionTitle(_currentStep)}',
                 style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111418)),
               ),
               Text(
-                '${_currentStep + 1} of $totalSteps',
+                '${_currentStep + 1} ${l10n.ofText} $totalSteps',
                 style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
               ),
             ],
@@ -147,6 +150,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildSectionHeader(service_models.FormSection section) {
+    final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
@@ -157,9 +161,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Please ensure your data matches your official ID documents.',
-            style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+          Text(
+            l10n.pleaseEnsureDataMatches,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
           ),
         ],
       ),
@@ -305,6 +309,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildFileField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     final files = _uploadedFiles[field.name] ?? [];
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
@@ -323,7 +328,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               children: [
                 const Icon(Icons.upload_file, color: Color(0xFF186ADC)),
                 const SizedBox(height: 8),
-                Text(files.isEmpty ? 'Choose file' : '${files.length} file(s) selected'),
+                Text(files.isEmpty ? l10n.chooseFile : '${files.length} ${l10n.filesSelected}'),
               ],
             ),
           ),
@@ -347,11 +352,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildTimeField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: 'Select time',
+        hintText: l10n.selectTime,
         suffixIcon: const Icon(Icons.access_time, color: Color(0xFF186ADC)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -379,11 +385,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildDateTimeField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: 'Select date and time',
+        hintText: l10n.selectDateAndTime,
         suffixIcon: const Icon(Icons.event, color: Color(0xFF186ADC)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -420,6 +427,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildRangeField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     final value = _formValues[field.name] ?? 0.0;
     return Column(
       children: [
@@ -431,12 +439,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           label: value.round().toString(),
           onChanged: (newValue) => setState(() => _formValues[field.name] = newValue),
         ),
-        Text('Value: ${value.round()}'),
+        Text('${l10n.value}: ${value.round()}'),
       ],
     );
   }
 
   Widget _buildColorField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     final color = _formValues[field.name] ?? Colors.blue;
     return GestureDetector(
       onTap: () => _showColorPicker(field.name),
@@ -447,8 +456,8 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           border: Border.all(color: const Color(0xFFDCE0E5)),
           borderRadius: BorderRadius.circular(8),
         ),
-        child: const Center(
-          child: Text('Tap to select color', style: TextStyle(color: Colors.white)),
+        child: Center(
+          child: Text(l10n.tapToSelectColor, style: const TextStyle(color: Colors.white)),
         ),
       ),
     );
@@ -477,11 +486,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildDateField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: 'Select date',
+        hintText: l10n.selectDate,
         suffixIcon: const Icon(Icons.calendar_today, color: Color(0xFF186ADC)),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(8),
@@ -512,20 +522,21 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildDocumentUpload() {
     if (_currentStep != 0) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
     
     return Padding(
       padding: const EdgeInsets.all(16),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          const Text(
-            'Required Documents',
-            style: TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+          Text(
+            l10n.requiredDocuments,
+            style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
           ),
           const SizedBox(height: 8),
-          const Text(
-            'Upload a clear copy of your ID card (Front and Back).',
-            style: TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
+          Text(
+            l10n.uploadClearCopyId,
+            style: const TextStyle(fontSize: 14, color: Color(0xFF6B7280)),
           ),
           const SizedBox(height: 16),
           Container(
@@ -547,13 +558,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                   child: const Icon(Icons.upload_file, size: 32, color: Color(0xFF186ADC)),
                 ),
                 const SizedBox(height: 12),
-                const Text(
-                  'Click to upload',
-                  style: TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111418)),
+                Text(
+                  l10n.clickToUpload,
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.w600, color: Color(0xFF111418)),
                 ),
-                const Text(
-                  'PDF, JPG or PNG (max. 10MB)',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF637288)),
+                Text(
+                  l10n.pdfJpgPngMax10mb,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF637288)),
                 ),
               ],
             ),
@@ -565,6 +576,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildInfoCard() {
     if (_currentStep != 0) return const SizedBox.shrink();
+    final l10n = AppLocalizations.of(context)!;
     
     return Container(
       margin: const EdgeInsets.all(16),
@@ -574,22 +586,22 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: const Color(0xFF186ADC).withValues(alpha: 0.1)),
       ),
-      child: const Row(
+      child: Row(
         children: [
-          Icon(Icons.info, color: Color(0xFF186ADC)),
-          SizedBox(width: 12),
+          const Icon(Icons.info, color: Color(0xFF186ADC)),
+          const SizedBox(width: 12),
           Expanded(
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Text(
-                  'Next Steps',
-                  style: TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF186ADC)),
+                  l10n.nextSteps,
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w600, color: Color(0xFF186ADC)),
                 ),
-                SizedBox(height: 4),
+                const SizedBox(height: 4),
                 Text(
-                  'In Step 2, you\'ll be asked to provide your current income statement (CU or 730).',
-                  style: TextStyle(fontSize: 12, color: Color(0xFF186ADC)),
+                  l10n.inStep2YoullBeAsked,
+                  style: const TextStyle(fontSize: 12, color: Color(0xFF186ADC)),
                 ),
               ],
             ),
@@ -600,6 +612,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildBottomActions(int totalSteps) {
+    final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(16),
       decoration: const BoxDecoration(
@@ -615,7 +628,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
               ),
-              child: const Text('Save Draft', style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
+              child: Text(l10n.saveDraft, style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold)),
             ),
           ),
           const SizedBox(width: 12),
@@ -632,7 +645,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   Text(
-                    _currentStep == totalSteps - 1 ? 'Submit' : 'Continue',
+                    _currentStep == totalSteps - 1 ? l10n.submit : l10n.continueButton,
                     style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Colors.white),
                   ),
                   const SizedBox(width: 8),
@@ -647,13 +660,14 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildError([String? errorMessage]) {
+    final l10n = AppLocalizations.of(context)!;
     return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
           const Icon(Icons.error_outline, size: 64, color: Color(0xFF9CA3AF)),
           const SizedBox(height: 16),
-          const Text('Failed to load form', style: TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
+          Text(l10n.failedToLoadForm, style: const TextStyle(fontSize: 16, color: Color(0xFF6B7280))),
           if (errorMessage != null) const SizedBox(height: 8),
           if (errorMessage != null)
             Padding(
@@ -667,7 +681,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => ref.refresh(serviceFormProvider(widget.serviceId)),
-            child: const Text('Retry'),
+            child: Text(l10n.retry),
           ),
         ],
       ),
@@ -686,9 +700,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Future<void> _submitForm() async {
+    final l10n = AppLocalizations.of(context)!;
     if (widget.serviceRequestId == null) {
       ScaffoldMessenger.of(context).showSnackBar(
-        const SnackBar(content: Text('Service request ID is missing')),
+        SnackBar(content: Text(l10n.serviceRequestIdMissing)),
       );
       return;
     }
@@ -717,7 +732,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          const SnackBar(content: Text('Form submitted successfully')),
+          SnackBar(content: Text(l10n.formSubmittedSuccessfully)),
         );
         context.go('/document-upload?serviceId=${widget.serviceId}&requestId=${widget.serviceRequestId}');
       }
@@ -725,18 +740,19 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       debugPrint('Form submission error: $e');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Error submitting form: $e')),
+          SnackBar(content: Text('${l10n.errorSubmittingForm}: $e')),
         );
       }
     }
   }
 
   String _getSectionTitle(int step) {
+    final l10n = AppLocalizations.of(context)!;
     switch (step) {
-      case 0: return 'Personal Data';
-      case 1: return 'Income Information';
-      case 2: return 'Additional Details';
-      default: return 'Information';
+      case 0: return l10n.personalData;
+      case 1: return l10n.incomeInformation;
+      case 2: return l10n.additionalDetails;
+      default: return l10n.information;
     }
   }
 
@@ -759,25 +775,26 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   String? _validateField(service_models.FormField field, String? value) {
+    final l10n = AppLocalizations.of(context)!;
     if (field.required && (value == null || value.isEmpty)) {
-      return 'This field is required';
+      return l10n.thisFieldIsRequired;
     }
     
     if (value != null && value.isNotEmpty) {
       switch (field.type) {
         case 'email':
           if (!RegExp(r'^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$').hasMatch(value)) {
-            return 'Please enter a valid email';
+            return l10n.pleaseEnterValidEmail;
           }
           break;
         case 'phone':
           if (!RegExp(r'^[+]?[0-9]{10,15}$').hasMatch(value)) {
-            return 'Please enter a valid phone number';
+            return l10n.pleaseEnterValidPhoneNumber;
           }
           break;
         case 'url':
           if (!RegExp(r'^https?:\/\/.+').hasMatch(value)) {
-            return 'Please enter a valid URL';
+            return l10n.pleaseEnterValidUrl;
           }
           break;
       }
@@ -787,19 +804,20 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   String _getFieldHint(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     switch (field.type) {
-      case 'email': return 'name@example.com';
+      case 'email': return l10n.nameAtExampleCom;
       case 'phone': return '+1234567890';
       case 'url': return 'https://example.com';
-      case 'password': return 'Enter password';
-      case 'textarea': return 'Enter detailed information';
+      case 'password': return l10n.enterPassword;
+      case 'textarea': return l10n.enterDetailedInformation;
       default:
         switch (field.name) {
-          case 'fullName': return 'Enter your full name';
+          case 'fullName': return l10n.enterYourFullName;
           case 'fiscalCode': return 'e.g. RSSMRA80A01H501W';
-          case 'employerName': return 'Enter employer name';
-          case 'grossIncome': return 'Enter gross income';
-          default: return 'Enter ${field.label.toLowerCase()}';
+          case 'employerName': return l10n.enterEmployerName;
+          case 'grossIncome': return l10n.enterGrossIncome;
+          default: return '${l10n.enter} ${field.label.toLowerCase()}';
         }
     }
   }
@@ -824,6 +842,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   void _showColorPicker(String fieldName) {
+    final l10n = AppLocalizations.of(context)!;
     final colors = [
       Colors.red, Colors.pink, Colors.purple, Colors.deepPurple,
       Colors.indigo, Colors.blue, Colors.lightBlue, Colors.cyan,
@@ -835,7 +854,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     showDialog(
       context: context,
       builder: (context) => AlertDialog(
-        title: const Text('Select Color'),
+        title: Text(l10n.selectColor),
         content: SizedBox(
           width: 300,
           child: GridView.builder(
