@@ -9,3 +9,9 @@ android/app/build/
 
 ios/Pods/
 ios/Flutter/build/
+.flutter-plugins
+.flutter-plugins-dependencies
+*.log
+.idea/
+lib/generated/
+lib/flutter_gen/
