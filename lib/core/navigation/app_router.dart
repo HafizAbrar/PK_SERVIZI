@@ -11,8 +11,6 @@ import '../../features/auth/presentation/pages/security_success_screen.dart';
 import '../../features/home/presentation/pages/main_navigation_screen.dart';
 import '../../features/profile/presentation/pages/profile_screen.dart';
 import '../../features/profile/presentation/pages/edit_profile_screen.dart';
-import '../../features/appointments/presentation/pages/appointments_screen.dart';
-import '../../features/appointments/presentation/pages/book_appointment_screen.dart';
 import '../../features/documents/presentation/pages/documents_screen.dart';
 import '../../features/documents/presentation/pages/document_upload_screen.dart';
 import '../../features/requests/presentation/pages/service_request_detail_screen.dart';
@@ -29,9 +27,9 @@ import '../../features/subscriptions/presentation/pages/subscription_plan_detail
 import '../../features/services/presentation/pages/services_screen.dart';
 import '../../features/services/presentation/pages/service_detail_screen.dart';
 import '../../features/services/presentation/pages/service_request_form_screen.dart';
-
-
 import '../../features/settings/presentation/pages/language_selection_screen.dart';
+import '../../features/invoices/presentation/pages/invoices_screen.dart';
+import '../../features/invoices/presentation/pages/invoice_detail_screen.dart';
 
 class RoutePaths {
   // Public routes
@@ -83,12 +81,6 @@ class RoutePaths {
   // Request submission
   static const String requestSubmission = '/request-submission';
   
-  // Appointments
-  static const String appointments = '/appointments';
-  static const String bookAppointment = '/appointments/book';
-  static const String appointmentDetail = '/appointments/:id';
-  static const String rescheduleAppointment = '/appointments/:id/reschedule';
-  
   // Subscription & payments
   static const String subscription = '/subscription';
   static const String subscriptionUpgrade = '/subscription/upgrade';
@@ -104,7 +96,7 @@ class RoutePaths {
   // Services
   static const String services = '/services';
   static const String serviceDetail = '/services/:id';
-  static const String serviceRequestForm = '/service-request-form/:serviceId';
+  static const String serviceRequestForm = '/service-request-form';
   static const String servicesByType = '/services/by-type/:serviceTypeId';
   
   // Courses
@@ -114,6 +106,10 @@ class RoutePaths {
   
   // Settings
   static const String settings = '/settings';
+  
+  // Invoices
+  static const String invoices = '/invoices';
+  static const String invoiceDetail = '/invoices/:id';
 }
 
 class AppRouter {
@@ -177,12 +173,6 @@ class AppRouter {
         requestId: state.uri.queryParameters['requestId']!,
       ), redirect: _authGuard),
       
-      // Appointments
-      GoRoute(path: RoutePaths.appointments, name: 'appointments', builder: (context, state) => const AppointmentsScreen(), redirect: _authGuard),
-      GoRoute(path: RoutePaths.bookAppointment, name: 'book-appointment', builder: (context, state) => BookAppointmentScreen(serviceTypeId: state.uri.queryParameters['serviceTypeId']), redirect: _authGuard),
-      GoRoute(path: RoutePaths.appointmentDetail, name: 'appointment-detail', builder: (context, state) => AppointmentDetailScreen(appointmentId: state.pathParameters['id']!), redirect: _authGuard),
-      GoRoute(path: RoutePaths.rescheduleAppointment, name: 'reschedule-appointment', builder: (context, state) => RescheduleAppointmentScreen(appointmentId: state.pathParameters['id']!), redirect: _authGuard),
-      
       // Subscription & payments
       GoRoute(path: RoutePaths.subscription, name: 'subscription', builder: (context, state) => const SubscriptionScreen(), redirect: _authGuard),
       GoRoute(path: RoutePaths.subscriptionUpgrade, name: 'subscription-upgrade', builder: (context, state) => const SubscriptionUpgradeScreen(), redirect: _authGuard),
@@ -204,6 +194,10 @@ class AppRouter {
       GoRoute(path: RoutePaths.services, name: 'services', builder: (context, state) => const ServicesScreen()),
       GoRoute(path: RoutePaths.serviceDetail, name: 'service-detail', builder: (context, state) => ServiceDetailScreen(serviceId: state.pathParameters['id']!)),
       GoRoute(path: RoutePaths.serviceRequestForm, name: 'service-request-form', builder: (context, state) => ServiceRequestFormScreen(
+        serviceId: state.uri.queryParameters['serviceId']!,
+        serviceRequestId: state.uri.queryParameters['serviceRequestId'],
+      )),
+      GoRoute(path: '/service-request-form/:serviceId', name: 'service-request-form-with-id', builder: (context, state) => ServiceRequestFormScreen(
         serviceId: state.pathParameters['serviceId']!,
         serviceRequestId: state.uri.queryParameters['serviceRequestId'],
       )),
@@ -214,6 +208,10 @@ class AppRouter {
       
       // Settings
       GoRoute(path: RoutePaths.settings, name: 'settings', builder: (context, state) => const LanguageSelectionScreen(), redirect: _authGuard),
+      
+      // Invoices
+      GoRoute(path: RoutePaths.invoices, name: 'invoices', builder: (context, state) => const InvoicesScreen(), redirect: _authGuard),
+      GoRoute(path: RoutePaths.invoiceDetail, name: 'invoice-detail', builder: (context, state) => InvoiceDetailScreen(invoiceId: state.pathParameters['id']!), redirect: _authGuard),
     ],
     errorBuilder: (context, state) => ErrorScreen(error: state.error),
   );
@@ -248,9 +246,6 @@ class AppNavigation {
   static void goToProfile() => goNamed('profile');
   static void goToServiceTypeDetail(String serviceTypeId) => goNamed('service-type-detail', pathParameters: {'id': serviceTypeId});
   static void goToServiceRequestDetail(String requestId) => goNamed('service-request-detail', pathParameters: {'id': requestId});
-  static void goToCreateServiceRequest({String? serviceTypeId}) => goNamed('create-service-request', queryParameters: {if (serviceTypeId != null) 'serviceTypeId': serviceTypeId});
-  static void goToAppointmentDetail(String appointmentId) => goNamed('appointment-detail', pathParameters: {'id': appointmentId});
-  static void goToBookAppointment({String? serviceTypeId}) => goNamed('book-appointment', queryParameters: {if (serviceTypeId != null) 'serviceTypeId': serviceTypeId});
   static void goToUploadDocuments({String? requestId}) => goNamed('upload-documents', queryParameters: {if (requestId != null) 'requestId': requestId});
   static void goToCheckout({String? planId}) => goNamed('checkout', queryParameters: {if (planId != null) 'planId': planId});
 }
@@ -316,20 +311,6 @@ class DocumentsByRequestScreen extends StatelessWidget {
   const DocumentsByRequestScreen({super.key, required this.requestId});
   @override
   Widget build(BuildContext context) => Scaffold(body: Center(child: Text('Documents by Request: $requestId')));
-}
-
-class AppointmentDetailScreen extends StatelessWidget {
-  final String appointmentId;
-  const AppointmentDetailScreen({super.key, required this.appointmentId});
-  @override
-  Widget build(BuildContext context) => Scaffold(body: Center(child: Text('Appointment Detail: $appointmentId')));
-}
-
-class RescheduleAppointmentScreen extends StatelessWidget {
-  final String appointmentId;
-  const RescheduleAppointmentScreen({super.key, required this.appointmentId});
-  @override
-  Widget build(BuildContext context) => Scaffold(body: Center(child: Text('Reschedule Appointment: $appointmentId')));
 }
 
 class SubscriptionUpgradeScreen extends StatelessWidget {

@@ -292,34 +292,39 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             ),
             const SizedBox(height: 20),
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                TextButton(
-                  onPressed: () => context.push('/services/${service['id']}'),
-                  child: Text(
-                    l10n.viewDetails,
-                    style: const TextStyle(
-                      fontSize: 14,
-                      fontWeight: FontWeight.w600,
-                      color: Color(0xFFF2D00D),
+                Flexible(
+                  child: TextButton(
+                    onPressed: () => context.push('/services/${service['id']}'),
+                    child: Text(
+                      l10n.viewDetails,
+                      style: const TextStyle(
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                        color: Color(0xFFF2D00D),
+                      ),
                     ),
                   ),
                 ),
-                ElevatedButton(
-                  onPressed: () => _initiateServiceRequest(context, service['id']),
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF2D00D),
-                    foregroundColor: const Color(0xFF0A192F),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-                    elevation: 0,
-                  ),
-                  child: Text(
-                    l10n.startService.toUpperCase(),
-                    style: const TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      letterSpacing: 1,
+                const SizedBox(width: 8),
+                Flexible(
+                  child: ElevatedButton(
+                    onPressed: () => _initiateServiceRequest(context, service['id']),
+                    style: ElevatedButton.styleFrom(
+                      backgroundColor: const Color(0xFFF2D00D),
+                      foregroundColor: const Color(0xFF0A192F),
+                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                      elevation: 0,
+                    ),
+                    child: Text(
+                      l10n.startService.toUpperCase(),
+                      style: const TextStyle(
+                        fontSize: 12,
+                        fontWeight: FontWeight.bold,
+                        letterSpacing: 1,
+                      ),
+                      textAlign: TextAlign.center,
                     ),
                   ),
                 ),

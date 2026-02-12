@@ -118,9 +118,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     final options = [
       {'title': l10n.editProfile, 'icon': Icons.edit, 'route': '/profile/edit'},
-      {'title': l10n.myAppointments, 'icon': Icons.calendar_today, 'route': '/appointments'},
       {'title': l10n.changePassword, 'icon': Icons.lock, 'route': '/profile/change-password'},
       {'title': l10n.mySubscriptions, 'icon': Icons.subscriptions, 'route': '/subscription'},
+      {'title': l10n.invoices, 'icon': Icons.receipt_long, 'route': '/invoices'},
       {'title': l10n.settings, 'icon': Icons.settings, 'route': '/settings'},
     ];
 

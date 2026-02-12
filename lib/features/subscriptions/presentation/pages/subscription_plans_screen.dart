@@ -54,14 +54,14 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     final plansAsync = ref.watch(subscriptionPlansProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F8),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
           _buildAppBar(),
           Expanded(
             child: plansAsync.when(
               data: (plans) => _buildContent(plans),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC))),
+              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
               error: (_, __) => _buildError(),
             ),
           ),
@@ -72,21 +72,31 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
 
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => context.pop(),
-            child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
           Expanded(
             child: Text(
               AppLocalizations.of(context)?.plans ?? 'Plans',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ),
@@ -212,11 +222,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isPopular ? const Color(0xFF186ADC) : const Color(0xFFDCE0E5),
+          color: isPopular ? const Color(0xFFF2D00D) : const Color(0xFFDCE0E5),
           width: isPopular ? 2 : 1,
         ),
         boxShadow: isPopular 
-          ? [BoxShadow(color: const Color(0xFF186ADC).withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))]
+          ? [BoxShadow(color: const Color(0xFFF2D00D).withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))]
           : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
@@ -233,7 +243,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF186ADC),
+                    color: const Color(0xFFF2D00D),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -271,8 +281,8 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             child: ElevatedButton(
               onPressed: processingPlanId == plan['id'] ? null : () => _purchasePlan(plan['id']),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF186ADC),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFFF2D00D),
+                foregroundColor: const Color(0xFF0A192F),
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
@@ -283,7 +293,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0A192F)),
                       ),
                     )
                   : Text(
@@ -297,7 +307,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             onPressed: () => context.push('/subscription-plan-details/${plan['id']}'),
             child: Text(
               AppLocalizations.of(context)?.viewDetails ?? 'View Details',
-              style: const TextStyle(fontSize: 14, color: Color(0xFF186ADC)),
+              style: const TextStyle(fontSize: 14, color: Color(0xFFF2D00D)),
             ),
           ),
           const SizedBox(height: 20),
@@ -308,7 +318,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                 children: [
                   Icon(
                     Icons.check_circle,
-                    color: isPopular ? const Color(0xFF186ADC) : const Color(0xFF10B981),
+                    color: isPopular ? const Color(0xFFF2D00D) : const Color(0xFF10B981),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -415,8 +425,8 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           ElevatedButton(
             onPressed: () => ref.refresh(subscriptionPlansProvider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF186ADC),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFF2D00D),
+              foregroundColor: const Color(0xFF0A192F),
             ),
             child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
           ),

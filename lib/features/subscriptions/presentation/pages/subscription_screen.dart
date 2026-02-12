@@ -20,19 +20,20 @@ class SubscriptionScreen extends ConsumerWidget {
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
+    final l10n = AppLocalizations.of(context)!;
     final subscriptionAsync = ref.watch(activeSubscriptionProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF6F7F8),
+      backgroundColor: const Color(0xFFF8F9FA),
       body: Column(
         children: [
-          _buildAppBar(context),
+          _buildHeader(context, l10n),
           Expanded(
             child: subscriptionAsync.when(
               data: (subscription) => subscription == null 
                   ? _buildNoSubscription(context)
                   : _buildSubscriptionContent(context, subscription),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC))),
+              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
               error: (_, __) => _buildNoSubscription(context),
             ),
           ),
@@ -41,24 +42,33 @@ class SubscriptionScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildAppBar(BuildContext context) {
-    final l10n = AppLocalizations.of(context)!;
+  Widget _buildHeader(BuildContext context, AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => context.pop(),
-            child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
           Expanded(
             child: Text(
               l10n.mySubscriptions,
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ),
@@ -74,17 +84,26 @@ class SubscriptionScreen extends ConsumerWidget {
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
-          const Icon(Icons.subscriptions_outlined, size: 80, color: Color(0xFF9CA3AF)),
-          const SizedBox(height: 16),
-          Text(l10n.noActiveRequests, style: const TextStyle(fontSize: 18, color: Color(0xFF6B7280))),
+          Container(
+            padding: const EdgeInsets.all(24),
+            decoration: BoxDecoration(
+              color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+              borderRadius: BorderRadius.circular(20),
+            ),
+            child: const Icon(Icons.subscriptions_outlined, size: 64, color: Color(0xFF0A192F)),
+          ),
+          const SizedBox(height: 20),
+          Text(l10n.noActiveRequests, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F))),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.push('/subscription-plans'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFF186ADC),
-              foregroundColor: Colors.white,
+              backgroundColor: const Color(0xFFF2D00D),
+              foregroundColor: const Color(0xFF0A192F),
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
-            child: Text(l10n.viewAll),
+            child: Text(l10n.viewAll, style: const TextStyle(fontWeight: FontWeight.bold)),
           ),
         ],
       ),
@@ -98,8 +117,8 @@ class SubscriptionScreen extends ConsumerWidget {
           _buildStatusHeader(),
           _buildPlanCard(subscription),
           _buildBillingInfo(subscription),
-          _buildUsageTracker(),
-          _buildFeaturesList(),
+          _buildUsageTracker(subscription),
+          _buildFeaturesList(subscription),
           _buildActions(context),
         ],
       ),
@@ -182,7 +201,7 @@ class SubscriptionScreen extends ConsumerWidget {
                     children: [
                       TextSpan(
                         text: '€$price',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF186ADC)),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF2D00D)),
                       ),
                       const TextSpan(
                         text: '/monthly',
@@ -203,13 +222,13 @@ class SubscriptionScreen extends ConsumerWidget {
             width: 96,
             height: 96,
             decoration: BoxDecoration(
-              color: const Color(0xFF186ADC).withValues(alpha: 0.1),
+              color: const Color(0xFF0A192F).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.workspace_premium,
               size: 36,
-              color: Color(0xFF186ADC),
+              color: Color(0xFF0A192F),
             ),
           ),
         ],
@@ -220,6 +239,7 @@ class SubscriptionScreen extends ConsumerWidget {
   Widget _buildBillingInfo(Map<String, dynamic> subscription) {
     final startDate = subscription['startDate'] ?? subscription['createdAt'] ?? 'Feb 1, 2026';
     final renewalDate = subscription['renewalDate'] ?? subscription['nextBillingDate'] ?? 'Mar 1, 2026';
+    final autoRenew = subscription['autoRenew'] ?? true;
     
     return Container(
       margin: const EdgeInsets.all(16),
@@ -265,11 +285,11 @@ class SubscriptionScreen extends ConsumerWidget {
                       width: 48,
                       height: 24,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF186ADC),
+                        color: autoRenew ? const Color(0xFFF2D00D) : const Color(0xFFE5E7EB),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Align(
-                        alignment: Alignment.centerRight,
+                        alignment: autoRenew ? Alignment.centerRight : Alignment.centerLeft,
                         child: Container(
                           margin: const EdgeInsets.all(2),
                           width: 20,
@@ -307,7 +327,12 @@ class SubscriptionScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildUsageTracker() {
+  Widget _buildUsageTracker(Map<String, dynamic> subscription) {
+    final serviceLimits = subscription['plan']?['serviceLimits'] ?? {};
+    final imuLimit = serviceLimits['imu'] ?? 0;
+    final iseeLimit = serviceLimits['isee'] ?? 0;
+    final modello730Limit = serviceLimits['modello730'] ?? 0;
+    
     return Container(
       margin: const EdgeInsets.all(16),
       child: Column(
@@ -320,11 +345,11 @@ class SubscriptionScreen extends ConsumerWidget {
           const SizedBox(height: 12),
           Column(
             children: [
-              _buildUsageItem('IMU', 0, 2),
+              _buildUsageItem('IMU', 0, imuLimit),
               const SizedBox(height: 16),
-              _buildUsageItem('ISEE', 0, 2),
+              _buildUsageItem('ISEE', 0, iseeLimit),
               const SizedBox(height: 16),
-              _buildUsageItem('Modello 730', 0, 2),
+              _buildUsageItem('Modello 730', 0, modello730Limit),
             ],
           ),
         ],
@@ -333,7 +358,8 @@ class SubscriptionScreen extends ConsumerWidget {
   }
 
   Widget _buildUsageItem(String title, int used, int total) {
-    final progress = used / total;
+    final isUnlimited = total == -1;
+    final progress = isUnlimited ? 0.0 : (total > 0 ? used / total : 0.0);
     
     return Column(
       children: [
@@ -345,7 +371,7 @@ class SubscriptionScreen extends ConsumerWidget {
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF374151)),
             ),
             Text(
-              '$used/$total',
+              isUnlimited ? '$used/∞' : '$used/$total',
               style: const TextStyle(fontSize: 12, fontWeight: FontWeight.w500, color: Color(0xFF9CA3AF)),
             ),
           ],
@@ -358,22 +384,31 @@ class SubscriptionScreen extends ConsumerWidget {
             color: const Color(0xFFE5E7EB),
             borderRadius: BorderRadius.circular(4),
           ),
-          child: FractionallySizedBox(
-            alignment: Alignment.centerLeft,
-            widthFactor: progress,
-            child: Container(
-              decoration: BoxDecoration(
-                color: const Color(0xFF186ADC),
-                borderRadius: BorderRadius.circular(4),
-              ),
-            ),
-          ),
+          child: isUnlimited
+              ? Container(
+                  decoration: BoxDecoration(
+                    color: const Color(0xFF07883b),
+                    borderRadius: BorderRadius.circular(4),
+                  ),
+                )
+              : FractionallySizedBox(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: progress,
+                  child: Container(
+                    decoration: BoxDecoration(
+                      color: const Color(0xFFF2D00D),
+                      borderRadius: BorderRadius.circular(4),
+                    ),
+                  ),
+                ),
         ),
       ],
     );
   }
 
-  Widget _buildFeaturesList() {
+  Widget _buildFeaturesList(Map<String, dynamic> subscription) {
+    final features = subscription['plan']?['features'] as List<dynamic>? ?? [];
+    
     return Container(
       margin: const EdgeInsets.all(16),
       child: Column(
@@ -385,13 +420,10 @@ class SubscriptionScreen extends ConsumerWidget {
           ),
           const SizedBox(height: 8),
           Column(
-            children: [
-              _buildFeatureItem('2 richieste al mese per tipologia'),
-              const SizedBox(height: 12),
-              _buildFeatureItem('Supporto email prioritario'),
-              const SizedBox(height: 12),
-              _buildFeatureItem('Archivio digitale documenti'),
-            ],
+            children: features.map((feature) => Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: _buildFeatureItem(feature.toString()),
+            )).toList(),
           ),
         ],
       ),
@@ -403,7 +435,7 @@ class SubscriptionScreen extends ConsumerWidget {
       children: [
         const Icon(
           Icons.check_circle,
-          color: Color(0xFF186ADC),
+          color: Color(0xFFF2D00D),
           size: 20,
         ),
         const SizedBox(width: 12),
@@ -428,39 +460,12 @@ class SubscriptionScreen extends ConsumerWidget {
               SizedBox(
                 width: double.infinity,
                 child: ElevatedButton(
-                  onPressed: () {},
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF186ADC),
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  ),
-                  child: Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: [
-                      const Icon(Icons.payments, size: 20),
-                      const SizedBox(width: 8),
-                      Text(
-                        l10n.completePayment,
-                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-              const SizedBox(height: 12),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
                   onPressed: () => context.push('/subscription-plans'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFF186ADC).withValues(alpha: 0.1),
-                    foregroundColor: const Color(0xFF186ADC),
+                    backgroundColor: const Color(0xFFF2D00D),
+                    foregroundColor: const Color(0xFF0A192F),
                     padding: const EdgeInsets.symmetric(vertical: 12),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                      side: const BorderSide(color: Color(0xFF186ADC), width: 0.2),
-                    ),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),
                   child: Text(
                     l10n.plans,
@@ -469,11 +474,20 @@ class SubscriptionScreen extends ConsumerWidget {
                 ),
               ),
               const SizedBox(height: 8),
-              TextButton(
-                onPressed: () => _cancelSubscription(context, ref),
-                child: Text(
-                  l10n.cancel,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Colors.red),
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () => _cancelSubscription(context, ref),
+                  style: OutlinedButton.styleFrom(
+                    foregroundColor: Colors.red,
+                    side: const BorderSide(color: Colors.red, width: 1.5),
+                    padding: const EdgeInsets.symmetric(vertical: 12),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  ),
+                  child: const Text(
+                    'Cancel Subscription',
+                    style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500),
+                  ),
                 ),
               ),
             ],
@@ -488,8 +502,8 @@ class SubscriptionScreen extends ConsumerWidget {
     final confirm = await showDialog<bool>(
       context: context,
       builder: (context) => AlertDialog(
-        title: Text(l10n.cancel),
-        content: Text(l10n.doYouWantToExit),
+        title: const Text('Cancel Subscription'),
+        content: const Text('Are you sure you want to cancel your subscription? This action cannot be undone.'),
         actions: [
           TextButton(
             onPressed: () => Navigator.pop(context, false),
@@ -498,7 +512,7 @@ class SubscriptionScreen extends ConsumerWidget {
           TextButton(
             onPressed: () => Navigator.pop(context, true),
             style: TextButton.styleFrom(foregroundColor: Colors.red),
-            child: Text(l10n.ok),
+            child: const Text('Yes, Cancel'),
           ),
         ],
       ),
@@ -507,17 +521,18 @@ class SubscriptionScreen extends ConsumerWidget {
     if (confirm == true) {
       try {
         final apiClient = ref.read(apiClientProvider);
-        await apiClient.post('/api/v1/subscriptions/cancel');
+        await apiClient.delete('/api/v1/subscriptions/my');
         ref.invalidate(activeSubscriptionProvider);
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(l10n.success)),
+            const SnackBar(content: Text('Subscription cancelled successfully'), backgroundColor: Colors.green),
           );
+          context.go('/subscription-plans');
         }
       } catch (e) {
         if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text('${l10n.error}: $e')),
+            SnackBar(content: Text('Failed to cancel subscription: $e'), backgroundColor: Colors.red),
           );
         }
       }

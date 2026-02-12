@@ -43,35 +43,53 @@ class MainNavigationScreen extends ConsumerWidget {
           index: currentIndex,
           children: screens,
         ),
-        bottomNavigationBar: BottomNavigationBar(
-          type: BottomNavigationBarType.fixed,
-          currentIndex: currentIndex,
-          onTap: (index) {
-            ref.read(navigationIndexProvider.notifier).state = index;
-          },
-          items: [
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.home),
-              label: l10n.home,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.business),
-              label: l10n.services,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.assignment),
-              label: l10n.requests,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.subscriptions),
-              label: l10n.plans,
-            ),
-            BottomNavigationBarItem(
-              icon: const Icon(Icons.person),
-              label: l10n.profile,
-            ),
-          ],
+        bottomNavigationBar: Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.1),
+                blurRadius: 20,
+                offset: const Offset(0, -4),
+              ),
+            ],
+          ),
+          padding: EdgeInsets.fromLTRB(24, 12, 24, MediaQuery.of(context).padding.bottom + 12),
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              _buildNavItem(context, ref, Icons.home, l10n.home, 0),
+              _buildNavItem(context, ref, Icons.grid_view, l10n.services, 1),
+              _buildNavItem(context, ref, Icons.assignment, l10n.requests, 2),
+              _buildNavItem(context, ref, Icons.subscriptions, l10n.plans, 3),
+              _buildNavItem(context, ref, Icons.account_circle, l10n.profile, 4),
+            ],
+          ),
         ),
+      ),
+    );
+  }
+
+  Widget _buildNavItem(BuildContext context, WidgetRef ref, IconData icon, String label, int index) {
+    final currentIndex = ref.watch(navigationIndexProvider);
+    final isActive = currentIndex == index;
+    
+    return GestureDetector(
+      onTap: () => ref.read(navigationIndexProvider.notifier).state = index,
+      child: Column(
+        mainAxisSize: MainAxisSize.min,
+        children: [
+          Icon(icon, color: isActive ? const Color(0xFFF2D00D) : Colors.grey, size: 24),
+          const SizedBox(height: 4),
+          Text(
+            label,
+            style: TextStyle(
+              fontSize: 9,
+              color: isActive ? const Color(0xFFF2D00D) : Colors.grey,
+              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+            ),
+          ),
+        ],
       ),
     );
   }
@@ -196,6 +214,10 @@ class MainNavigationScreen extends ConsumerWidget {
             _buildDrawerAction(context, Icons.folder, l10n.documents, () {
               Navigator.pop(context);
               context.go('/documents');
+            }),
+            _buildDrawerAction(context, Icons.receipt_long, l10n.invoices, () {
+              Navigator.pop(context);
+              context.go('/invoices');
             }),
             _buildDrawerAction(context, Icons.notifications, l10n.notifications, () {
               Navigator.pop(context);

@@ -380,6 +380,28 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
+          if (status == 'draft')
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: () => _submitRequest(context, request, ref, l10n),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: const Color(0xFFF2D00D),
+                  foregroundColor: const Color(0xFF0A192F),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: Text(
+                  l10n.submitRequest,
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
           if (status == 'payment_pending')
             SizedBox(
               width: double.infinity,
@@ -473,6 +495,37 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
     );
   }
 
+  Future<void> _submitRequest(BuildContext context, Map<String, dynamic> request, WidgetRef ref, AppLocalizations l10n) async {
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      await apiClient.post('/api/v1/service-requests/${request['id']}/submit');
+      
+      ref.invalidate(serviceRequestDetailNewProvider(requestId));
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.requestSubmittedSuccessfully),
+            backgroundColor: const Color(0xFF10B981),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    } catch (e) {
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.error}: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
+    }
+  }
+
   Future<void> _initiatePayment(BuildContext context, Map<String, dynamic> request, WidgetRef ref, AppLocalizations l10n) async {
     try {
       final apiClient = ref.read(apiClientProvider);
@@ -534,12 +587,15 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
   }
 
   Color _getStatusColor(String status) {
-    switch (status) {
+    switch (status.toLowerCase()) {
+      case 'draft':
+        return Colors.grey[600]!;
       case 'awaiting_documents':
         return const Color(0xFFEF4444);
       case 'awaiting_form':
         return const Color(0xFFF59E0B);
       case 'processing':
+      case 'submitted':
         return const Color(0xFFF2D00D);
       case 'completed':
         return const Color(0xFF10B981);
@@ -547,27 +603,35 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
         return const Color(0xFF10B981);
       case 'ready_to_submit':
         return const Color(0xFFF2D00D);
+      case 'rejected':
+        return const Color(0xFFEF4444);
       default:
         return Colors.grey[600]!;
     }
   }
 
   String _getStatusText(String status, AppLocalizations l10n) {
-    switch (status) {
+    switch (status.toLowerCase()) {
+      case 'draft':
+        return 'DRAFT';
       case 'awaiting_documents':
         return l10n.awaitingDocuments;
       case 'awaiting_form':
         return l10n.awaitingForm;
       case 'processing':
         return l10n.processing;
+      case 'submitted':
+        return 'SUBMITTED';
       case 'completed':
         return l10n.completed;
       case 'payment_pending':
         return l10n.paymentPending;
       case 'ready_to_submit':
         return l10n.readyToSubmit;
+      case 'rejected':
+        return l10n.rejected;
       default:
-        return l10n.pending;
+        return status.toUpperCase().replaceAll('_', ' ');
     }
   }
 

@@ -243,7 +243,20 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
   }
 
   Widget _buildFilterChips(AppLocalizations l10n) {
-    final filters = [l10n.all, l10n.pending, l10n.processing, l10n.completed];
+    final requestsAsync = ref.watch(serviceRequestsProvider);
+    final requests = requestsAsync.maybeWhen(data: (data) => data, orElse: () => <Map<String, dynamic>>[]);
+    
+    final allCount = requests.length;
+    final pendingCount = requests.where((r) => r['status'] == 'awaiting_form' || r['status'] == 'payment_pending').length;
+    final processingCount = requests.where((r) => r['status'] == 'processing' || r['status'] == 'awaiting_documents' || r['status'] == 'submitted').length;
+    final completedCount = requests.where((r) => r['status'] == 'completed').length;
+    
+    final filters = [
+      {'label': l10n.all, 'count': allCount},
+      {'label': l10n.pending, 'count': pendingCount},
+      {'label': l10n.processing, 'count': processingCount},
+      {'label': l10n.completed, 'count': completedCount},
+    ];
     
     return Container(
       height: 50,
@@ -274,13 +287,33 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                     ),
                   ] : null,
                 ),
-                child: Text(
-                  filter,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : const Color(0xFF0A192F),
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                  ),
+                child: Row(
+                  children: [
+                    Text(
+                      filter['label'] as String,
+                      style: TextStyle(
+                        color: isSelected ? Colors.white : const Color(0xFF0A192F),
+                        fontSize: 14,
+                        fontWeight: FontWeight.w600,
+                      ),
+                    ),
+                    const SizedBox(width: 8),
+                    Container(
+                      padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                      decoration: BoxDecoration(
+                        color: isSelected ? Colors.white.withValues(alpha: 0.2) : const Color(0xFF0A192F).withValues(alpha: 0.1),
+                        borderRadius: BorderRadius.circular(8),
+                      ),
+                      child: Text(
+                        '${filter['count']}',
+                        style: TextStyle(
+                          fontSize: 11,
+                          fontWeight: FontWeight.bold,
+                          color: isSelected ? Colors.white : const Color(0xFF0A192F),
+                        ),
+                      ),
+                    ),
+                  ],
                 ),
               ),
             ),
@@ -381,7 +414,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
         case 'Pending':
           return status == 'awaiting_form' || status == 'payment_pending';
         case 'Processing':
-          return status == 'processing' || status == 'awaiting_documents';
+          return status == 'processing' || status == 'awaiting_documents' || status == 'submitted';
         case 'Completed':
           return status == 'completed';
         default:

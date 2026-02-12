@@ -339,7 +339,9 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
     setState(() => _isSubmitting = true);
 
     try {
-      await ApiServiceFactory.customer.submitServiceRequest(widget.requestId);
+      print('Submitting request ID: ${widget.requestId}');
+      final response = await ApiServiceFactory.customer.submitServiceRequest(widget.requestId);
+      print('Submit response: ${response.data}');
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -353,13 +355,21 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
         context.go('/service-requests');
       }
     } catch (e) {
+      print('Submit error: $e');
       if (mounted) {
+        String errorMessage = l10n.error;
+        if (e.toString().contains('400')) {
+          errorMessage = 'Bad Request: Check if form and documents are complete';
+        } else if (e.toString().contains('DioException')) {
+          errorMessage = 'Network error: ${e.toString()}';
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${l10n.error}: ${e.toString()}'),
+            content: Text(errorMessage),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 5),
           ),
         );
       }

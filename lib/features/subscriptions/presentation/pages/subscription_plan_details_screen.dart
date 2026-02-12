@@ -55,10 +55,10 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     final planAsync = ref.watch(planDetailsProvider(widget.planId));
     
     return Scaffold(
-      backgroundColor: Colors.white,
+      backgroundColor: const Color(0xFFF8F9FA),
       body: planAsync.when(
         data: (plan) => _buildContent(plan),
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF186ADC))),
+        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
         error: (_, __) => _buildError(),
       ),
     );
@@ -91,21 +91,31 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
 
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(16, 50, 16, 16),
-      decoration: const BoxDecoration(
-        color: Colors.white,
-        border: Border(bottom: BorderSide(color: Color(0xFFE5E7EB))),
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      decoration: BoxDecoration(
+        color: const Color(0xFF0A192F),
+        borderRadius: const BorderRadius.only(
+          bottomLeft: Radius.circular(24),
+          bottomRight: Radius.circular(24),
+        ),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
+          ),
+        ],
       ),
       child: Row(
         children: [
           GestureDetector(
             onTap: () => context.pop(),
-            child: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
+            child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
           ),
           Expanded(
             child: Text(
               AppLocalizations.of(context)?.planDetails ?? 'Plan Details',
-              style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
               textAlign: TextAlign.center,
             ),
           ),
@@ -117,32 +127,33 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
 
   Widget _buildProfileHeader(Map<String, dynamic> plan) {
     return Padding(
-      padding: const EdgeInsets.all(16),
+      padding: const EdgeInsets.all(20),
       child: Column(
         children: [
           Container(
             width: 128,
             height: 128,
             decoration: BoxDecoration(
-              color: const Color(0xFF186ADC).withValues(alpha: 0.1),
+              color: const Color(0xFF0A192F),
               borderRadius: BorderRadius.circular(16),
+              border: Border.all(color: const Color(0xFFF2D00D), width: 3),
             ),
             child: const Icon(
               Icons.workspace_premium,
               size: 64,
-              color: Color(0xFF186ADC),
+              color: Color(0xFFF2D00D),
             ),
           ),
           const SizedBox(height: 16),
           TranslatedText(
             plan['name'] ?? 'Professional',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
           TranslatedText(
             plan['description'] ?? '',
-            style: const TextStyle(fontSize: 16, color: Color(0xFF637288)),
+            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
             textAlign: TextAlign.center,
           ),
         ],
@@ -152,11 +163,17 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
 
   Widget _buildBillingToggle() {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: const Color(0xFFF3F4F6),
-        borderRadius: BorderRadius.circular(12),
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -164,19 +181,18 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             child: GestureDetector(
               onTap: () => setState(() => isYearly = false),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 11),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: !isYearly ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: !isYearly ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
+                  color: !isYearly ? const Color(0xFFF2D00D) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   AppLocalizations.of(context)?.monthly ?? 'Monthly',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: !isYearly ? const Color(0xFF111418) : const Color(0xFF637288),
+                    fontWeight: FontWeight.bold,
+                    color: !isYearly ? const Color(0xFF0A192F) : Colors.grey[600],
                   ),
                 ),
               ),
@@ -186,19 +202,18 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             child: GestureDetector(
               onTap: () => setState(() => isYearly = true),
               child: Container(
-                padding: const EdgeInsets.symmetric(vertical: 11),
+                padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isYearly ? Colors.white : Colors.transparent,
-                  borderRadius: BorderRadius.circular(8),
-                  boxShadow: isYearly ? [BoxShadow(color: Colors.black.withValues(alpha: 0.1), blurRadius: 2)] : null,
+                  color: isYearly ? const Color(0xFFF2D00D) : Colors.transparent,
+                  borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
                   AppLocalizations.of(context)?.yearlyDiscount ?? 'Yearly (-17%)',
                   textAlign: TextAlign.center,
                   style: TextStyle(
                     fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: isYearly ? const Color(0xFF111418) : const Color(0xFF637288),
+                    fontWeight: FontWeight.bold,
+                    color: isYearly ? const Color(0xFF0A192F) : Colors.grey[600],
                   ),
                 ),
               ),
@@ -210,18 +225,41 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
   }
 
   Widget _buildPriceHeader(double price) {
-    return Padding(
-      padding: const EdgeInsets.symmetric(vertical: 16),
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        gradient: const LinearGradient(
+          colors: [Color(0xFF0A192F), Color(0xFF1a2e4d)],
+          begin: Alignment.topLeft,
+          end: Alignment.bottomRight,
+        ),
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.1),
+            blurRadius: 12,
+          ),
+        ],
+      ),
       child: RichText(
         textAlign: TextAlign.center,
         text: TextSpan(
           children: [
+            const TextSpan(
+              text: '€',
+              style: TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFFF2D00D),
+              ),
+            ),
             TextSpan(
-              text: '€${price.toStringAsFixed(2)}',
+              text: price.toStringAsFixed(2),
               style: const TextStyle(
-                fontSize: 36,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF111418),
+                fontSize: 48,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
               ),
             ),
             TextSpan(
@@ -229,7 +267,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.normal,
-                color: Color(0xFF9CA3AF),
+                color: Colors.white70,
               ),
             ),
           ],
@@ -247,64 +285,76 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
       'Notifiche scadenze fiscali in tempo reale',
     ];
 
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 16, 16, 8),
-          child: Text(
+    return Container(
+      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             AppLocalizations.of(context)?.planFeatures ?? 'Plan Features',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 16),
-          child: Column(
-            children: features.map((feature) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Color(0xFF186ADC), size: 24),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TranslatedText(
-                      feature.toString(),
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
-                    ),
+          const SizedBox(height: 16),
+          ...features.map((feature) => Padding(
+            padding: const EdgeInsets.only(bottom: 12),
+            child: Row(
+              children: [
+                const Icon(Icons.check_circle, color: Color(0xFFF2D00D), size: 20),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: TranslatedText(
+                    feature.toString(),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF0A192F)),
                   ),
-                ],
-              ),
-            )).toList(),
-          ),
-        ),
-      ],
+                ),
+              ],
+            ),
+          )),
+        ],
+      ),
     );
   }
 
   Widget _buildUsageLimits(Map<String, dynamic> plan) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 24, 16, 8),
-          child: Text(
+    return Container(
+      margin: const EdgeInsets.fromLTRB(20, 16, 20, 32),
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
+        ],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
             AppLocalizations.of(context)?.usageLimits ?? 'Usage Limits',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
           ),
-        ),
-        Padding(
-          padding: const EdgeInsets.fromLTRB(16, 0, 16, 32),
-          child: Column(
-            children: [
-              _buildUsageItem('Dichiarazione IMU', 5, 5),
-              const SizedBox(height: 20),
-              _buildUsageItem('Calcolo ISEE', 5, 5),
-              const SizedBox(height: 20),
-              _buildUsageItem('Modello 730', 5, 5),
-            ],
-          ),
-        ),
-      ],
+          const SizedBox(height: 16),
+          _buildUsageItem('Dichiarazione IMU', 5, 5),
+          const SizedBox(height: 20),
+          _buildUsageItem('Calcolo ISEE', 5, 5),
+          const SizedBox(height: 20),
+          _buildUsageItem('Modello 730', 5, 5),
+        ],
+      ),
     );
   }
 
@@ -318,11 +368,11 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF0A192F)),
             ),
             Text(
               '$remaining / $total ${AppLocalizations.of(context)?.remaining ?? 'remaining'}',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF186ADC)),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFF2D00D)),
             ),
           ],
         ),
@@ -331,7 +381,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
           width: double.infinity,
           height: 8,
           decoration: BoxDecoration(
-            color: const Color(0xFFF3F4F6),
+            color: Colors.grey[200],
             borderRadius: BorderRadius.circular(4),
           ),
           child: FractionallySizedBox(
@@ -339,7 +389,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             widthFactor: progress,
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFF186ADC),
+                color: const Color(0xFFF2D00D),
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -351,10 +401,16 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
 
   Widget _buildFooter(Map<String, dynamic> plan) {
     return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: const BoxDecoration(
+      padding: const EdgeInsets.all(20),
+      decoration: BoxDecoration(
         color: Colors.white,
-        border: Border(top: BorderSide(color: Color(0xFFE5E7EB))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 12,
+            offset: const Offset(0, -4),
+          ),
+        ],
       ),
       child: Column(
         children: [
@@ -363,10 +419,10 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             child: ElevatedButton(
               onPressed: isProcessing ? null : () => _purchasePlan(plan['id']),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFF186ADC),
-                foregroundColor: Colors.white,
+                backgroundColor: const Color(0xFFF2D00D),
+                foregroundColor: const Color(0xFF0A192F),
                 padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
               ),
               child: isProcessing
@@ -375,7 +431,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0A192F)),
                       ),
                     )
                   : Row(

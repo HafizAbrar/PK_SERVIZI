@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:flutter_svg/flutter_svg.dart';
 import '../../../../core/providers/language_provider.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 
@@ -33,11 +34,11 @@ class LanguageSelectionScreen extends ConsumerWidget {
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
           ),
           const SizedBox(height: 24),
-          _buildLanguageOption(context, ref, 'English', 'en', '🇬🇧', currentLocale.languageCode == 'en'),
+          _buildLanguageOption(context, ref, 'English', 'en', 'assets/flags/gb.svg', currentLocale.languageCode == 'en'),
           const SizedBox(height: 12),
-          _buildLanguageOption(context, ref, 'Italiano', 'it', '🇮🇹', currentLocale.languageCode == 'it'),
+          _buildLanguageOption(context, ref, 'Italiano', 'it', 'assets/flags/it.svg', currentLocale.languageCode == 'it'),
           const SizedBox(height: 12),
-          _buildLanguageOption(context, ref, 'Français', 'fr', '🇫🇷', currentLocale.languageCode == 'fr'),
+          _buildLanguageOption(context, ref, 'Français', 'fr', 'assets/flags/fr.svg', currentLocale.languageCode == 'fr'),
         ],
       ),
     );
@@ -76,7 +77,7 @@ class LanguageSelectionScreen extends ConsumerWidget {
         ),
         child: Row(
           children: [
-            Text(flag, style: const TextStyle(fontSize: 32)),
+            SvgPicture.asset(flag, width: 40, height: 40),
             const SizedBox(width: 16),
             Expanded(child: Text(language, style: TextStyle(fontSize: 16, fontWeight: isSelected ? FontWeight.bold : FontWeight.normal))),
             if (isSelected) const Icon(Icons.check, color: Color(0xFFF2D00D)),
