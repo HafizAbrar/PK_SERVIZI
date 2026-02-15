@@ -3,7 +3,12 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
 import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
 import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/network/api_client.dart';
 import '../../data/invoice_data_source.dart';
 import '../../data/invoice_model.dart';
 import '../../../profile/presentation/providers/profile_provider.dart';
@@ -32,11 +37,11 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
     final profileAsync = ref.watch(profileProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F8F5),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           Container(
-            decoration: const BoxDecoration(color: Color(0xFF0A192F), boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))]),
+            decoration: const BoxDecoration(color: AppTheme.primaryColor, boxShadow: [BoxShadow(color: Colors.black12, blurRadius: 4, offset: Offset(0, 2))]),
             padding: EdgeInsets.fromLTRB(20, MediaQuery.of(context).padding.top + 16, 20, 24),
             child: Row(
               children: [
@@ -45,30 +50,30 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                   child: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 20),
                 ),
                 const SizedBox(width: 16),
-                Text(l10n.invoices, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Color(0xFFF2D00D))),
+                Text(l10n.invoices, style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: AppTheme.accentColor)),
                 const Spacer(),
                 profileAsync.when(
                   data: (profile) => Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFF2D00D).withOpacity(0.3))),
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppTheme.accentColor.withOpacity(0.3))),
                     child: ClipOval(
                       child: profile['profile']?['avatarUrl'] != null
-                          ? Image.network(profile['profile']['avatarUrl'], fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.person, color: Color(0xFFF2D00D)))
-                          : const Icon(Icons.person, color: Color(0xFFF2D00D)),
+                          ? Image.network(profile['profile']['avatarUrl'], fit: BoxFit.cover, errorBuilder: (_, __, ___) => const Icon(Icons.person, color: AppTheme.accentColor))
+                          : const Icon(Icons.person, color: AppTheme.accentColor),
                     ),
                   ),
                   loading: () => Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFF2D00D).withOpacity(0.3))),
-                    child: const Icon(Icons.person, color: Color(0xFFF2D00D)),
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppTheme.accentColor.withOpacity(0.3))),
+                    child: const Icon(Icons.person, color: AppTheme.accentColor),
                   ),
                   error: (_, __) => Container(
                     width: 40,
                     height: 40,
-                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: const Color(0xFFF2D00D).withOpacity(0.3))),
-                    child: const Icon(Icons.person, color: Color(0xFFF2D00D)),
+                    decoration: BoxDecoration(shape: BoxShape.circle, border: Border.all(color: AppTheme.accentColor.withOpacity(0.3))),
+                    child: const Icon(Icons.person, color: AppTheme.accentColor),
                   ),
                 ),
               ],
@@ -77,7 +82,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
           Expanded(
             child: invoicesAsync.when(
               data: (result) => _buildInvoicesList(context, result['invoices'], result['payments'], l10n),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               error: (_, __) => Center(child: Text(l10n.error)),
             ),
           ),
@@ -111,15 +116,15 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+                color: AppTheme.primaryColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(Icons.receipt_long_outlined, size: 64, color: Color(0xFF0A192F)),
+              child: const Icon(Icons.receipt_long_outlined, size: 64, color: Colors.white),
             ),
             const SizedBox(height: 20),
             const Text(
               'Invoice History is Empty',
-              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Colors.white),
             ),
             const SizedBox(height: 8),
             Text(
@@ -136,7 +141,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
       children: [
         Container(
           decoration: BoxDecoration(
-            gradient: const LinearGradient(colors: [Color(0xFF0A192F), Color(0xFF1a2e4d)], begin: Alignment.topLeft, end: Alignment.bottomRight),
+            gradient: const LinearGradient(colors: [AppTheme.primaryColor, Color(0xFF1a2e4d)], begin: Alignment.topLeft, end: Alignment.bottomRight),
             borderRadius: BorderRadius.circular(12),
             boxShadow: const [BoxShadow(color: Colors.black26, blurRadius: 20, offset: Offset(0, 10))],
           ),
@@ -147,13 +152,13 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text('${l10n.fiscalYear} ${DateTime.now().year}', style: const TextStyle(color: Colors.grey, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
+                  Text('${l10n.fiscalYear} ${DateTime.now().year}', style: const TextStyle(color: Colors.white, fontSize: 10, fontWeight: FontWeight.bold, letterSpacing: 2)),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text('€${totalPaid.toStringAsFixed(2)}', style: const TextStyle(fontSize: 28, fontWeight: FontWeight.bold, color: Colors.white, fontFamily: 'serif')),
                       const SizedBox(width: 8),
-                      Text(l10n.totalPaid, style: const TextStyle(fontSize: 12, color: Color(0xFFF2D00D))),
+                      Text(l10n.totalPaid, style: const TextStyle(fontSize: 12, color: AppTheme.accentColor)),
                     ],
                   ),
                   const SizedBox(height: 16),
@@ -163,7 +168,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        const Icon(Icons.history, color: Color(0xFFF2D00D), size: 14),
+                        const Icon(Icons.history, color: AppTheme.accentColor, size: 14),
                         const SizedBox(width: 8),
                         Text('${l10n.recent}: ', style: const TextStyle(fontSize: 11, color: Colors.white)),
                         Text(recentInvoiceNumber, style: const TextStyle(fontSize: 11, color: Colors.white, fontWeight: FontWeight.bold)),
@@ -216,9 +221,9 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
       child: Container(
         padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 10),
         decoration: BoxDecoration(
-          color: isSelected ? const Color(0xFFF2D00D) : Colors.white,
+          color: isSelected ? AppTheme.accentColor : Colors.white,
           borderRadius: BorderRadius.circular(20),
-          border: Border.all(color: isSelected ? const Color(0xFFF2D00D) : Colors.grey[300]!),
+          border: Border.all(color: isSelected ? AppTheme.accentColor : Colors.grey[300]!),
         ),
         child: Row(
           children: [
@@ -227,14 +232,14 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: isSelected ? const Color(0xFF0A192F) : Colors.grey[700],
+                color: isSelected ? AppTheme.primaryColor : Colors.grey[700],
               ),
             ),
             const SizedBox(width: 8),
             Container(
               padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 2),
               decoration: BoxDecoration(
-                color: isSelected ? const Color(0xFF0A192F).withOpacity(0.2) : Colors.grey[200],
+                color: isSelected ? AppTheme.primaryColor.withOpacity(0.2) : Colors.grey[200],
                 borderRadius: BorderRadius.circular(10),
               ),
               child: Text(
@@ -242,7 +247,7 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                 style: TextStyle(
                   fontSize: 12,
                   fontWeight: FontWeight.bold,
-                  color: isSelected ? const Color(0xFF0A192F) : Colors.grey[600],
+                  color: isSelected ? AppTheme.primaryColor : Colors.grey[600],
                 ),
               ),
             ),
@@ -272,13 +277,13 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  Text(invoice.invoiceNumber, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F), fontFamily: 'serif')),
+                  Text(invoice.invoiceNumber, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontFamily: 'serif')),
                   const SizedBox(height: 4),
                   Row(
                     children: [
                       Text(DateFormat('MMM dd, yyyy').format(date), style: const TextStyle(fontSize: 11, color: Colors.grey)),
                       const Text(' • ', style: TextStyle(color: Colors.grey)),
-                      Text('€${invoice.amount}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0A192F))),
+                      Text('€${invoice.amount}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
                     ],
                   ),
                   const SizedBox(height: 8),
@@ -287,15 +292,15 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                   Container(
                     padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                     decoration: BoxDecoration(
-                      color: isPaid ? const Color(0xFFF2D00D).withOpacity(0.1) : Colors.grey[100],
+                      color: isPaid ? AppTheme.accentColor.withOpacity(0.1) : Colors.grey[100],
                       borderRadius: BorderRadius.circular(20),
                     ),
                     child: Row(
                       mainAxisSize: MainAxisSize.min,
                       children: [
-                        Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: isPaid ? const Color(0xFFF2D00D) : Colors.grey)),
+                        Container(width: 6, height: 6, decoration: BoxDecoration(shape: BoxShape.circle, color: isPaid ? AppTheme.accentColor : Colors.grey)),
                         const SizedBox(width: 6),
-                        Text(isPaid ? l10n.paid : l10n.sent, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: isPaid ? const Color(0xFF0A192F) : Colors.grey[600], letterSpacing: 1)),
+                        Text(isPaid ? l10n.paid : l10n.sent, style: TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: isPaid ? AppTheme.primaryColor : Colors.grey[600], letterSpacing: 1)),
                       ],
                     ),
                   ),
@@ -306,11 +311,11 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFFF2D00D).withOpacity(0.1),
+                color: AppTheme.accentColor.withOpacity(0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFF2D00D).withOpacity(0.2)),
+                border: Border.all(color: AppTheme.accentColor.withOpacity(0.2)),
               ),
-              child: const Icon(Icons.picture_as_pdf, color: Color(0xFFF2D00D)),
+              child: const Icon(Icons.picture_as_pdf, color: AppTheme.accentColor),
             ),
           ],
         ),
@@ -337,13 +342,13 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                Text(serviceName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F), fontFamily: 'serif')),
+                Text(serviceName, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor, fontFamily: 'serif')),
                 const SizedBox(height: 4),
                 Row(
                   children: [
                     Text(DateFormat('MMM dd, yyyy').format(date), style: const TextStyle(fontSize: 11, color: Colors.grey)),
                     const Text(' • ', style: TextStyle(color: Colors.grey)),
-                    Text('€${payment.amount}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Color(0xFF0A192F))),
+                    Text('€${payment.amount}', style: const TextStyle(fontSize: 11, fontWeight: FontWeight.bold, color: Colors.white)),
                   ],
                 ),
                 const SizedBox(height: 8),
@@ -352,15 +357,15 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2D00D).withOpacity(0.1),
+                    color: AppTheme.accentColor.withOpacity(0.1),
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Row(
                     mainAxisSize: MainAxisSize.min,
                     children: [
-                      Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: Color(0xFFF2D00D))),
+                      Container(width: 6, height: 6, decoration: const BoxDecoration(shape: BoxShape.circle, color: AppTheme.accentColor)),
                       const SizedBox(width: 6),
-                      Text(l10n.paid, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: Color(0xFF0A192F), letterSpacing: 1)),
+                      Text(l10n.paid, style: const TextStyle(fontSize: 9, fontWeight: FontWeight.bold, color: AppTheme.primaryColor, letterSpacing: 1)),
                     ],
                   ),
                 ),
@@ -372,11 +377,11 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
               width: 48,
               height: 48,
               decoration: BoxDecoration(
-                color: const Color(0xFFF2D00D).withOpacity(0.1),
+                color: AppTheme.accentColor.withOpacity(0.1),
                 shape: BoxShape.circle,
-                border: Border.all(color: const Color(0xFFF2D00D).withOpacity(0.2)),
+                border: Border.all(color: AppTheme.accentColor.withOpacity(0.2)),
               ),
-              child: const Icon(Icons.more_vert, color: Color(0xFFF2D00D)),
+              child: const Icon(Icons.more_vert, color: AppTheme.accentColor),
             ),
             onSelected: (value) => _handlePaymentAction(context, payment.id, value),
             itemBuilder: (context) => [
@@ -390,13 +395,27 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
   }
 
   Future<void> _handlePaymentAction(BuildContext context, String paymentId, String action) async {
-    final dataSource = ref.read(invoiceDataSourceProvider);
     try {
       if (action == 'receipt') {
-        final result = await dataSource.downloadPaymentReceipt(paymentId);
-        final url = 'https://api.pkservizi.com${result['receiptUrl']}';
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
+        final apiClient = ref.read(apiClientProvider);
+        final response = await apiClient.dio.get(
+          '/api/v1/payments/$paymentId/receipt',
+          options: Options(responseType: ResponseType.bytes),
+        );
+        
+        final directory = await getApplicationDocumentsDirectory();
+        final file = File('${directory.path}/receipt_$paymentId.pdf');
+        await file.writeAsBytes(response.data);
+        
+        final result = await launchUrl(Uri.file(file.path), mode: LaunchMode.externalApplication);
+        
+        if (context.mounted && result) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(content: Text('Opening receipt...')),
+          );
+        }
       } else if (action == 'invoice') {
+        final dataSource = ref.read(invoiceDataSourceProvider);
         final result = await dataSource.generatePaymentInvoice(paymentId);
         final url = 'https://api.pkservizi.com${result['invoiceUrl']}';
         await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
@@ -409,3 +428,4 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
   }
 
 }
+

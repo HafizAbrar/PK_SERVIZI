@@ -376,11 +376,57 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
 
   Widget _buildActionButtons(BuildContext context, Map<String, dynamic> request, WidgetRef ref, AppLocalizations l10n) {
     final status = request['status'] ?? 'pending';
+    final service = request['service'] as Map<String, dynamic>;
+    final price = service['basePrice'] ?? 0;
     
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
+          if (price != 0 && status != 'submitted' && status != 'completed')
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => _cancelRequest(context, request, ref, l10n),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: const Text(
+                  'Cancel Request',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+          if (price != 0 && status != 'submitted' && status != 'completed') const SizedBox(height: 12),
+          if (price == 0 && status != 'completed')
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () => _deleteRequest(context, request, ref, l10n),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(
+                  'Delete Request',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+          if (price == 0 && status != 'completed') const SizedBox(height: 12),
           if (status == 'draft')
             SizedBox(
               width: double.infinity,
@@ -494,6 +540,138 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
         ],
       ),
     );
+  }
+
+  Future<void> _cancelRequest(BuildContext context, Map<String, dynamic> request, WidgetRef ref, AppLocalizations l10n) async {
+    final confirmed = await showDialog<String?>(
+      context: context,
+      builder: (context) {
+        final reasonController = TextEditingController();
+        return AlertDialog(
+          title: const Text('Cancel Request'),
+          content: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              const Text('Are you sure you want to cancel this request? Refund will be processed immediately.'),
+              const SizedBox(height: 16),
+              TextField(
+                controller: reasonController,
+                decoration: const InputDecoration(
+                  labelText: 'Reason for cancellation *',
+                  border: OutlineInputBorder(),
+                ),
+                maxLines: 3,
+              ),
+            ],
+          ),
+          actions: [
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(null),
+              child: Text(l10n.cancel),
+            ),
+            TextButton(
+              onPressed: () => Navigator.of(context).pop(reasonController.text),
+              style: TextButton.styleFrom(foregroundColor: Colors.red),
+              child: const Text('Cancel Request'),
+            ),
+          ],
+        );
+      },
+    );
+
+    if (confirmed != null && confirmed.isNotEmpty && context.mounted) {
+      try {
+        final apiClient = ref.read(apiClientProvider);
+        debugPrint('Cancelling request with reason: $confirmed');
+        
+        final response = await apiClient.post(
+          '/api/v1/service-requests/${request['id']}/refund',
+          data: {'reason': confirmed},
+        );
+        
+        debugPrint('Cancel response: ${response.data}');
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Request cancelled and refund processed successfully'),
+              backgroundColor: Color(0xFF10B981),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          context.go('/home');
+        }
+      } catch (e) {
+        debugPrint('Cancel error details: $e');
+        String errorMessage = 'Error cancelling request';
+        if (e.toString().contains('DioException')) {
+          try {
+            final dioError = e as dynamic;
+            if (dioError.response?.data != null) {
+              errorMessage = dioError.response.data['message'] ?? dioError.response.data['error'] ?? errorMessage;
+            }
+          } catch (_) {}
+        }
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(errorMessage),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
+  }
+
+  Future<void> _deleteRequest(BuildContext context, Map<String, dynamic> request, WidgetRef ref, AppLocalizations l10n) async {
+    final confirmed = await showDialog<bool>(
+      context: context,
+      builder: (context) => AlertDialog(
+        title: const Text('Delete Request'),
+        content: const Text('Are you sure you want to delete this request?'),
+        actions: [
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(false),
+            child: Text(l10n.cancel),
+          ),
+          TextButton(
+            onPressed: () => Navigator.of(context).pop(true),
+            style: TextButton.styleFrom(foregroundColor: Colors.red),
+            child: const Text('Delete'),
+          ),
+        ],
+      ),
+    );
+
+    if (confirmed == true && context.mounted) {
+      try {
+        final apiClient = ref.read(apiClientProvider);
+        await apiClient.delete('/api/v1/service-requests/${request['id']}');
+        
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Request deleted successfully'),
+              backgroundColor: Color(0xFF10B981),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          context.go('/home');
+        }
+      } catch (e) {
+        if (context.mounted) {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text('Error: $e'),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+        }
+      }
+    }
   }
 
   Future<void> _submitRequest(BuildContext context, Map<String, dynamic> request, WidgetRef ref, AppLocalizations l10n) async {
