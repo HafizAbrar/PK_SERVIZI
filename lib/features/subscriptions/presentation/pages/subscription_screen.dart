@@ -262,47 +262,6 @@ class SubscriptionScreen extends ConsumerWidget {
                 _buildBillingRow('Start Date', startDate),
                 const SizedBox(height: 16),
                 _buildBillingRow('Renewal Date', renewalDate),
-                const SizedBox(height: 16),
-                const Divider(color: Color(0xFFE5E7EB)),
-                const SizedBox(height: 16),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                  children: [
-                    const Column(
-                      crossAxisAlignment: CrossAxisAlignment.start,
-                      children: [
-                        Text(
-                          'Auto-Renew',
-                          style: TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
-                        ),
-                        Text(
-                          'Charge my card automatically',
-                          style: TextStyle(fontSize: 12, color: Color(0xFF9CA3AF)),
-                        ),
-                      ],
-                    ),
-                    Container(
-                      width: 48,
-                      height: 24,
-                      decoration: BoxDecoration(
-                        color: autoRenew ? const Color(0xFFF2D00D) : const Color(0xFFE5E7EB),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: Align(
-                        alignment: autoRenew ? Alignment.centerRight : Alignment.centerLeft,
-                        child: Container(
-                          margin: const EdgeInsets.all(2),
-                          width: 20,
-                          height: 20,
-                          decoration: const BoxDecoration(
-                            color: Colors.white,
-                            shape: BoxShape.circle,
-                          ),
-                        ),
-                      ),
-                    ),
-                  ],
-                ),
               ],
             ),
           ),

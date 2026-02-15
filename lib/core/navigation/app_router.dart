@@ -17,10 +17,7 @@ import '../../features/requests/presentation/pages/service_request_detail_screen
 import '../../features/requests/presentation/pages/service_requests_screen.dart';
 import '../../features/requests/presentation/pages/request_submission_screen.dart';
 import '../../features/notifications/presentation/pages/notifications_screen.dart';
-import '../../features/payments/presentation/pages/payments_screen.dart';
-import '../../features/payments/presentation/pages/payment_detail_screen.dart';
 import '../../features/payments/presentation/pages/payment_checkout_screen.dart';
-import '../../features/payments/presentation/pages/payment_success_screen.dart';
 import '../../features/subscriptions/presentation/pages/subscription_screen.dart';
 import '../../features/subscriptions/presentation/pages/subscription_plans_screen.dart';
 import '../../features/subscriptions/presentation/pages/subscription_plan_details_screen.dart';
@@ -176,15 +173,9 @@ class AppRouter {
       // Subscription & payments
       GoRoute(path: RoutePaths.subscription, name: 'subscription', builder: (context, state) => const SubscriptionScreen(), redirect: _authGuard),
       GoRoute(path: RoutePaths.subscriptionUpgrade, name: 'subscription-upgrade', builder: (context, state) => const SubscriptionUpgradeScreen(), redirect: _authGuard),
-      GoRoute(path: RoutePaths.payments, name: 'payments', builder: (context, state) => const PaymentsScreen(), redirect: _authGuard),
-      GoRoute(path: RoutePaths.paymentDetail, name: 'payment-detail', builder: (context, state) => PaymentDetailScreen(paymentId: state.pathParameters['id']!), redirect: _authGuard),
       GoRoute(path: RoutePaths.paymentCheckout, name: 'payment-checkout', builder: (context, state) => PaymentCheckoutScreen(
         paymentUrl: state.uri.queryParameters['url']!,
         serviceRequestId: state.uri.queryParameters['serviceRequestId'],
-      )),
-      GoRoute(path: RoutePaths.paymentSuccess, name: 'payment-success', builder: (context, state) => PaymentSuccessScreen(
-        requestId: state.uri.queryParameters['requestId'],
-        serviceId: state.uri.queryParameters['serviceId'],
       )),
 
       // Notifications

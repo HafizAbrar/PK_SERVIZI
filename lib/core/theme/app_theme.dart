@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 
 class AppTheme {
   // Executive color scheme from HTML design
-  static const Color primaryColor = Color(0xFF0A1D37);
+  static const Color primaryColor = Color(0xFFFF8C00);
   static const Color accentColor = Color(0xFF1E3A5F);
   static const Color goldLight = Color(0xFFD4AF37);
   static const Color goldDark = Color(0xFF996515);

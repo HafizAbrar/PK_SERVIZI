@@ -20,48 +20,102 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
-      backgroundColor: AppTheme.primaryColor,
-      appBar: AppBar(
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        title: Text(
-          l10n.profile,
-          style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+      backgroundColor: AppTheme.backgroundLight,
+      body: profileAsync.when(
+        data: (profile) => RefreshIndicator(
+          color: AppTheme.primaryColor,
+          onRefresh: () async => ref.invalidate(profileProvider),
+          child: CustomScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            slivers: [
+              SliverAppBar(
+                expandedHeight: 200,
+                pinned: true,
+                backgroundColor: AppTheme.primaryColor,
+                flexibleSpace: FlexibleSpaceBar(
+                  background: Container(
+                    decoration: BoxDecoration(
+                      gradient: LinearGradient(
+                        begin: Alignment.topLeft,
+                        end: Alignment.bottomRight,
+                        colors: [AppTheme.primaryColor, AppTheme.accentColor],
+                      ),
+                    ),
+                    child: SafeArea(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          const SizedBox(height: 40),
+                          _buildAvatar(profile),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                actions: [
+                  IconButton(
+                    icon: const Icon(Icons.edit_outlined, color: Colors.white),
+                    onPressed: () async {
+                      await context.push('/profile/edit');
+                      ref.invalidate(profileProvider);
+                    },
+                  ),
+                ],
+              ),
+              SliverToBoxAdapter(
+                child: Padding(
+                  padding: const EdgeInsets.all(AppTheme.spacingLarge),
+                  child: _buildProfileContent(profile),
+                ),
+              ),
+            ],
+          ),
         ),
-        actions: [
-          IconButton(
-            icon: const Icon(Icons.edit, color: Colors.white),
-            onPressed: () async {
-              await context.push('/profile/edit');
-              ref.invalidate(profileProvider);
-            },
+        loading: () => const Center(child: CircularProgressIndicator()),
+        error: (_, __) => RefreshIndicator(
+          color: AppTheme.primaryColor,
+          onRefresh: () async => ref.invalidate(profileProvider),
+          child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
+            child: Center(child: Text(l10n.failedToLoad)),
+          ),
+        ),
+      ),
+    );
+  }
+
+  Widget _buildAvatar(Map<String, dynamic> profile) {
+    return Container(
+      decoration: BoxDecoration(
+        shape: BoxShape.circle,
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.2),
+            blurRadius: 20,
+            offset: const Offset(0, 10),
           ),
         ],
       ),
-      body: Container(
-        decoration: AppTheme.cardDecoration.copyWith(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: profileAsync.when(
-          data: (profile) => RefreshIndicator(
-            color: AppTheme.primaryColor,
-            onRefresh: () async => ref.invalidate(profileProvider),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              padding: const EdgeInsets.all(AppTheme.spacingLarge),
-              child: _buildProfileContent(profile),
-            ),
-          ),
-          loading: () => const Center(child: CircularProgressIndicator()),
-          error: (_, __) => RefreshIndicator(
-            color: AppTheme.primaryColor,
-            onRefresh: () async => ref.invalidate(profileProvider),
-            child: SingleChildScrollView(
-              physics: const AlwaysScrollableScrollPhysics(),
-              child: Center(child: Text(l10n.failedToLoad)),
-            ),
-          ),
-        ),
+      child: CircleAvatar(
+        radius: 50,
+        backgroundColor: Colors.white,
+        child: (profile['profile']?['avatarUrl'] != null && profile['profile']['avatarUrl'].toString().isNotEmpty)
+            ? ClipOval(
+                child: Image.network(
+                  profile['profile']['avatarUrl'],
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                  errorBuilder: (context, error, stackTrace) {
+                    return Icon(Icons.person, size: 50, color: AppTheme.primaryColor);
+                  },
+                  loadingBuilder: (context, child, loadingProgress) {
+                    if (loadingProgress == null) return child;
+                    return CircularProgressIndicator(color: AppTheme.primaryColor);
+                  },
+                ),
+              )
+            : Icon(Icons.person, size: 50, color: AppTheme.primaryColor),
       ),
     );
   }
@@ -70,41 +124,19 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        const SizedBox(height: AppTheme.spacingMedium),
-        CircleAvatar(
-          radius: 60,
-          backgroundColor: AppTheme.primaryColor,
-          child: (profile['profile']?['avatarUrl'] != null && profile['profile']['avatarUrl'].toString().isNotEmpty)
-              ? ClipOval(
-                  child: Image.network(
-                    profile['profile']['avatarUrl'],
-                    width: 120,
-                    height: 120,
-                    fit: BoxFit.cover,
-                    errorBuilder: (context, error, stackTrace) {
-                      return const Icon(Icons.person, size: 60, color: Colors.white);
-                    },
-                    loadingBuilder: (context, child, loadingProgress) {
-                      if (loadingProgress == null) return child;
-                      return const CircularProgressIndicator(color: Colors.white);
-                    },
-                  ),
-                )
-              : const Icon(Icons.person, size: 60, color: Colors.white),
-        ),
-        const SizedBox(height: AppTheme.spacingMedium),
         Text(
           profile['fullName'] ?? l10n.user,
-          style: TextStyle(
-            fontSize: AppTheme.fontSizeXXLarge,
+          style: const TextStyle(
+            fontSize: 24,
             fontWeight: FontWeight.bold,
-            color: AppTheme.primaryColor,
+            color: AppTheme.textPrimary,
           ),
         ),
+        const SizedBox(height: 4),
         Text(
           profile['email'] ?? l10n.defaultEmail,
-          style: TextStyle(
-            fontSize: AppTheme.fontSizeRegular,
+          style: const TextStyle(
+            fontSize: 14,
             color: AppTheme.textSecondary,
           ),
         ),
@@ -117,30 +149,66 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   Widget _buildProfileOptions() {
     final l10n = AppLocalizations.of(context)!;
     final options = [
-      {'title': l10n.editProfile, 'icon': Icons.edit, 'route': '/profile/edit'},
-      {'title': l10n.changePassword, 'icon': Icons.lock, 'route': '/profile/change-password'},
-      {'title': l10n.mySubscriptions, 'icon': Icons.subscriptions, 'route': '/subscription'},
-      {'title': l10n.invoices, 'icon': Icons.receipt_long, 'route': '/invoices'},
-      {'title': l10n.settings, 'icon': Icons.settings, 'route': '/settings'},
+      {'title': l10n.editProfile, 'icon': Icons.edit_outlined, 'route': '/profile/edit'},
+      {'title': l10n.changePassword, 'icon': Icons.lock_outline, 'route': '/profile/change-password'},
+      {'title': l10n.mySubscriptions, 'icon': Icons.subscriptions_outlined, 'route': '/subscription'},
+      {'title': l10n.invoices, 'icon': Icons.receipt_long_outlined, 'route': '/invoices'},
+      {'title': l10n.settings, 'icon': Icons.settings_outlined, 'route': '/settings'},
     ];
 
     return Column(
       children: [
-        ...options.map((option) => Card(
-          margin: const EdgeInsets.only(bottom: AppTheme.spacingSmall),
+        ...options.map((option) => Container(
+          margin: const EdgeInsets.only(bottom: 12),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: AppTheme.borderColor),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.04),
+                blurRadius: 8,
+                offset: const Offset(0, 2),
+              ),
+            ],
+          ),
           child: ListTile(
-            leading: Icon(option['icon'] as IconData, color: AppTheme.primaryColor),
-            title: Text(option['title'] as String),
-            trailing: Icon(Icons.arrow_forward_ios, color: AppTheme.textSecondary),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: AppTheme.primaryColor.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: Icon(option['icon'] as IconData, color: AppTheme.primaryColor, size: 20),
+            ),
+            title: Text(
+              option['title'] as String,
+              style: const TextStyle(fontWeight: FontWeight.w500),
+            ),
+            trailing: Icon(Icons.arrow_forward_ios, color: AppTheme.textTertiary, size: 16),
             onTap: () => context.push(option['route'] as String),
           ),
         )),
-        Card(
-          margin: const EdgeInsets.only(bottom: AppTheme.spacingSmall),
+        const SizedBox(height: 8),
+        Container(
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(12),
+            border: Border.all(color: Colors.red.withValues(alpha: 0.2)),
+          ),
           child: ListTile(
-            leading: const Icon(Icons.logout, color: Colors.red),
-            title: Text(l10n.logout, style: const TextStyle(color: Colors.red)),
-            trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red),
+            contentPadding: const EdgeInsets.symmetric(horizontal: 16, vertical: 4),
+            leading: Container(
+              padding: const EdgeInsets.all(8),
+              decoration: BoxDecoration(
+                color: Colors.red.withValues(alpha: 0.1),
+                borderRadius: BorderRadius.circular(8),
+              ),
+              child: const Icon(Icons.logout, color: Colors.red, size: 20),
+            ),
+            title: Text(l10n.logout, style: const TextStyle(color: Colors.red, fontWeight: FontWeight.w500)),
+            trailing: const Icon(Icons.arrow_forward_ios, color: Colors.red, size: 16),
             onTap: _handleLogout,
           ),
         ),
