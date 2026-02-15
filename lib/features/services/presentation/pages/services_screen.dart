@@ -4,6 +4,7 @@ import '../../../../core/network/api_client.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/widgets/translated_text.dart';
+import '../../../../core/theme/app_theme.dart';
 
 final serviceTypesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final apiClient = ref.read(apiClientProvider);
@@ -42,7 +43,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     final selectedServiceType = ref.watch(selectedServiceTypeProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           _buildHeader(),
@@ -62,7 +63,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -170,14 +171,14 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0A192F) : Colors.white,
+            color: isSelected ? AppTheme.primaryColor : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? const Color(0xFF0A192F) : Colors.grey[300]!,
+              color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
             ),
             boxShadow: isSelected ? [
               BoxShadow(
-                color: const Color(0xFF0A192F).withValues(alpha: 0.2),
+                color: AppTheme.primaryColor.withValues(alpha: 0.2),
                 blurRadius: 8,
               ),
             ] : null,
@@ -187,7 +188,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.w600,
-              color: isSelected ? Colors.white : const Color(0xFF0A192F),
+              color: isSelected ? Colors.white : AppTheme.primaryColor,
             ),
           ),
         ),
@@ -197,7 +198,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
 
   Widget _buildServicesList(String? selectedServiceType) {
     if (selectedServiceType == null) {
-      return const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D)));
+      return const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor));
     }
     
     final servicesAsync = ref.watch(servicesByTypeProvider(selectedServiceType));
@@ -219,7 +220,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           itemBuilder: (context, index) => _buildServiceCard(filteredServices[index]),
         );
       },
-      loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
       error: (_, __) => _buildErrorState(() => ref.refresh(servicesByTypeProvider(selectedServiceType))),
     );
   }
@@ -249,10 +250,10 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: const Icon(Icons.business, size: 28, color: Color(0xFFF2D00D)),
+                  child: Icon(Icons.business, size: 28, color: AppTheme.accentColor),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
@@ -264,16 +265,16 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                         style: const TextStyle(
                           fontSize: 18,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0A192F),
+                          color: AppTheme.primaryColor,
                         ),
                       ),
                       const SizedBox(height: 4),
                       Text(
                         service['price'] != null ? '€${service['price']}' : '',
-                        style: const TextStyle(
+                        style: TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.w600,
-                          color: Color(0xFFF2D00D),
+                          color: AppTheme.accentColor,
                         ),
                       ),
                     ],
@@ -298,10 +299,10 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                     onPressed: () => context.push('/services/${service['id']}'),
                     child: Text(
                       l10n.viewDetails,
-                      style: const TextStyle(
+                      style: TextStyle(
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
-                        color: Color(0xFFF2D00D),
+                        color: AppTheme.accentColor,
                       ),
                     ),
                   ),
@@ -311,8 +312,8 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                   child: ElevatedButton(
                     onPressed: () => _initiateServiceRequest(context, service['id']),
                     style: ElevatedButton.styleFrom(
-                      backgroundColor: const Color(0xFFF2D00D),
-                      foregroundColor: const Color(0xFF0A192F),
+                      backgroundColor: AppTheme.accentColor,
+                      foregroundColor: Colors.white,
                       shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                       padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
                       elevation: 0,
@@ -345,13 +346,13 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+              color: AppTheme.primaryColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(20),
             ),
             child: const Icon(
               Icons.search_off,
               size: 64,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
@@ -360,7 +361,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -400,7 +401,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -415,8 +416,8 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
           ElevatedButton(
             onPressed: onRetry,
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

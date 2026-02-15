@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/widgets/translated_text.dart';
@@ -24,7 +25,7 @@ class SubscriptionScreen extends ConsumerWidget {
     final subscriptionAsync = ref.watch(activeSubscriptionProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           _buildHeader(context, l10n),
@@ -33,7 +34,7 @@ class SubscriptionScreen extends ConsumerWidget {
               data: (subscription) => subscription == null 
                   ? _buildNoSubscription(context)
                   : _buildSubscriptionContent(context, subscription),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               error: (_, __) => _buildNoSubscription(context),
             ),
           ),
@@ -46,7 +47,7 @@ class SubscriptionScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -87,19 +88,19 @@ class SubscriptionScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(24),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+              color: AppTheme.primaryColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(Icons.subscriptions_outlined, size: 64, color: Color(0xFF0A192F)),
+            child: const Icon(Icons.subscriptions_outlined, size: 64, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 20),
-          Text(l10n.noActiveRequests, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F))),
+          Text(l10n.noActiveRequests, style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor)),
           const SizedBox(height: 16),
           ElevatedButton(
             onPressed: () => context.push('/subscription-plans'),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -201,7 +202,7 @@ class SubscriptionScreen extends ConsumerWidget {
                     children: [
                       TextSpan(
                         text: '€$price',
-                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFFF2D00D)),
+                        style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
                       ),
                       const TextSpan(
                         text: '/monthly',
@@ -222,13 +223,13 @@ class SubscriptionScreen extends ConsumerWidget {
             width: 96,
             height: 96,
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F).withValues(alpha: 0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: const Icon(
               Icons.workspace_premium,
               size: 36,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
         ],
@@ -355,7 +356,7 @@ class SubscriptionScreen extends ConsumerWidget {
                   widthFactor: progress,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2D00D),
+                      color: AppTheme.accentColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -394,7 +395,7 @@ class SubscriptionScreen extends ConsumerWidget {
       children: [
         const Icon(
           Icons.check_circle,
-          color: Color(0xFFF2D00D),
+          color: AppTheme.accentColor,
           size: 20,
         ),
         const SizedBox(width: 12),
@@ -421,8 +422,8 @@ class SubscriptionScreen extends ConsumerWidget {
                 child: ElevatedButton(
                   onPressed: () => context.push('/subscription-plans'),
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: const Color(0xFFF2D00D),
-                    foregroundColor: const Color(0xFF0A192F),
+                    backgroundColor: AppTheme.accentColor,
+                    foregroundColor: AppTheme.primaryColor,
                     padding: const EdgeInsets.symmetric(vertical: 12),
                     shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   ),

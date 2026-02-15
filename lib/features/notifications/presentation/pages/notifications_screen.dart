@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../core/theme/app_theme.dart';
 
 final notificationsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final response = await ApiServiceFactory.customer.getMyNotifications();
@@ -26,7 +27,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     final notificationsAsync = ref.watch(notificationsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           _buildHeader(l10n),
@@ -34,7 +35,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
           Expanded(
             child: notificationsAsync.when(
               data: (notifications) => _buildNotificationsList(notifications, l10n),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
               error: (error, stack) => Center(child: Text('${l10n.error}: $error')),
             ),
           ),
@@ -47,7 +48,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -76,17 +77,6 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             ),
           ),
           const Spacer(),
-          TextButton(
-            onPressed: () => _markAllAsRead(l10n),
-            child: Text(
-              l10n.markAllAsRead,
-              style: const TextStyle(
-                color: Color(0xFFF2D00D),
-                fontSize: 14,
-                fontWeight: FontWeight.w600,
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -115,14 +105,14 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         child: Container(
           padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
           decoration: BoxDecoration(
-            color: isSelected ? const Color(0xFF0A192F) : Colors.white,
+            color: isSelected ? AppTheme.primaryColor : Colors.white,
             borderRadius: BorderRadius.circular(20),
             border: Border.all(
-              color: isSelected ? const Color(0xFF0A192F) : Colors.grey[300]!,
+              color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
             ),
             boxShadow: isSelected ? [
               BoxShadow(
-                color: const Color(0xFF0A192F).withValues(alpha: 0.2),
+                color: AppTheme.primaryColor.withValues(alpha: 0.2),
                 blurRadius: 8,
               ),
             ] : null,
@@ -133,7 +123,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               style: TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: isSelected ? Colors.white : const Color(0xFF0A192F),
+                color: isSelected ? Colors.white : AppTheme.primaryColor,
               ),
             ),
           ),
@@ -153,13 +143,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+                color: AppTheme.primaryColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
                 Icons.notifications_none,
                 size: 64,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
             const SizedBox(height: 20),
@@ -168,7 +158,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
           ],
@@ -192,7 +182,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(20),
-        border: isUnread ? Border.all(color: const Color(0xFFF2D00D), width: 2) : null,
+        border: isUnread ? Border.all(color: AppTheme.accentColor, width: 2) : null,
         boxShadow: [
           BoxShadow(
             color: Colors.black.withValues(alpha: 0.05),
@@ -216,7 +206,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         child: Text(
                           _cleanTitle(notification['title'] ?? ''),
                           style: TextStyle(
-                            color: const Color(0xFF0A192F),
+                            color: AppTheme.primaryColor,
                             fontSize: 16,
                             fontWeight: isUnread ? FontWeight.bold : FontWeight.w600,
                           ),
@@ -228,13 +218,13 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: const Color(0xFFF2D00D),
+                            color: AppTheme.accentColor,
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
                             l10n.newLabel,
                             style: const TextStyle(
-                              color: Color(0xFF0A192F),
+                              color: Colors.white,
                               fontSize: 9,
                               fontWeight: FontWeight.bold,
                               letterSpacing: 1,
@@ -280,8 +270,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
     switch (type.toLowerCase()) {
       case 'success':
         icon = Icons.check_circle;
-        backgroundColor = const Color(0xFF0A192F);
-        iconColor = const Color(0xFFF2D00D);
+        backgroundColor = AppTheme.primaryColor;
+        iconColor = AppTheme.accentColor;
         break;
       case 'warning':
         icon = Icons.warning;
@@ -295,8 +285,8 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         break;
       default:
         icon = Icons.notifications;
-        backgroundColor = const Color(0xFF0A192F);
-        iconColor = const Color(0xFFF2D00D);
+        backgroundColor = AppTheme.primaryColor;
+        iconColor = AppTheme.accentColor;
     }
 
     return Container(
@@ -354,7 +344,7 @@ class _NotificationsScreenState extends ConsumerState<NotificationsScreen> {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
             content: Text(l10n.allNotificationsMarkedAsRead),
-            backgroundColor: const Color(0xFF0A192F),
+            backgroundColor: AppTheme.primaryColor,
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),

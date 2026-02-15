@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/widgets/translated_text.dart';
@@ -54,14 +55,14 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     final plansAsync = ref.watch(subscriptionPlansProvider);
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           _buildAppBar(),
           Expanded(
             child: plansAsync.when(
               data: (plans) => _buildContent(plans),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               error: (_, __) => _buildError(),
             ),
           ),
@@ -74,7 +75,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -90,7 +91,13 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
       child: Row(
         children: [
           GestureDetector(
-            onTap: () => context.pop(),
+            onTap: () {
+              if (Navigator.of(context).canPop()) {
+                context.pop();
+              } else {
+                context.go('/home');
+              }
+            },
             child: const Icon(Icons.arrow_back_ios, color: Colors.white),
           ),
           Expanded(
@@ -222,11 +229,11 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
         border: Border.all(
-          color: isPopular ? const Color(0xFFF2D00D) : const Color(0xFFDCE0E5),
+          color: isPopular ? AppTheme.accentColor : const Color(0xFFDCE0E5),
           width: isPopular ? 2 : 1,
         ),
         boxShadow: isPopular 
-          ? [BoxShadow(color: const Color(0xFFF2D00D).withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))]
+          ? [BoxShadow(color: AppTheme.accentColor.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))]
           : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
       ),
       child: Column(
@@ -243,7 +250,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                 Container(
                   padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2D00D),
+                    color: AppTheme.accentColor,
                     borderRadius: BorderRadius.circular(20),
                   ),
                   child: Text(
@@ -281,8 +288,8 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             child: ElevatedButton(
               onPressed: processingPlanId == plan['id'] ? null : () => _purchasePlan(plan['id']),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF2D00D),
-                foregroundColor: const Color(0xFF0A192F),
+                backgroundColor: AppTheme.accentColor,
+                foregroundColor: AppTheme.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
@@ -293,7 +300,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0A192F)),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),
                     )
                   : Text(
@@ -307,7 +314,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
             onPressed: () => context.push('/subscription-plan-details/${plan['id']}'),
             child: Text(
               AppLocalizations.of(context)?.viewDetails ?? 'View Details',
-              style: const TextStyle(fontSize: 14, color: Color(0xFFF2D00D)),
+              style: const TextStyle(fontSize: 14, color: AppTheme.accentColor),
             ),
           ),
           const SizedBox(height: 20),
@@ -318,7 +325,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
                 children: [
                   Icon(
                     Icons.check_circle,
-                    color: isPopular ? const Color(0xFFF2D00D) : const Color(0xFF10B981),
+                    color: isPopular ? AppTheme.accentColor : const Color(0xFF10B981),
                     size: 20,
                   ),
                   const SizedBox(width: 12),
@@ -425,8 +432,8 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           ElevatedButton(
             onPressed: () => ref.refresh(subscriptionPlansProvider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: AppTheme.primaryColor,
             ),
             child: Text(AppLocalizations.of(context)?.retry ?? 'Retry'),
           ),

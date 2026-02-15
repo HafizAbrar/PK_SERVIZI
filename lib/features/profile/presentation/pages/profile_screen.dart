@@ -20,7 +20,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: AppTheme.primaryColor,
       body: profileAsync.when(
         data: (profile) => RefreshIndicator(
           color: AppTheme.primaryColor,
@@ -29,24 +29,39 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
             physics: const AlwaysScrollableScrollPhysics(),
             slivers: [
               SliverAppBar(
-                expandedHeight: 200,
-                pinned: true,
+                expandedHeight: 220,
+                pinned: false,
                 backgroundColor: AppTheme.primaryColor,
                 flexibleSpace: FlexibleSpaceBar(
                   background: Container(
-                    decoration: BoxDecoration(
-                      gradient: LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [AppTheme.primaryColor, AppTheme.accentColor],
-                      ),
-                    ),
+                    color: AppTheme.primaryColor,
+                    padding: const EdgeInsets.symmetric(horizontal: AppTheme.spacingLarge),
                     child: SafeArea(
                       child: Column(
                         mainAxisAlignment: MainAxisAlignment.center,
                         children: [
-                          const SizedBox(height: 40),
+                          const SizedBox(height: 20),
                           _buildAvatar(profile),
+                          const SizedBox(height: 16),
+                          Text(
+                            profile['fullName'] ?? l10n.user,
+                            style: const TextStyle(
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              color: Colors.white,
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 4),
+                          Text(
+                            profile['email'] ?? l10n.defaultEmail,
+                            style: TextStyle(
+                              fontSize: 14,
+                              color: Colors.white.withValues(alpha: 0.9),
+                            ),
+                            textAlign: TextAlign.center,
+                          ),
+                          const SizedBox(height: 20),
                         ],
                       ),
                     ),
@@ -63,9 +78,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                 ],
               ),
               SliverToBoxAdapter(
-                child: Padding(
-                  padding: const EdgeInsets.all(AppTheme.spacingLarge),
-                  child: _buildProfileContent(profile),
+                child: Container(
+                  decoration: AppTheme.cardDecoration.copyWith(
+                    borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+                  ),
+                  child: Padding(
+                    padding: const EdgeInsets.all(AppTheme.spacingLarge),
+                    child: _buildProfileContent(profile),
+                  ),
                 ),
               ),
             ],
@@ -121,26 +141,9 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildProfileContent(Map<String, dynamic> profile) {
-    final l10n = AppLocalizations.of(context)!;
     return Column(
       children: [
-        Text(
-          profile['fullName'] ?? l10n.user,
-          style: const TextStyle(
-            fontSize: 24,
-            fontWeight: FontWeight.bold,
-            color: AppTheme.textPrimary,
-          ),
-        ),
-        const SizedBox(height: 4),
-        Text(
-          profile['email'] ?? l10n.defaultEmail,
-          style: const TextStyle(
-            fontSize: 14,
-            color: AppTheme.textSecondary,
-          ),
-        ),
-        const SizedBox(height: AppTheme.spacingXLarge),
+        const SizedBox(height: AppTheme.spacingMedium),
         _buildProfileOptions(),
       ],
     );

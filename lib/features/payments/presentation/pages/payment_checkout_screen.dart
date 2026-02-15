@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:webview_flutter/webview_flutter.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class PaymentCheckoutScreen extends StatefulWidget {
   final String paymentUrl;
@@ -82,9 +83,8 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   void _handlePaymentSuccess() {
     debugPrint('Payment success - serviceId: $_serviceId, serviceRequestId: ${widget.serviceRequestId}');
     if (mounted) {
-      if (_serviceId != null) {
-        // Navigate to form with serviceId, serviceRequestId will be fetched from the checkout screen context
-        context.go('/service-request-form/$_serviceId?serviceRequestId=${widget.serviceRequestId ?? ''}');
+      if (_serviceId != null && widget.serviceRequestId != null && widget.serviceRequestId!.isNotEmpty) {
+        context.go('/service-request-form/$_serviceId?serviceRequestId=${widget.serviceRequestId}');
       } else {
         context.go('/home');
       }
@@ -100,23 +100,35 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
-        title: const Text('Payment'),
-        backgroundColor: const Color(0xFF186ADC),
-        foregroundColor: Colors.white,
+        title: const Text(
+          'Payment',
+          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+        ),
+        backgroundColor: Colors.transparent,
+        elevation: 0,
         leading: IconButton(
-          icon: const Icon(Icons.close),
+          icon: const Icon(Icons.close, color: Colors.white),
           onPressed: () => context.pop(),
         ),
       ),
-      body: Stack(
-        children: [
-          WebViewWidget(controller: _controller),
-          if (_isLoading)
-            const Center(
-              child: CircularProgressIndicator(color: Color(0xFF186ADC)),
-            ),
-        ],
+      body: Container(
+        decoration: AppTheme.cardDecoration.copyWith(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+        ),
+        child: ClipRRect(
+          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          child: Stack(
+            children: [
+              WebViewWidget(controller: _controller),
+              if (_isLoading)
+                Center(
+                  child: CircularProgressIndicator(color: AppTheme.primaryColor),
+                ),
+            ],
+          ),
+        ),
       ),
     );
   }

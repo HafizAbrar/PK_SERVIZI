@@ -103,6 +103,34 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
       filteredItems = servicePayments;
     }
 
+    if (invoices.isEmpty && servicePayments.isEmpty) {
+      return Center(
+        child: Column(
+          mainAxisAlignment: MainAxisAlignment.center,
+          children: [
+            Container(
+              padding: const EdgeInsets.all(24),
+              decoration: BoxDecoration(
+                color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+                borderRadius: BorderRadius.circular(20),
+              ),
+              child: const Icon(Icons.receipt_long_outlined, size: 64, color: Color(0xFF0A192F)),
+            ),
+            const SizedBox(height: 20),
+            const Text(
+              'Invoice History is Empty',
+              style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+            ),
+            const SizedBox(height: 8),
+            Text(
+              'No invoices or payments found',
+              style: TextStyle(fontSize: 14, color: Colors.grey[600]),
+            ),
+          ],
+        ),
+      );
+    }
+
     return ListView(
       padding: const EdgeInsets.all(20),
       children: [

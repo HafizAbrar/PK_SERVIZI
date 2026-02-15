@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../services/presentation/pages/services_screen.dart';
 import '../../../requests/presentation/pages/service_requests_screen.dart';
 import '../../../subscriptions/presentation/pages/subscription_plans_screen.dart';
@@ -79,13 +80,13 @@ class MainNavigationScreen extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isActive ? const Color(0xFFF2D00D) : Colors.grey, size: 24),
+          Icon(icon, color: isActive ? AppTheme.accentColor : Colors.grey, size: 24),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 9,
-              color: isActive ? const Color(0xFFF2D00D) : Colors.grey,
+              color: isActive ? AppTheme.accentColor : Colors.grey,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -100,14 +101,14 @@ class MainNavigationScreen extends ConsumerWidget {
     
     return Drawer(
       child: Container(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         child: ListView(
           padding: EdgeInsets.zero,
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
                 gradient: LinearGradient(
-                  colors: [Color(0xFFC5A059), Color(0xFF0A192F)],
+                  colors: [AppTheme.primaryColor, AppTheme.accentColor],
                 ),
               ),
               child: profileAsync.when(
@@ -118,9 +119,9 @@ class MainNavigationScreen extends ConsumerWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF112240),
+                        color: AppTheme.accentColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFC5A059).withValues(alpha: 0.3)),
+                        border: Border.all(color: AppTheme.goldLight.withValues(alpha: 0.3)),
                       ),
                       child: profile['profile']?['avatarUrl'] != null
                           ? ClipRRect(
@@ -128,10 +129,10 @@ class MainNavigationScreen extends ConsumerWidget {
                               child: Image.network(
                                 profile['profile']['avatarUrl'],
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: Color(0xFFC5A059), size: 36),
+                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                               ),
                             )
-                          : const Icon(Icons.shield, color: Color(0xFFC5A059), size: 36),
+                          : const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -148,7 +149,7 @@ class MainNavigationScreen extends ConsumerWidget {
                       profile['email'] ?? '',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: Color(0xFFE2C275),
+                        color: AppTheme.goldLight,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -162,11 +163,11 @@ class MainNavigationScreen extends ConsumerWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF112240),
+                        color: AppTheme.accentColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFC5A059).withValues(alpha: 0.3)),
+                        border: Border.all(color: AppTheme.goldLight.withValues(alpha: 0.3)),
                       ),
-                      child: const Icon(Icons.shield, color: Color(0xFFC5A059), size: 36),
+                      child: const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -186,11 +187,11 @@ class MainNavigationScreen extends ConsumerWidget {
                       width: 60,
                       height: 60,
                       decoration: BoxDecoration(
-                        color: const Color(0xFF112240),
+                        color: AppTheme.accentColor,
                         borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: const Color(0xFFC5A059).withValues(alpha: 0.3)),
+                        border: Border.all(color: AppTheme.goldLight.withValues(alpha: 0.3)),
                       ),
-                      child: const Icon(Icons.shield, color: Color(0xFFC5A059), size: 36),
+                      child: const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -210,11 +211,7 @@ class MainNavigationScreen extends ConsumerWidget {
             _buildDrawerItem(context, ref, Icons.assignment, l10n.requests, 2),
             _buildDrawerItem(context, ref, Icons.subscriptions, l10n.plans, 3),
             _buildDrawerItem(context, ref, Icons.person, l10n.profile, 4),
-            const Divider(color: Color(0xFFC5A059), thickness: 0.5),
-            _buildDrawerAction(context, Icons.folder, l10n.documents, () {
-              Navigator.pop(context);
-              context.go('/documents');
-            }),
+            const Divider(color: AppTheme.goldLight, thickness: 0.5),
             _buildDrawerAction(context, Icons.receipt_long, l10n.invoices, () {
               Navigator.pop(context);
               context.go('/invoices');
@@ -242,16 +239,16 @@ class MainNavigationScreen extends ConsumerWidget {
     final isSelected = currentIndex == index;
     
     return ListTile(
-      leading: Icon(icon, color: isSelected ? const Color(0xFFC5A059) : Colors.white70),
+      leading: Icon(icon, color: isSelected ? AppTheme.goldLight : Colors.white70),
       title: Text(
         title,
         style: TextStyle(
-          color: isSelected ? const Color(0xFFC5A059) : Colors.white70,
+          color: isSelected ? AppTheme.goldLight : Colors.white70,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),
       selected: isSelected,
-      selectedTileColor: const Color(0xFF112240),
+      selectedTileColor: AppTheme.accentColor,
       onTap: () {
         ref.read(navigationIndexProvider.notifier).state = index;
         Navigator.pop(context);

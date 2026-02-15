@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../core/widgets/translated_text.dart';
@@ -55,10 +56,10 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     final planAsync = ref.watch(planDetailsProvider(widget.planId));
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: planAsync.when(
         data: (plan) => _buildContent(plan),
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
         error: (_, __) => _buildError(),
       ),
     );
@@ -93,7 +94,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -134,20 +135,20 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             width: 128,
             height: 128,
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
               borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: const Color(0xFFF2D00D), width: 3),
+              border: Border.all(color: AppTheme.accentColor, width: 3),
             ),
             child: const Icon(
               Icons.workspace_premium,
               size: 64,
-              color: Color(0xFFF2D00D),
+              color: AppTheme.accentColor,
             ),
           ),
           const SizedBox(height: 16),
           TranslatedText(
             plan['name'] ?? 'Professional',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
             textAlign: TextAlign.center,
           ),
           const SizedBox(height: 4),
@@ -183,7 +184,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: !isYearly ? const Color(0xFFF2D00D) : Colors.transparent,
+                  color: !isYearly ? AppTheme.accentColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -192,7 +193,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: !isYearly ? const Color(0xFF0A192F) : Colors.grey[600],
+                    color: !isYearly ? AppTheme.primaryColor : Colors.grey[600],
                   ),
                 ),
               ),
@@ -204,7 +205,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               child: Container(
                 padding: const EdgeInsets.symmetric(vertical: 12),
                 decoration: BoxDecoration(
-                  color: isYearly ? const Color(0xFFF2D00D) : Colors.transparent,
+                  color: isYearly ? AppTheme.accentColor : Colors.transparent,
                   borderRadius: BorderRadius.circular(12),
                 ),
                 child: Text(
@@ -213,7 +214,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                   style: TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.bold,
-                    color: isYearly ? const Color(0xFF0A192F) : Colors.grey[600],
+                    color: isYearly ? AppTheme.primaryColor : Colors.grey[600],
                   ),
                 ),
               ),
@@ -230,7 +231,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
-          colors: [Color(0xFF0A192F), Color(0xFF1a2e4d)],
+          colors: [AppTheme.primaryColor, Color(0xFF1a2e4d)],
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
@@ -251,7 +252,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
               style: TextStyle(
                 fontSize: 24,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFFF2D00D),
+                color: AppTheme.accentColor,
               ),
             ),
             TextSpan(
@@ -303,19 +304,19 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
         children: [
           Text(
             AppLocalizations.of(context)?.planFeatures ?? 'Plan Features',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 16),
           ...features.map((feature) => Padding(
             padding: const EdgeInsets.only(bottom: 12),
             child: Row(
               children: [
-                const Icon(Icons.check_circle, color: Color(0xFFF2D00D), size: 20),
+                const Icon(Icons.check_circle, color: AppTheme.accentColor, size: 20),
                 const SizedBox(width: 12),
                 Expanded(
                   child: TranslatedText(
                     feature.toString(),
-                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF0A192F)),
+                    style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.primaryColor),
                   ),
                 ),
               ],
@@ -345,7 +346,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
         children: [
           Text(
             AppLocalizations.of(context)?.usageLimits ?? 'Usage Limits',
-            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+            style: const TextStyle(fontSize: 18, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 16),
           _buildUsageItem('Dichiarazione IMU', 5, 5),
@@ -368,11 +369,11 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
           children: [
             Text(
               title,
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF0A192F)),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: AppTheme.primaryColor),
             ),
             Text(
               '$remaining / $total ${AppLocalizations.of(context)?.remaining ?? 'remaining'}',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFFF2D00D)),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.accentColor),
             ),
           ],
         ),
@@ -389,7 +390,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             widthFactor: progress,
             child: Container(
               decoration: BoxDecoration(
-                color: const Color(0xFFF2D00D),
+                color: AppTheme.accentColor,
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -419,8 +420,8 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
             child: ElevatedButton(
               onPressed: isProcessing ? null : () => _purchasePlan(plan['id']),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF2D00D),
-                foregroundColor: const Color(0xFF0A192F),
+                backgroundColor: AppTheme.accentColor,
+                foregroundColor: AppTheme.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
                 elevation: 0,
@@ -431,7 +432,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                       width: 20,
                       child: CircularProgressIndicator(
                         strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(Color(0xFF0A192F)),
+                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
                       ),
                     )
                   : Row(

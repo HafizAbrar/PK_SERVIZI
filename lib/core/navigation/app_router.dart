@@ -11,7 +11,6 @@ import '../../features/auth/presentation/pages/security_success_screen.dart';
 import '../../features/home/presentation/pages/main_navigation_screen.dart';
 import '../../features/profile/presentation/pages/profile_screen.dart';
 import '../../features/profile/presentation/pages/edit_profile_screen.dart';
-import '../../features/documents/presentation/pages/documents_screen.dart';
 import '../../features/documents/presentation/pages/document_upload_screen.dart';
 import '../../features/requests/presentation/pages/service_request_detail_screen.dart';
 import '../../features/requests/presentation/pages/service_requests_screen.dart';
@@ -158,7 +157,7 @@ class AppRouter {
       GoRoute(path: RoutePaths.editServiceRequest, name: 'edit-service-request', builder: (context, state) => EditServiceRequestScreen(requestId: state.pathParameters['id']!), redirect: _authGuard),
       
       // Documents
-      GoRoute(path: RoutePaths.documents, name: 'documents', builder: (context, state) => const DocumentsScreen(), redirect: _authGuard),
+
       GoRoute(path: RoutePaths.documentUpload, name: 'document-upload', builder: (context, state) => DocumentUploadScreen(
         serviceId: state.uri.queryParameters['serviceId']!,
         requestId: state.uri.queryParameters['requestId']!,

@@ -6,6 +6,7 @@ import 'package:file_picker/file_picker.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../data/models/service.dart' as service_models;
+import '../../../../core/theme/app_theme.dart';
 
 final serviceFormProvider = FutureProvider.family<service_models.FormSchema, String>((ref, serviceId) async {
   debugPrint('Loading form schema for serviceId: $serviceId');
@@ -49,10 +50,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     final schemaAsync = ref.watch(serviceFormProvider(widget.serviceId));
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: schemaAsync.when(
         data: (schema) => _buildForm(schema),
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
         error: (error, stackTrace) {
           debugPrint('Error loading form schema: $error');
           return _buildError(error.toString());
@@ -95,7 +96,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -111,7 +112,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       child: Row(
         children: [
           IconButton(
-            onPressed: () => context.pop(),
+            onPressed: () => context.go('/home'),
             icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
           ),
           Expanded(
@@ -152,7 +153,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               children: [
                 Text(
                   '${l10n.step} ${_currentStep + 1}: ${_getSectionTitle(_currentStep)}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                 ),
                 Text(
                   '${_currentStep + 1} ${l10n.ofText} $totalSteps',
@@ -172,7 +173,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 widthFactor: (_currentStep + 1) / totalSteps,
                 child: Container(
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2D00D),
+                    color: AppTheme.accentColor,
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -193,7 +194,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         children: [
           Text(
             section.title,
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 8),
           Text(
@@ -224,7 +225,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           if (field.type != 'checkbox')
             Text(
               '${field.label}${field.required ? ' *' : ''}',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
             ),
           const SizedBox(height: 8),
           _buildFieldWidget(field),
@@ -282,7 +283,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFF2D00D), width: 2),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
         filled: true,
@@ -305,7 +306,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFF2D00D), width: 2),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
         filled: true,
@@ -366,15 +367,15 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 Container(
                   padding: const EdgeInsets.all(12),
                   decoration: BoxDecoration(
-                    color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.05),
                     borderRadius: BorderRadius.circular(12),
                   ),
-                  child: const Icon(Icons.upload_file, color: Color(0xFFF2D00D), size: 32),
+                  child: const Icon(Icons.upload_file, color: AppTheme.accentColor, size: 32),
                 ),
                 const SizedBox(height: 12),
                 Text(
                   files.isEmpty ? l10n.chooseFile : '${files.length} ${l10n.filesSelected}',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                 ),
               ],
             ),
@@ -385,7 +386,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             padding: const EdgeInsets.only(top: 8),
             child: Row(
               children: [
-                const Icon(Icons.attach_file, size: 16, color: Color(0xFFF2D00D)),
+                const Icon(Icons.attach_file, size: 16, color: AppTheme.accentColor),
                 Expanded(child: Text(file.name, style: const TextStyle(fontSize: 12))),
                 IconButton(
                   icon: const Icon(Icons.close, size: 16),
@@ -406,14 +407,14 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       decoration: InputDecoration(
         hintText: l10n.selectTime,
         hintStyle: TextStyle(color: Colors.grey[400]),
-        suffixIcon: const Icon(Icons.access_time, color: Color(0xFFF2D00D)),
+        suffixIcon: const Icon(Icons.access_time, color: AppTheme.accentColor),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Colors.grey[100]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFF2D00D), width: 2),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
         filled: true,
@@ -440,14 +441,14 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       decoration: InputDecoration(
         hintText: l10n.selectDateAndTime,
         hintStyle: TextStyle(color: Colors.grey[400]),
-        suffixIcon: const Icon(Icons.event, color: Color(0xFFF2D00D)),
+        suffixIcon: const Icon(Icons.event, color: AppTheme.accentColor),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Colors.grey[100]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFF2D00D), width: 2),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
         filled: true,
@@ -522,7 +523,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFF2D00D), width: 2),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
         filled: true,
@@ -542,14 +543,14 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       decoration: InputDecoration(
         hintText: l10n.selectDate,
         hintStyle: TextStyle(color: Colors.grey[400]),
-        suffixIcon: const Icon(Icons.calendar_today, color: Color(0xFFF2D00D)),
+        suffixIcon: const Icon(Icons.calendar_today, color: AppTheme.accentColor),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
           borderSide: BorderSide(color: Colors.grey[100]!),
         ),
         focusedBorder: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: Color(0xFFF2D00D), width: 2),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
         ),
         contentPadding: const EdgeInsets.all(16),
         filled: true,
@@ -563,7 +564,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           lastDate: DateTime.now(),
         );
         if (date != null && mounted) {
-          _controllers[field.name]!.text = '${date.day}/${date.month}/${date.year}';
+          _controllers[field.name]!.text = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
         }
       },
       validator: (value) => _validateField(field, value),
@@ -578,19 +579,19 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       margin: const EdgeInsets.all(20),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+        color: AppTheme.primaryColor.withValues(alpha: 0.05),
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: const Color(0xFFF2D00D).withValues(alpha: 0.2)),
+        border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.2)),
       ),
       child: Row(
         children: [
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFFF2D00D).withValues(alpha: 0.2),
+              color: AppTheme.accentColor.withValues(alpha: 0.2),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.info, color: Color(0xFF0A192F), size: 20),
+            child: const Icon(Icons.info, color: AppTheme.primaryColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -599,7 +600,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               children: [
                 Text(
                   l10n.nextSteps,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: Color(0xFF0A192F)),
+                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                 ),
                 const SizedBox(height: 4),
                 Text(
@@ -628,29 +629,56 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           ),
         ],
       ),
-      child: SizedBox(
-        width: double.infinity,
-        child: ElevatedButton(
-          onPressed: () => _nextStep(totalSteps),
-          style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF2D00D),
-            foregroundColor: const Color(0xFF0A192F),
-            padding: const EdgeInsets.symmetric(vertical: 16),
-            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 0,
-          ),
-          child: Row(
-            mainAxisAlignment: MainAxisAlignment.center,
-            children: [
-              Text(
-                _currentStep == totalSteps - 1 ? l10n.submit : l10n.continueButton,
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+      child: Row(
+        children: [
+          if (_currentStep > 0)
+            Expanded(
+              child: OutlinedButton(
+                onPressed: () => setState(() => _currentStep--),
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: AppTheme.primaryColor,
+                  side: BorderSide(color: AppTheme.primaryColor),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                ),
+                child: Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    const Icon(Icons.arrow_back, size: 20),
+                    const SizedBox(width: 8),
+                    Text(
+                      'Back',
+                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                    ),
+                  ],
+                ),
               ),
-              const SizedBox(width: 8),
-              const Icon(Icons.arrow_forward, size: 20),
-            ],
+            ),
+          if (_currentStep > 0) const SizedBox(width: 12),
+          Expanded(
+            child: ElevatedButton(
+              onPressed: () => _nextStep(totalSteps),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: AppTheme.accentColor,
+                foregroundColor: AppTheme.primaryColor,
+                padding: const EdgeInsets.symmetric(vertical: 16),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+                elevation: 0,
+              ),
+              child: Row(
+                mainAxisAlignment: MainAxisAlignment.center,
+                children: [
+                  Text(
+                    _currentStep == totalSteps - 1 ? l10n.submit : l10n.continueButton,
+                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                  const SizedBox(width: 8),
+                  Icon(_currentStep == totalSteps - 1 ? Icons.check : Icons.arrow_forward, size: 20),
+                ],
+              ),
+            ),
           ),
-        ),
+        ],
       ),
     );
   }
@@ -681,8 +709,8 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           ElevatedButton(
             onPressed: () => ref.refresh(serviceFormProvider(widget.serviceId)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
               elevation: 0,
@@ -707,7 +735,8 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Future<void> _submitForm() async {
     final l10n = AppLocalizations.of(context)!;
-    if (widget.serviceRequestId == null) {
+    if (widget.serviceRequestId == null || widget.serviceRequestId!.isEmpty) {
+      debugPrint('ERROR: serviceRequestId is null or empty');
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(l10n.serviceRequestIdMissing)),
       );
@@ -717,24 +746,34 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     try {
       final apiClient = ref.read(apiClientProvider);
       
-      // Prepare form data
+      // Prepare form data with proper structure
       final formData = <String, dynamic>{};
+      
+      // Add text field values
       for (var entry in _controllers.entries) {
-        final value = entry.value.text;
+        final value = entry.value.text.trim();
         if (value.isNotEmpty) {
           formData[entry.key] = value;
         }
       }
-      formData.addAll(_formValues);
+      
+      // Add other form values (checkboxes, radios, dropdowns, etc.)
+      for (var entry in _formValues.entries) {
+        if (entry.value != null) {
+          formData[entry.key] = entry.value;
+        }
+      }
       
       debugPrint('Submitting to: /api/v1/service-requests/${widget.serviceRequestId}/questionnaire');
       debugPrint('Form data: $formData');
       
-      // Submit form data using PATCH endpoint
-      await apiClient.patch(
+      // Submit form data
+      final response = await apiClient.patch(
         '/api/v1/service-requests/${widget.serviceRequestId}/questionnaire',
         data: formData,
       );
+      
+      debugPrint('Submit response: ${response.data}');
       
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(

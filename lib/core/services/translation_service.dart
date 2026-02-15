@@ -6,11 +6,11 @@ class TranslationService {
   static final _cache = <String, String>{};
   static final _dio = Dio();
   
-  // Google Translate API endpoint (free alternative: LibreTranslate)
-  static const _apiUrl = 'https://libretranslate.com/translate';
+  // Using Google Translate API
+  static const _apiUrl = 'https://translate.googleapis.com/translate_a/single';
   
   // Translate text from backend
-  static Future<String> translate(String text, String targetLang, {String sourceLang = 'auto'}) async {
+  static Future<String> translate(String text, String targetLang, {String sourceLang = 'it'}) async {
     if (text.isEmpty) return text;
     
     final cacheKey = '$text-$sourceLang-$targetLang';
@@ -29,18 +29,19 @@ class TranslationService {
     }
     
     try {
-      // Call LibreTranslate API (free, no API key needed)
-      final response = await _dio.post(
+      // Call Google Translate API
+      final response = await _dio.get(
         _apiUrl,
-        data: {
+        queryParameters: {
+          'client': 'gtx',
+          'sl': sourceLang,
+          'tl': targetLang,
+          'dt': 't',
           'q': text,
-          'source': sourceLang,
-          'target': targetLang,
-          'format': 'text',
         },
       );
       
-      final translated = response.data['translatedText'] ?? text;
+      final translated = response.data[0][0][0] ?? text;
       
       // Cache the result
       _cache[cacheKey] = translated;
@@ -48,7 +49,6 @@ class TranslationService {
       
       return translated;
     } catch (e) {
-      // Return original text on error
       return text;
     }
   }
@@ -63,9 +63,9 @@ class TranslationService {
     final text = backendText?.toString() ?? '';
     final locale = Localizations.localeOf(context).languageCode;
     
-    // Only translate if not English and text is not empty
-    if (locale != 'en' && text.isNotEmpty) {
-      return await translate(text, locale);
+    // Translate from Italian to target language
+    if (text.isNotEmpty && locale != 'it') {
+      return await translate(text, locale, sourceLang: 'it');
     }
     
     return text;

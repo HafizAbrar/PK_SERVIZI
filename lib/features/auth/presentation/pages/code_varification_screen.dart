@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class CodeVarificationScreen extends StatefulWidget {
   final String phoneNumber;
@@ -42,7 +43,7 @@ class _CodeVarificationScreenState extends State<CodeVarificationScreen> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1B5E20),
+      backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
         backgroundColor: Colors.transparent,
         automaticallyImplyLeading: false,
@@ -99,7 +100,7 @@ class _CodeVarificationScreenState extends State<CodeVarificationScreen> {
                                 hintText: 'Code',
                                 prefixIcon: Icon(
                                   Icons.security,
-                                  color: const Color(0xFF1B5E20),
+                                  color: AppTheme.primaryColor,
                                 ),
                                 border: const OutlineInputBorder(
                                   borderRadius: BorderRadius.all(Radius.circular(20.0)),
@@ -137,7 +138,7 @@ class _CodeVarificationScreenState extends State<CodeVarificationScreen> {
                                     if (states.contains(WidgetState.disabled)) {
                                       return Colors.grey[300]!;
                                     }
-                                    return const Color(0xFF1B5E20);
+                                    return AppTheme.primaryColor;
                                   },
                                 ),
                               ),
@@ -170,7 +171,7 @@ class _CodeVarificationScreenState extends State<CodeVarificationScreen> {
                             TextSpan(
                               text: widget.phoneNumber,
                               style: TextStyle(
-                                color: const Color(0xFF1B5E20),
+                                color: AppTheme.primaryColor,
                                 fontWeight: FontWeight.bold,
                                 fontSize: 14,
                               ),
@@ -204,7 +205,7 @@ class _CodeVarificationScreenState extends State<CodeVarificationScreen> {
                               if (states.contains(WidgetState.disabled)) {
                                 return Colors.grey[300]!;
                               }
-                              return const Color(0xFF1B5E20);
+                              return AppTheme.primaryColor;
                             },
                           ),
                         ),
@@ -238,7 +239,7 @@ class _CodeVarificationScreenState extends State<CodeVarificationScreen> {
             child: Text(
               'Change phone number',
               style: TextStyle(
-                color: const Color(0xFF1B5E20),
+                color: AppTheme.primaryColor,
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
               ),

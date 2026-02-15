@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
 
 final serviceRequestDetailNewProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, requestId) async {
   final apiClient = ref.read(apiClientProvider);
@@ -21,10 +22,10 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
     final requestAsync = ref.watch(serviceRequestDetailNewProvider(requestId));
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: requestAsync.when(
         data: (request) => _buildContent(context, ref, request, l10n),
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
         error: (error, stack) => _buildError(context, ref, l10n),
       ),
     );
@@ -58,7 +59,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -182,7 +183,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
@@ -219,7 +220,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
@@ -249,7 +250,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             height: 16,
             margin: const EdgeInsets.only(top: 2),
             decoration: const BoxDecoration(
-              color: Color(0xFFF2D00D),
+              color: AppTheme.accentColor,
               shape: BoxShape.circle,
             ),
           ),
@@ -263,7 +264,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 if (history['notes'] != null) ...[
@@ -314,7 +315,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
@@ -339,7 +340,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
+        color: AppTheme.backgroundLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),
@@ -364,7 +365,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
           ),
@@ -386,8 +387,8 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () => _submitRequest(context, request, ref, l10n),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF2D00D),
-                  foregroundColor: const Color(0xFF0A192F),
+                  backgroundColor: AppTheme.accentColor,
+                  foregroundColor: AppTheme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
@@ -430,8 +431,8 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () => context.push('/service-request-form?serviceId=${request['serviceId']}&requestId=${request['id']}'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF2D00D),
-                  foregroundColor: const Color(0xFF0A192F),
+                  backgroundColor: AppTheme.accentColor,
+                  foregroundColor: AppTheme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
@@ -474,8 +475,8 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () => context.push('/request-submission/${request['id']}'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFF2D00D),
-                  foregroundColor: const Color(0xFF0A192F),
+                  backgroundColor: AppTheme.accentColor,
+                  foregroundColor: AppTheme.primaryColor,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                   elevation: 0,
@@ -577,7 +578,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
           ),
@@ -596,13 +597,13 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
         return const Color(0xFFF59E0B);
       case 'processing':
       case 'submitted':
-        return const Color(0xFFF2D00D);
+        return AppTheme.accentColor;
       case 'completed':
         return const Color(0xFF10B981);
       case 'payment_pending':
         return const Color(0xFF10B981);
       case 'ready_to_submit':
-        return const Color(0xFFF2D00D);
+        return AppTheme.accentColor;
       case 'rejected':
         return const Color(0xFFEF4444);
       default:
@@ -670,15 +671,15 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => ref.refresh(serviceRequestDetailNewProvider(requestId)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

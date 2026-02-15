@@ -100,7 +100,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           Expanded(
             child: homeDataAsync.when(
               data: (data) => RefreshIndicator(
-                color: const Color(0xFF2196F3),
+                color: const Color(0xFF1E3A5F),
                 onRefresh: () async {
                   ref.invalidate(homeDataProvider);
                   ref.invalidate(profileProvider);
@@ -120,9 +120,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF2196F3))),
+              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFF1E3A5F))),
               error: (_, __) => RefreshIndicator(
-                color: const Color(0xFF2196F3),
+                color: const Color(0xFF1E3A5F),
                 onRefresh: () async => ref.invalidate(homeDataProvider),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
@@ -181,7 +181,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     style: const TextStyle(
                       fontSize: 10,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF2196F3),
+                      color: Color(0xFF1E3A5F),
                       letterSpacing: 2,
                     ),
                   ),
@@ -230,7 +230,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                           height: 40,
                           decoration: BoxDecoration(
                             borderRadius: BorderRadius.circular(20),
-                            border: Border.all(color: const Color(0xFF2196F3), width: 2),
+                            border: Border.all(color: const Color(0xFF1E3A5F), width: 2),
                           ),
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(18),
@@ -239,9 +239,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                                     profile['profile']['avatarUrl'],
                                     fit: BoxFit.cover,
                                     errorBuilder: (context, error, stackTrace) => 
-                                        const Icon(Icons.person, color: Color(0xFF2196F3), size: 24),
+                                        const Icon(Icons.person, color: Color(0xFF1E3A5F), size: 24),
                                   )
-                                : const Icon(Icons.person, color: Color(0xFF2196F3), size: 24),
+                                : const Icon(Icons.person, color: Color(0xFF1E3A5F), size: 24),
                           ),
                         ),
                         Positioned(
@@ -251,7 +251,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                             width: 16,
                             height: 16,
                             decoration: BoxDecoration(
-                              color: const Color(0xFF2196F3),
+                              color: const Color(0xFF1E3A5F),
                               borderRadius: BorderRadius.circular(8),
                               border: Border.all(color: AppTheme.primaryColor, width: 2),
                             ),
@@ -265,18 +265,18 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFF2196F3), width: 2),
+                        border: Border.all(color: const Color(0xFF1E3A5F), width: 2),
                       ),
-                      child: const Icon(Icons.person, color: Color(0xFF2196F3), size: 24),
+                      child: const Icon(Icons.person, color: Color(0xFF1E3A5F), size: 24),
                     ),
                     error: (_, __) => Container(
                       width: 40,
                       height: 40,
                       decoration: BoxDecoration(
                         borderRadius: BorderRadius.circular(20),
-                        border: Border.all(color: const Color(0xFF2196F3), width: 2),
+                        border: Border.all(color: const Color(0xFF1E3A5F), width: 2),
                       ),
-                      child: const Icon(Icons.person, color: Color(0xFF2196F3), size: 24),
+                      child: const Icon(Icons.person, color: Color(0xFF1E3A5F), size: 24),
                     ),
                   );
                 },
@@ -408,7 +408,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   child: Text(
                     l10n.viewAll,
                     style: const TextStyle(
-                      color: Color(0xFF2196F3),
+                      color: Color(0xFF1E3A5F),
                       fontSize: 14,
                       fontWeight: FontWeight.w600,
                     ),
@@ -455,7 +455,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   width: _currentRequestPage == index ? 24 : 8,
                   height: 8,
                   decoration: BoxDecoration(
-                    color: _currentRequestPage == index ? const Color(0xFF2196F3) : Colors.grey[300],
+                    color: _currentRequestPage == index ? const Color(0xFF1E3A5F) : Colors.grey[300],
                     borderRadius: BorderRadius.circular(4),
                   ),
                 ),
@@ -524,7 +524,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
         ),
         borderRadius: BorderRadius.circular(20),
         border: Border.all(
-          color: const Color(0xFF2196F3),
+          color: const Color(0xFF1E3A5F),
           width: 2,
         ),
         boxShadow: [
@@ -543,7 +543,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             child: Icon(
               isCompleted ? Icons.check_circle : Icons.description,
               size: 100,
-              color: const Color(0xFF2196F3).withValues(alpha: 0.1),
+              color: const Color(0xFF1E3A5F).withValues(alpha: 0.1),
             ),
           ),
           Column(
@@ -555,12 +555,12 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   Container(
                     padding: const EdgeInsets.all(8),
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2196F3).withValues(alpha: 0.2),
+                      color: const Color(0xFF1E3A5F).withValues(alpha: 0.2),
                       borderRadius: BorderRadius.circular(8),
                     ),
                     child: Icon(
                       isCompleted ? Icons.check_circle : Icons.description,
-                      color: const Color(0xFF2196F3),
+                      color: const Color(0xFF1E3A5F),
                       size: 24,
                     ),
                   ),
@@ -568,8 +568,8 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                     decoration: BoxDecoration(
                       color: isProcessing 
-                          ? const Color(0xFF2196F3)
-                          : const Color(0xFF2196F3).withValues(alpha: 0.3),
+                          ? const Color(0xFF1E3A5F)
+                          : const Color(0xFF1E3A5F).withValues(alpha: 0.3),
                       borderRadius: BorderRadius.circular(12),
                     ),
                     child: Text(
@@ -618,7 +618,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   widthFactor: progress,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFF2196F3),
+                      color: const Color(0xFF1E3A5F),
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -721,7 +721,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                   color: isActive ? AppTheme.primaryColor : Colors.grey[400],
                   borderRadius: BorderRadius.circular(24),
                 ),
-                child: Icon(icon, color: const Color(0xFF2196F3), size: 24),
+                child: Icon(icon, color: const Color(0xFF1E3A5F), size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(
@@ -743,7 +743,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         Container(
                           padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
                           decoration: BoxDecoration(
-                            color: isActive ? const Color(0xFF2196F3).withOpacity(0.2) : Colors.grey[300],
+                            color: isActive ? const Color(0xFF1E3A5F).withOpacity(0.2) : Colors.grey[300],
                             borderRadius: BorderRadius.circular(12),
                           ),
                           child: Text(
@@ -832,7 +832,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                 child: Text(
                   l10n.viewAll,
                   style: const TextStyle(
-                    color: Color(0xFF2196F3),
+                    color: Color(0xFF1E3A5F),
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
                   ),
@@ -868,7 +868,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               width: _currentPage == index ? 24 : 8,
               height: 8,
               decoration: BoxDecoration(
-                color: _currentPage == index ? const Color(0xFF2196F3) : Colors.grey[300],
+                color: _currentPage == index ? const Color(0xFF1E3A5F) : Colors.grey[300],
                 borderRadius: BorderRadius.circular(4),
               ),
             ),
@@ -894,7 +894,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           borderRadius: BorderRadius.circular(20),
           border: Border.all(
-            color: const Color(0xFF2196F3),
+            color: const Color(0xFF1E3A5F),
             width: 2,
           ),
           boxShadow: [
@@ -913,7 +913,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               child: Icon(
                 Icons.star,
                 size: 100,
-                color: const Color(0xFF2196F3).withValues(alpha: 0.1),
+                color: Colors.white.withValues(alpha: 0.1),
               ),
             ),
             Padding(
@@ -925,7 +925,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
                       decoration: BoxDecoration(
-                        color: const Color(0xFF2196F3),
+                        color: const Color(0xFF1E3A5F),
                         borderRadius: BorderRadius.circular(12),
                       ),
                       child: Text(
@@ -956,7 +956,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF2196F3),
+                          color: Color(0xFF1E3A5F),
                         ),
                       ),
                       Text(
@@ -991,7 +991,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                               Icon(
                                 Icons.check_circle,
                                 size: 14,
-                                color: const Color(0xFF2196F3),
+                                color: const Color(0xFF1E3A5F),
                               ),
                               const SizedBox(width: 6),
                               Expanded(
@@ -1016,7 +1016,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     child: ElevatedButton(
                       onPressed: () => context.push('/subscription-plan-details/${plan['id']}'),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFF2196F3),
+                        backgroundColor: const Color(0xFF1E3A5F),
                         foregroundColor: AppTheme.primaryColor,
                         elevation: 0,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -1060,6 +1060,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     }
   }
 }
+
 
 
 

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../data/models/service.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/widgets/translated_text.dart';
+import '../../../../core/theme/app_theme.dart';
 
 final serviceDetailProvider = FutureProvider.family<Service, String>((ref, serviceId) async {
   final apiClient = ref.read(apiClientProvider);
@@ -29,10 +30,10 @@ class ServiceDetailScreen extends ConsumerWidget {
     final serviceAsync = ref.watch(serviceDetailProvider(serviceId));
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: serviceAsync.when(
         data: (service) => _buildContent(context, service, ref, l10n),
-        loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
         error: (_, __) => _buildError(context, ref, l10n),
       ),
     );
@@ -64,7 +65,7 @@ class ServiceDetailScreen extends ConsumerWidget {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 32),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -96,7 +97,7 @@ class ServiceDetailScreen extends ConsumerWidget {
               color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: const Icon(Icons.business, color: Color(0xFFF2D00D), size: 48),
+            child: Icon(Icons.business, color: AppTheme.accentColor, size: 48),
           ),
           const SizedBox(height: 16),
           TranslatedText(
@@ -135,7 +136,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
@@ -178,7 +179,7 @@ class ServiceDetailScreen extends ConsumerWidget {
               style: const TextStyle(
                 fontSize: 14,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
           ),
@@ -209,7 +210,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 16),
@@ -224,7 +225,7 @@ class ServiceDetailScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
+        color: AppTheme.backgroundLight,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(color: Colors.grey[200]!),
       ),
@@ -245,7 +246,7 @@ class ServiceDetailScreen extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 Text(
@@ -304,7 +305,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 16),
@@ -319,7 +320,7 @@ class ServiceDetailScreen extends ConsumerWidget {
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: const Color(0xFFF8F9FA),
+        color: AppTheme.backgroundLight,
         borderRadius: BorderRadius.circular(12),
       ),
       child: Row(
@@ -327,10 +328,10 @@ class ServiceDetailScreen extends ConsumerWidget {
           Container(
             padding: const EdgeInsets.all(8),
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F).withValues(alpha: 0.1),
+              color: AppTheme.primaryColor.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
-            child: const Icon(Icons.folder_outlined, color: Color(0xFF0A192F), size: 20),
+            child: const Icon(Icons.folder_outlined, color: AppTheme.primaryColor, size: 20),
           ),
           const SizedBox(width: 12),
           Expanded(
@@ -342,7 +343,7 @@ class ServiceDetailScreen extends ConsumerWidget {
                   style: const TextStyle(
                     fontSize: 14,
                     fontWeight: FontWeight.w600,
-                    color: Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 Text(
@@ -385,7 +386,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 16),
@@ -393,7 +394,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             data: (faqs) => faqs.isEmpty 
                 ? Text(l10n.noFaqsAvailable, style: TextStyle(color: Colors.grey[600]))
                 : Column(children: faqs.map((faq) => _buildFAQItem(faq['question'] ?? '', faq['answer'] ?? '')).toList()),
-            loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
             error: (_, __) => Text(l10n.failedToLoadFaqs, style: TextStyle(color: Colors.grey[600])),
           ),
         ],
@@ -412,7 +413,7 @@ class ServiceDetailScreen extends ConsumerWidget {
           style: const TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.w600,
-            color: Color(0xFF0A192F),
+            color: AppTheme.primaryColor,
           ),
         ),
         children: [
@@ -446,8 +447,8 @@ class ServiceDetailScreen extends ConsumerWidget {
         child: ElevatedButton(
           onPressed: () => _initiateServiceRequest(context, service.id, ref, l10n),
           style: ElevatedButton.styleFrom(
-            backgroundColor: const Color(0xFFF2D00D),
-            foregroundColor: const Color(0xFF0A192F),
+            backgroundColor: AppTheme.accentColor,
+            foregroundColor: Colors.white,
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             elevation: 0,
@@ -472,13 +473,21 @@ class ServiceDetailScreen extends ConsumerWidget {
         'serviceId': serviceId,
       });
       
+      debugPrint('Initiate service response: ${response.data}');
+      
       if (context.mounted) {
         if (response.data['success'] == true) {
           final paymentUrl = response.data['data']['paymentUrl'] as String;
-          context.push('/payment-checkout?url=${Uri.encodeComponent(paymentUrl)}&serviceId=$serviceId');
+          final serviceRequestId = response.data['data']['serviceRequestId'] as String?;
+          
+          debugPrint('Payment URL: $paymentUrl');
+          debugPrint('Service Request ID: $serviceRequestId');
+          
+          context.push('/payment-checkout?url=${Uri.encodeComponent(paymentUrl)}&serviceId=$serviceId&serviceRequestId=${serviceRequestId ?? ""}');
         }
       }
     } catch (e) {
+      debugPrint('Error initiating service request: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -515,15 +524,15 @@ class ServiceDetailScreen extends ConsumerWidget {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 20),
           ElevatedButton(
             onPressed: () => ref.refresh(serviceDetailProvider(serviceId)),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: Colors.white,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),

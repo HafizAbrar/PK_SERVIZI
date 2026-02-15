@@ -3,6 +3,8 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/theme/app_theme.dart';
+import '../../../../core/theme/app_theme.dart';
 
 final serviceRequestsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final response = await ApiServiceFactory.customer.getMyServiceRequests();
@@ -27,19 +29,20 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
     final requestsAsync = ref.watch(serviceRequestsProvider);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           _buildHeader(l10n),
           Expanded(
             child: requestsAsync.when(
               data: (requests) => RefreshIndicator(
-                color: const Color(0xFFF2D00D),
+                color: AppTheme.accentColor,
                 onRefresh: () async => ref.invalidate(serviceRequestsProvider),
                 child: SingleChildScrollView(
                   physics: const AlwaysScrollableScrollPhysics(),
                   child: Column(
                     children: [
+                      SizedBox(height: 16),
                       _buildSummaryStats(requests, l10n),
                       _buildSearchBar(l10n),
                       _buildFilterChips(l10n),
@@ -49,7 +52,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                   ),
                 ),
               ),
-              loading: () => const Center(child: CircularProgressIndicator(color: Color(0xFFF2D00D))),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
               error: (_, __) => _buildError(l10n),
             ),
           ),
@@ -62,7 +65,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -143,7 +146,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                         style: const TextStyle(
                           fontSize: 32,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0A192F),
+                          color: AppTheme.primaryColor,
                         ),
                       ),
                       const SizedBox(width: 8),
@@ -200,7 +203,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                     style: const TextStyle(
                       fontSize: 32,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFEF4444),
+                      color: AppTheme.accentColor,
                     ),
                   ),
                 ],
@@ -275,14 +278,14 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
               child: Container(
                 padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 8),
                 decoration: BoxDecoration(
-                  color: isSelected ? const Color(0xFF0A192F) : Colors.white,
+                  color: isSelected ? AppTheme.primaryColor : Colors.white,
                   borderRadius: BorderRadius.circular(20),
                   border: Border.all(
-                    color: isSelected ? const Color(0xFF0A192F) : Colors.grey[300]!,
+                    color: isSelected ? AppTheme.primaryColor : Colors.grey[300]!,
                   ),
                   boxShadow: isSelected ? [
                     BoxShadow(
-                      color: const Color(0xFF0A192F).withValues(alpha: 0.2),
+                      color: AppTheme.primaryColor.withValues(alpha: 0.2),
                       blurRadius: 8,
                     ),
                   ] : null,
@@ -292,7 +295,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                     Text(
                       filter['label'] as String,
                       style: TextStyle(
-                        color: isSelected ? Colors.white : const Color(0xFF0A192F),
+                        color: isSelected ? Colors.white : AppTheme.primaryColor,
                         fontSize: 14,
                         fontWeight: FontWeight.w600,
                       ),
@@ -301,7 +304,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                     Container(
                       padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
                       decoration: BoxDecoration(
-                        color: isSelected ? Colors.white.withValues(alpha: 0.2) : const Color(0xFF0A192F).withValues(alpha: 0.1),
+                        color: isSelected ? Colors.white.withValues(alpha: 0.2) : AppTheme.primaryColor.withValues(alpha: 0.1),
                         borderRadius: BorderRadius.circular(8),
                       ),
                       child: Text(
@@ -309,7 +312,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                         style: TextStyle(
                           fontSize: 11,
                           fontWeight: FontWeight.bold,
-                          color: isSelected ? Colors.white : const Color(0xFF0A192F),
+                          color: isSelected ? Colors.white : AppTheme.primaryColor,
                         ),
                       ),
                     ),
@@ -344,13 +347,13 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
             Container(
               padding: const EdgeInsets.all(24),
               decoration: BoxDecoration(
-                color: const Color(0xFF0A192F).withValues(alpha: 0.05),
+                color: AppTheme.primaryColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
               ),
               child: const Icon(
                 Icons.assignment_outlined,
                 size: 64,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
             const SizedBox(height: 20),
@@ -359,7 +362,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
               style: const TextStyle(
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
-                color: Color(0xFF0A192F),
+                color: AppTheme.primaryColor,
               ),
             ),
             const SizedBox(height: 8),
@@ -385,7 +388,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 16),
@@ -437,7 +440,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
           borderRadius: BorderRadius.circular(16),
           border: Border(
             left: BorderSide(
-              color: needsAttention ? const Color(0xFFEF4444) : const Color(0xFFF2D00D),
+              color: needsAttention ? const Color(0xFFEF4444) : AppTheme.accentColor,
               width: 4,
             ),
           ),
@@ -473,7 +476,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                         style: const TextStyle(
                           fontSize: 16,
                           fontWeight: FontWeight.bold,
-                          color: Color(0xFF0A192F),
+                          color: AppTheme.primaryColor,
                         ),
                       ),
                     ],
@@ -524,7 +527,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                   widthFactor: 0.65,
                   child: Container(
                     decoration: BoxDecoration(
-                      color: const Color(0xFFF2D00D),
+                      color: AppTheme.accentColor,
                       borderRadius: BorderRadius.circular(4),
                     ),
                   ),
@@ -547,7 +550,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                     style: TextStyle(
                       fontSize: 11,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFF2D00D),
+                      color: AppTheme.accentColor,
                     ),
                   ),
                 ],
@@ -574,11 +577,11 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                     style: const TextStyle(
                       fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFFF2D00D),
+                      color: AppTheme.accentColor,
                     ),
                   ),
                   const SizedBox(width: 4),
-                  const Icon(Icons.chevron_right, size: 16, color: Color(0xFFF2D00D)),
+                  const Icon(Icons.chevron_right, size: 16, color: AppTheme.accentColor),
                 ],
               ),
             ],
@@ -628,7 +631,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
             style: const TextStyle(
               fontSize: 18,
               fontWeight: FontWeight.bold,
-              color: Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
             ),
           ),
           const SizedBox(height: 8),
@@ -643,8 +646,8 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
           ElevatedButton(
             onPressed: () => ref.refresh(serviceRequestsProvider),
             style: ElevatedButton.styleFrom(
-              backgroundColor: const Color(0xFFF2D00D),
-              foregroundColor: const Color(0xFF0A192F),
+              backgroundColor: AppTheme.accentColor,
+              foregroundColor: AppTheme.primaryColor,
               padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 12),
               shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
             ),
@@ -661,7 +664,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
       case 'rejected':
         return const Color(0xFFEF4444).withValues(alpha: 0.1);
       case 'processing':
-        return const Color(0xFFF2D00D).withValues(alpha: 0.2);
+        return AppTheme.accentColor.withValues(alpha: 0.2);
       case 'completed':
         return const Color(0xFF10B981).withValues(alpha: 0.1);
       default:
@@ -675,7 +678,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
       case 'rejected':
         return const Color(0xFFEF4444);
       case 'processing':
-        return const Color(0xFF0A192F);
+        return AppTheme.primaryColor;
       case 'completed':
         return const Color(0xFF10B981);
       default:

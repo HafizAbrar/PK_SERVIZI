@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import '../../../../core/theme/app_theme.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:dio/dio.dart';
 import 'dart:io';
@@ -83,7 +84,7 @@ class _DocumentUploadScreenState extends ConsumerState<DocumentUploadScreen> {
       child: Row(
         children: [
           IconButton(
-            onPressed: () => context.pop(),
+            onPressed: () => context.go('/home'),
             icon: const Icon(Icons.arrow_back_ios, color: Color(0xFF111418)),
           ),
           Expanded(

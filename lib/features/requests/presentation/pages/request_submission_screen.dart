@@ -3,6 +3,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/services/api_service.dart';
+import '../../../../core/theme/app_theme.dart';
 
 class RequestSubmissionScreen extends ConsumerStatefulWidget {
   final String requestId;
@@ -24,7 +25,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
     final l10n = AppLocalizations.of(context)!;
     
     return Scaffold(
-      backgroundColor: const Color(0xFFF8F9FA),
+      backgroundColor: AppTheme.backgroundLight,
       body: Column(
         children: [
           _buildHeader(l10n),
@@ -39,7 +40,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
     return Container(
       padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
       decoration: BoxDecoration(
-        color: const Color(0xFF0A192F),
+        color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
           bottomLeft: Radius.circular(24),
           bottomRight: Radius.circular(24),
@@ -111,7 +112,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                   ),
                   textAlign: TextAlign.center,
                 ),
@@ -129,17 +130,17 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                 Container(
                   padding: const EdgeInsets.all(16),
                   decoration: BoxDecoration(
-                    color: const Color(0xFFF2D00D).withValues(alpha: 0.1),
+                    color: AppTheme.accentColor.withValues(alpha: 0.1),
                     borderRadius: BorderRadius.circular(12),
                     border: Border.all(
-                      color: const Color(0xFFF2D00D).withValues(alpha: 0.3),
+                      color: AppTheme.accentColor.withValues(alpha: 0.3),
                     ),
                   ),
                   child: Row(
                     children: [
                       const Icon(
                         Icons.info_outline,
-                        color: Color(0xFF0A192F),
+                        color: AppTheme.primaryColor,
                         size: 24,
                       ),
                       const SizedBox(width: 12),
@@ -152,7 +153,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                               style: const TextStyle(
                                 fontSize: 11,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0A192F),
+                                color: AppTheme.primaryColor,
                                 letterSpacing: 1,
                               ),
                             ),
@@ -162,7 +163,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                               style: const TextStyle(
                                 fontSize: 16,
                                 fontWeight: FontWeight.bold,
-                                color: Color(0xFF0A192F),
+                                color: AppTheme.primaryColor,
                               ),
                             ),
                           ],
@@ -195,7 +196,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                   style: const TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 16),
@@ -220,7 +221,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
             width: 32,
             height: 32,
             decoration: BoxDecoration(
-              color: const Color(0xFF0A192F),
+              color: AppTheme.primaryColor,
               borderRadius: BorderRadius.circular(16),
             ),
             child: Center(
@@ -229,7 +230,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                 style: const TextStyle(
                   fontSize: 14,
                   fontWeight: FontWeight.bold,
-                  color: Color(0xFFF2D00D),
+                  color: AppTheme.accentColor,
                 ),
               ),
             ),
@@ -244,7 +245,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                   style: const TextStyle(
                     fontSize: 15,
                     fontWeight: FontWeight.bold,
-                    color: Color(0xFF0A192F),
+                    color: AppTheme.primaryColor,
                   ),
                 ),
                 const SizedBox(height: 4),
@@ -284,8 +285,8 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
             child: ElevatedButton(
               onPressed: _isSubmitting ? null : () => _submitRequest(l10n),
               style: ElevatedButton.styleFrom(
-                backgroundColor: const Color(0xFFF2D00D),
-                foregroundColor: const Color(0xFF0A192F),
+                backgroundColor: AppTheme.accentColor,
+                foregroundColor: AppTheme.primaryColor,
                 padding: const EdgeInsets.symmetric(vertical: 16),
                 shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                 elevation: 0,
@@ -295,7 +296,7 @@ class _RequestSubmissionScreenState extends ConsumerState<RequestSubmissionScree
                       height: 20,
                       width: 20,
                       child: CircularProgressIndicator(
-                        color: Color(0xFF0A192F),
+                        color: AppTheme.primaryColor,
                         strokeWidth: 2,
                       ),
                     )

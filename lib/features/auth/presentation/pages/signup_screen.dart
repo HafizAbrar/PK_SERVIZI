@@ -21,6 +21,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
   bool isButtonEnabled = false;
   bool _obscurePassword = true;
+  bool _hasMinLength = false;
+  bool _hasUppercase = false;
+  bool _hasLowercase = false;
+  bool _hasNumber = false;
+  bool _hasSpecialChar = false;
 
   @override
   void initState() {
@@ -41,11 +46,23 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   }
 
   void _validate() {
+    final password = _passwordController.text;
     setState(() {
+      _hasMinLength = password.length >= 8;
+      _hasUppercase = password.contains(RegExp(r'[A-Z]'));
+      _hasLowercase = password.contains(RegExp(r'[a-z]'));
+      _hasNumber = password.contains(RegExp(r'[0-9]'));
+      _hasSpecialChar = password.contains(RegExp(r'[!@#$%^&*(),.?":{}|<>]'));
+      
       isButtonEnabled = _emailController.text.isNotEmpty &&
                        _passwordController.text.isNotEmpty &&
                        _fullNameController.text.isNotEmpty &&
-                       _phoneController.text.isNotEmpty;
+                       _phoneController.text.isNotEmpty &&
+                       _hasMinLength &&
+                       _hasUppercase &&
+                       _hasLowercase &&
+                       _hasNumber &&
+                       _hasSpecialChar;
     });
   }
 
@@ -232,6 +249,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   obscure: _obscurePassword,
                   onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
                 ),
+                if (_passwordController.text.isNotEmpty)
+                  const SizedBox(height: 12),
+                if (_passwordController.text.isNotEmpty)
+                  _buildPasswordStrengthIndicator(l10n),
                 const SizedBox(height: AppTheme.spacingLarge),
                 SizedBox(
                   width: double.infinity,
@@ -310,11 +331,68 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         if (label == l10n.email && !v.contains('@')) {
           return l10n.enterValidEmail;
         }
-        if (label == l10n.password && v.length < 6) {
-          return l10n.passwordMinLength;
+        if (label == l10n.password) {
+          if (v.length < 8) return l10n.passwordMinLength;
+          if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Must contain uppercase letter';
+          if (!RegExp(r'[a-z]').hasMatch(v)) return 'Must contain lowercase letter';
+          if (!RegExp(r'[0-9]').hasMatch(v)) return 'Must contain number';
+          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(v)) return 'Must contain special character';
         }
         return null;
       },
+    );
+  }
+
+  Widget _buildPasswordStrengthIndicator(AppLocalizations l10n) {
+    return Container(
+      padding: const EdgeInsets.all(12),
+      decoration: BoxDecoration(
+        color: AppTheme.primaryColor.withValues(alpha: 0.05),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: AppTheme.primaryColor.withValues(alpha: 0.1)),
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          Text(
+            'Password Requirements:',
+            style: TextStyle(
+              fontSize: 12,
+              fontWeight: FontWeight.bold,
+              color: AppTheme.primaryColor,
+            ),
+          ),
+          const SizedBox(height: 8),
+          _buildRequirement('At least 8 characters', _hasMinLength),
+          _buildRequirement('One uppercase letter', _hasUppercase),
+          _buildRequirement('One lowercase letter', _hasLowercase),
+          _buildRequirement('One number', _hasNumber),
+          _buildRequirement('One special character', _hasSpecialChar),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildRequirement(String text, bool isMet) {
+    return Padding(
+      padding: const EdgeInsets.only(top: 4),
+      child: Row(
+        children: [
+          Icon(
+            isMet ? Icons.check_circle : Icons.circle_outlined,
+            size: 16,
+            color: isMet ? AppTheme.successColor : Colors.grey,
+          ),
+          const SizedBox(width: 8),
+          Text(
+            text,
+            style: TextStyle(
+              fontSize: 11,
+              color: isMet ? AppTheme.successColor : Colors.grey[600],
+            ),
+          ),
+        ],
+      ),
     );
   }
 }
