@@ -6,6 +6,7 @@ import 'package:url_launcher/url_launcher.dart';
 import 'dart:io';
 import 'package:path_provider/path_provider.dart';
 import 'package:dio/dio.dart';
+import 'package:open_file/open_file.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/api_client.dart';
@@ -407,11 +408,11 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
         final file = File('${directory.path}/receipt_$paymentId.pdf');
         await file.writeAsBytes(response.data);
         
-        final result = await launchUrl(Uri.file(file.path), mode: LaunchMode.externalApplication);
+        final result = await OpenFile.open(file.path);
         
-        if (context.mounted && result) {
+        if (context.mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Opening receipt...')),
+            SnackBar(content: Text(result.message)),
           );
         }
       } else if (action == 'invoice') {

@@ -5,6 +5,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/widgets/translated_text.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/services/translation_service.dart';
 
 final serviceTypesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final apiClient = ref.read(apiClientProvider);
@@ -164,12 +165,21 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             }
           });
           
+          // Sort by translated name
+          final locale = Localizations.localeOf(context).languageCode;
+          final sortedTypes = List<Map<String, dynamic>>.from(serviceTypes);
+          sortedTypes.sort((a, b) {
+            final nameA = TranslationService.getCached(a['name'] ?? '', locale) ?? a['name'] ?? '';
+            final nameB = TranslationService.getCached(b['name'] ?? '', locale) ?? b['name'] ?? '';
+            return nameA.toLowerCase().compareTo(nameB.toLowerCase());
+          });
+          
           return SizedBox(
             height: 50,
             child: ListView(
               scrollDirection: Axis.horizontal,
               padding: const EdgeInsets.symmetric(horizontal: 20),
-              children: serviceTypes.map((type) => _buildCategoryTab(
+              children: sortedTypes.map((type) => _buildCategoryTab(
                 type['name'] ?? 'Type',
                 type['id'],
                 ref.watch(selectedServiceTypeProvider) == type['id'],
