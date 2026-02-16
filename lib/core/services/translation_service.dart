@@ -85,6 +85,11 @@ class TranslationService {
     return _cache[cacheKey] ?? text;
   }
   
+  // Get cached translation
+  static String? getCached(String text, String targetLang, {String sourceLang = 'it'}) {
+    return _cache['$text-$sourceLang-$targetLang'];
+  }
+  
   // Clear cache
   static Future<void> clearCache() async {
     _cache.clear();

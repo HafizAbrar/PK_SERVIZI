@@ -6,6 +6,7 @@ import '../../../../core/network/api_client.dart';
 import '../../data/models/service_type.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/widgets/translated_text.dart';
+import '../../../../core/services/translation_service.dart';
 
 final serviceTypesProvider = FutureProvider<List<ServiceType>>((ref) async {
   final apiClient = ref.read(apiClientProvider);
@@ -124,12 +125,30 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
   }
 
   Widget _buildServiceTypesList(BuildContext context, List<ServiceType> serviceTypes) {
+    final locale = Localizations.localeOf(context).languageCode;
+    
     final filteredTypes = serviceTypes.where((type) {
       if (_searchQuery.isEmpty) return true;
-      final query = _searchQuery.toLowerCase();
-      return type.name.toLowerCase().contains(query) ||
-             type.description.toLowerCase().contains(query);
+      final query = _searchQuery.toLowerCase().trim();
+      final name = type.name.toLowerCase();
+      final description = type.description.toLowerCase();
+      
+      // Search in original text
+      if (name.contains(query) || description.contains(query)) return true;
+      
+      // Search in translated text (cached)
+      final translatedName = TranslationService.getCached(type.name, locale)?.toLowerCase() ?? '';
+      final translatedDesc = TranslationService.getCached(type.description, locale)?.toLowerCase() ?? '';
+      
+      return translatedName.contains(query) || translatedDesc.contains(query);
     }).toList();
+    
+    // Sort by translated name
+    filteredTypes.sort((a, b) {
+      final nameA = TranslationService.getCached(a.name, locale) ?? a.name;
+      final nameB = TranslationService.getCached(b.name, locale) ?? b.name;
+      return nameA.toLowerCase().compareTo(nameB.toLowerCase());
+    });
 
     if (filteredTypes.isEmpty) {
       return Center(
