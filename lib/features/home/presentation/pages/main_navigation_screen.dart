@@ -4,7 +4,7 @@ import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../services/presentation/pages/services_screen.dart';
+import '../../../services/presentation/pages/service_type_screen.dart';
 import '../../../requests/presentation/pages/service_requests_screen.dart';
 import '../../../subscriptions/presentation/pages/subscription_plans_screen.dart';
 import '../../../profile/presentation/pages/profile_screen.dart';
@@ -23,7 +23,7 @@ class MainNavigationScreen extends ConsumerWidget {
 
     final screens = [
       const HomeScreen(),
-      const ServicesScreen(),
+      const ServiceTypeScreen(),
       const ServiceRequestsScreen(),
       const SubscriptionPlansScreen(),
       const ProfileScreen(),

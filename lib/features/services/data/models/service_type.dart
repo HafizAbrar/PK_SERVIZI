@@ -7,21 +7,17 @@ class ServiceType {
   final String id;
   final String name;
   final String description;
-  final double basePrice;
-  final String category;
-  final List<String> requiredDocuments;
-  final Map<String, dynamic> formSchema;
   final bool isActive;
+  final DateTime createdAt;
+  final DateTime updatedAt;
 
   const ServiceType({
     required this.id,
     required this.name,
     required this.description,
-    required this.basePrice,
-    required this.category,
-    required this.requiredDocuments,
-    required this.formSchema,
     required this.isActive,
+    required this.createdAt,
+    required this.updatedAt,
   });
 
   factory ServiceType.fromJson(Map<String, dynamic> json) => _$ServiceTypeFromJson(json);

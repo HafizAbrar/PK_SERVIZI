@@ -9,7 +9,9 @@ import '../../../../core/theme/app_theme.dart';
 final serviceTypesProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final apiClient = ref.read(apiClientProvider);
   final response = await apiClient.get('/api/v1/service-types');
-  return List<Map<String, dynamic>>.from(response.data['data']);
+  final list = List<Map<String, dynamic>>.from(response.data['data']);
+  list.sort((a, b) => (a['name'] ?? '').toString().toLowerCase().compareTo((b['name'] ?? '').toString().toLowerCase()));
+  return list;
 });
 
 final selectedServiceTypeProvider = StateProvider<String?>((ref) => null);
@@ -21,7 +23,9 @@ final servicesByTypeProvider = FutureProvider.family<List<Map<String, dynamic>>,
 });
 
 class ServicesScreen extends ConsumerStatefulWidget {
-  const ServicesScreen({super.key});
+  final String? serviceTypeId;
+  
+  const ServicesScreen({super.key, this.serviceTypeId});
 
   @override
   ConsumerState<ServicesScreen> createState() => _ServicesScreenState();
@@ -30,6 +34,16 @@ class ServicesScreen extends ConsumerStatefulWidget {
 class _ServicesScreenState extends ConsumerState<ServicesScreen> {
   final TextEditingController _searchController = TextEditingController();
   String _searchQuery = '';
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.serviceTypeId != null) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        ref.read(selectedServiceTypeProvider.notifier).state = widget.serviceTypeId;
+      });
+    }
+  }
 
   @override
   void dispose() {
@@ -78,6 +92,12 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
       ),
       child: Row(
         children: [
+          IconButton(
+            onPressed: () => context.pop(),
+            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+            padding: EdgeInsets.zero,
+          ),
+          const SizedBox(width: 12),
           Text(
             l10n.services,
             style: const TextStyle(

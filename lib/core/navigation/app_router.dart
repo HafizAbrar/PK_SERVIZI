@@ -22,6 +22,7 @@ import '../../features/subscriptions/presentation/pages/subscription_plans_scree
 import '../../features/subscriptions/presentation/pages/subscription_plan_details_screen.dart';
 import '../../features/services/presentation/pages/services_screen.dart';
 import '../../features/services/presentation/pages/service_detail_screen.dart';
+import '../../features/services/presentation/pages/service_type_screen.dart';
 import '../../features/services/presentation/pages/service_request_form_screen.dart';
 import '../../features/settings/presentation/pages/language_selection_screen.dart';
 import '../../features/invoices/presentation/pages/invoices_screen.dart';
@@ -181,7 +182,10 @@ class AppRouter {
       GoRoute(path: RoutePaths.notifications, name: 'notifications', builder: (context, state) => const NotificationsScreen(), redirect: _authGuard),
       
       // Services
-      GoRoute(path: RoutePaths.services, name: 'services', builder: (context, state) => const ServicesScreen()),
+      GoRoute(path: RoutePaths.services, name: 'services', builder: (context, state) {
+        final serviceTypeId = state.uri.queryParameters['serviceTypeId'];
+        return serviceTypeId != null ? ServicesScreen(serviceTypeId: serviceTypeId) : const ServiceTypeScreen();
+      }),
       GoRoute(path: RoutePaths.serviceDetail, name: 'service-detail', builder: (context, state) => ServiceDetailScreen(serviceId: state.pathParameters['id']!)),
       GoRoute(path: RoutePaths.serviceRequestForm, name: 'service-request-form', builder: (context, state) => ServiceRequestFormScreen(
         serviceId: state.uri.queryParameters['serviceId']!,

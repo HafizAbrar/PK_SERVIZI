@@ -10,13 +10,9 @@ ServiceType _$ServiceTypeFromJson(Map<String, dynamic> json) => ServiceType(
   id: json['id'] as String,
   name: json['name'] as String,
   description: json['description'] as String,
-  basePrice: (json['basePrice'] as num).toDouble(),
-  category: json['category'] as String,
-  requiredDocuments: (json['requiredDocuments'] as List<dynamic>)
-      .map((e) => e as String)
-      .toList(),
-  formSchema: json['formSchema'] as Map<String, dynamic>,
   isActive: json['isActive'] as bool,
+  createdAt: DateTime.parse(json['createdAt'] as String),
+  updatedAt: DateTime.parse(json['updatedAt'] as String),
 );
 
 Map<String, dynamic> _$ServiceTypeToJson(ServiceType instance) =>
@@ -24,11 +20,9 @@ Map<String, dynamic> _$ServiceTypeToJson(ServiceType instance) =>
       'id': instance.id,
       'name': instance.name,
       'description': instance.description,
-      'basePrice': instance.basePrice,
-      'category': instance.category,
-      'requiredDocuments': instance.requiredDocuments,
-      'formSchema': instance.formSchema,
       'isActive': instance.isActive,
+      'createdAt': instance.createdAt.toIso8601String(),
+      'updatedAt': instance.updatedAt.toIso8601String(),
     };
 
 ServiceRequest _$ServiceRequestFromJson(Map<String, dynamic> json) =>

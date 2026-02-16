@@ -78,8 +78,19 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => context.go('/home'),
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                padding: EdgeInsets.zero,
+              ),
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 8),
           Text(
             l10n.myRequests,
             style: const TextStyle(
@@ -87,15 +98,6 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),
-          ),
-          const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
-            ),
-            child: const Icon(Icons.filter_list, color: Colors.white, size: 24),
           ),
         ],
       ),
