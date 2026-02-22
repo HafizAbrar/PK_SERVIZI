@@ -200,16 +200,13 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
             padding: const EdgeInsets.all(20),
             child: Row(
               children: [
-                Container(
-                  padding: const EdgeInsets.all(14),
-                  decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.1),
-                    borderRadius: BorderRadius.circular(14),
-                  ),
-                  child: Icon(
-                    _getIconForServiceType(serviceType.name),
-                    color: AppTheme.primaryColor,
-                    size: 28,
+                ClipRRect(
+                  borderRadius: BorderRadius.circular(28),
+                  child: Image.asset(
+                    'assets/logos/APP LOGO.jpeg',
+                    width: 70,
+                    height: 30,
+                    fit: BoxFit.fitWidth,
                   ),
                 ),
                 const SizedBox(width: 16),

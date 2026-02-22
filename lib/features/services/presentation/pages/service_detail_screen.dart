@@ -97,7 +97,15 @@ class ServiceDetailScreen extends ConsumerWidget {
               color: Colors.white.withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(20),
             ),
-            child: Icon(Icons.business, color: AppTheme.accentColor, size: 48),
+            child: ClipRRect(
+              borderRadius: BorderRadius.circular(20),
+              child: Image.asset(
+                'assets/logos/APP LOGO.jpeg',
+                width: 70,
+                height: 30,
+                fit: BoxFit.fitWidth,
+              ),
+            ),
           ),
           const SizedBox(height: 16),
           TranslatedText(

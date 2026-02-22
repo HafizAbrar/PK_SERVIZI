@@ -33,6 +33,10 @@ class MainNavigationScreen extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
+        if (Scaffold.of(context).isDrawerOpen) {
+          Navigator.of(context).pop();
+          return;
+        }
         final shouldExit = await _showExitDialog(context);
         if (shouldExit && context.mounted) {
           SystemNavigator.pop();
@@ -115,24 +119,27 @@ class MainNavigationScreen extends ConsumerWidget {
                 data: (profile) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.goldLight.withValues(alpha: 0.3)),
-                      ),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
                       child: profile['profile']?['avatarUrl'] != null
-                          ? ClipRRect(
-                              borderRadius: BorderRadius.circular(12),
-                              child: Image.network(
-                                profile['profile']['avatarUrl'],
+                          ? Image.network(
+                              profile['profile']['avatarUrl'],
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                              errorBuilder: (context, error, stackTrace) => Image.asset(
+                                'assets/logos/APP LOGO.jpeg',
+                                width: 60,
+                                height: 60,
                                 fit: BoxFit.cover,
-                                errorBuilder: (context, error, stackTrace) => const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                               ),
                             )
-                          : const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
+                          : Image.asset(
+                              'assets/logos/APP LOGO.jpeg',
+                              width: 60,
+                              height: 60,
+                              fit: BoxFit.cover,
+                            ),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -159,15 +166,14 @@ class MainNavigationScreen extends ConsumerWidget {
                 loading: () => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.goldLight.withValues(alpha: 0.3)),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/logos/APP LOGO.jpeg',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
                       ),
-                      child: const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                     ),
                     const SizedBox(height: 12),
                     Text(
@@ -183,15 +189,14 @@ class MainNavigationScreen extends ConsumerWidget {
                 error: (_, __) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Container(
-                      width: 60,
-                      height: 60,
-                      decoration: BoxDecoration(
-                        color: AppTheme.accentColor,
-                        borderRadius: BorderRadius.circular(12),
-                        border: Border.all(color: AppTheme.goldLight.withValues(alpha: 0.3)),
+                    ClipRRect(
+                      borderRadius: BorderRadius.circular(12),
+                      child: Image.asset(
+                        'assets/logos/APP LOGO.jpeg',
+                        width: 60,
+                        height: 60,
+                        fit: BoxFit.cover,
                       ),
-                      child: const Icon(Icons.shield, color: AppTheme.goldLight, size: 36),
                     ),
                     const SizedBox(height: 12),
                     Text(

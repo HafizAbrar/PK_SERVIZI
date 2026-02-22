@@ -128,8 +128,19 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     } catch (e) {
       if (mounted) {
         final l10n = AppLocalizations.of(context)!;
+        String errorMessage = l10n.errorUpdatingProfile;
+        
+        if (e is DioException && e.response?.statusCode == 400) {
+          final responseData = e.response?.data;
+          if (responseData is Map && responseData['message'] != null) {
+            errorMessage = responseData['message'];
+          } else {
+            errorMessage = l10n.invalidDataPleasecheckYourInputs;
+          }
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorUpdatingProfile}: $e')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     } finally {
@@ -188,7 +199,16 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 radius: 60,
                                 backgroundColor: AppTheme.primaryColor,
                                 backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
-                                child: _selectedImage == null ? const Icon(Icons.person, size: 60, color: Colors.white) : null,
+                                child: _selectedImage == null 
+                                    ? ClipOval(
+                                        child: Image.asset(
+                                          'assets/logos/APP LOGO.jpeg',
+                                          width: 120,
+                                          height: 120,
+                                          fit: BoxFit.cover,
+                                        ),
+                                      )
+                                    : null,
                               ),
                               Positioned(
                                 bottom: 0,

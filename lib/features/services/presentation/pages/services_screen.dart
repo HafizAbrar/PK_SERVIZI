@@ -283,7 +283,15 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                     color: AppTheme.primaryColor,
                     borderRadius: BorderRadius.circular(16),
                   ),
-                  child: Icon(Icons.business, size: 28, color: AppTheme.accentColor),
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(16),
+                    child: Image.asset(
+                      'assets/logos/APP LOGO.jpeg',
+                      width: 70,
+                      height: 30,
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(

@@ -322,5 +322,6 @@
   "issuedAt": "Emesso Il",
   "transactionId": "ID Transazione",
   "downloadPdfReceipt": "Scarica Ricevuta PDF",
-  "transactionCard": "Carta Transazione"
+  "transactionCard": "Carta Transazione",
+  "invalidDataPleasecheckYourInputs": "Dati non validi. Controlla i tuoi dati e riprova."
 }

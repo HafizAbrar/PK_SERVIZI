@@ -93,7 +93,6 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
   }
 
   Widget _buildInvoicesList(BuildContext context, List<Invoice> invoices, List<Payment> payments, AppLocalizations l10n) {
-    final planPayments = payments.where((p) => p.subscriptionId != null).toList();
     final servicePayments = payments.where((p) => p.serviceRequestId != null && p.status == 'completed').toList();
     
     final totalPaid = invoices.fold(0.0, (sum, i) => sum + double.parse(i.amount)) + 

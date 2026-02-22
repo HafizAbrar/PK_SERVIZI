@@ -4,7 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/services/api_service.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
-import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final serviceRequestsProvider = FutureProvider<List<Map<String, dynamic>>>((ref) async {
   final response = await ApiServiceFactory.customer.getMyServiceRequests();
@@ -352,10 +352,14 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                 color: AppTheme.primaryColor.withValues(alpha: 0.05),
                 borderRadius: BorderRadius.circular(20),
               ),
-              child: const Icon(
-                Icons.assignment_outlined,
-                size: 64,
-                color: AppTheme.primaryColor,
+              child: ClipRRect(
+                borderRadius: BorderRadius.circular(20),
+                child: Image.asset(
+                  'assets/logos/APP LOGO.jpeg',
+                  width: 64,
+                  height: 64,
+                  fit: BoxFit.cover,
+                ),
               ),
             ),
             const SizedBox(height: 20),
@@ -473,7 +477,7 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
                         ),
                       ),
                       const SizedBox(height: 4),
-                      Text(
+                      TranslatedText(
                         request['service']?['name'] ?? l10n.serviceRequest,
                         style: const TextStyle(
                           fontSize: 16,

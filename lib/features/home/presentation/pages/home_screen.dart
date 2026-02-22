@@ -714,14 +714,14 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           ),
           child: Row(
             children: [
-              Container(
-                width: 48,
-                height: 48,
-                decoration: BoxDecoration(
-                  color: isActive ? AppTheme.primaryColor : Colors.grey[400],
-                  borderRadius: BorderRadius.circular(24),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Image.asset(
+                  'assets/logos/APP LOGO.jpeg',
+                  width: 70,
+                  height: 30,
+                  fit: BoxFit.fitWidth,
                 ),
-                child: Icon(icon, color: const Color(0xFF1E3A5F), size: 24),
               ),
               const SizedBox(width: 16),
               Expanded(

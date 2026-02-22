@@ -322,5 +322,6 @@
   "issuedAt": "Issued At",
   "transactionId": "Transaction ID",
   "downloadPdfReceipt": "Download PDF Receipt",
-  "transactionCard": "Transaction Card"
+  "transactionCard": "Transaction Card",
+  "invalidDataPleasecheckYourInputs": "Invalid data. Please check your inputs and try again."
 }

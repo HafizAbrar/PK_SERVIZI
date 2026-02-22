@@ -127,7 +127,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   height: 100,
                   fit: BoxFit.cover,
                   errorBuilder: (context, error, stackTrace) {
-                    return Icon(Icons.person, size: 50, color: AppTheme.primaryColor);
+                    return ClipOval(
+                      child: Image.asset(
+                        'assets/logos/APP LOGO.jpeg',
+                        width: 100,
+                        height: 100,
+                        fit: BoxFit.cover,
+                      ),
+                    );
                   },
                   loadingBuilder: (context, child, loadingProgress) {
                     if (loadingProgress == null) return child;
@@ -135,7 +142,14 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   },
                 ),
               )
-            : Icon(Icons.person, size: 50, color: AppTheme.primaryColor),
+            : ClipOval(
+                child: Image.asset(
+                  'assets/logos/APP LOGO.jpeg',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
       ),
     );
   }

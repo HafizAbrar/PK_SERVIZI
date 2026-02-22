@@ -4,6 +4,7 @@ import 'package:go_router/go_router.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/translated_text.dart';
 
 final serviceRequestDetailNewProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, requestId) async {
   final apiClient = ref.read(apiClientProvider);
@@ -81,7 +82,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Text(
+            child: TranslatedText(
               title,
               style: const TextStyle(
                 fontSize: 20,
@@ -187,7 +188,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          _buildInfoRow(l10n.service, service['name'] ?? 'N/A', l10n),
+          _buildInfoRow(l10n.service, service['name'] ?? 'N/A', l10n, translate: true),
           _buildInfoRow(l10n.code, service['code'] ?? 'N/A', l10n),
           _buildInfoRow(l10n.category, service['category'] ?? 'N/A', l10n),
           _buildInfoRow(l10n.price, '€${service['basePrice'] ?? '0.00'}', l10n),
@@ -499,7 +500,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
               child: ElevatedButton(
                 onPressed: () => context.push('/document-upload?serviceId=${request['serviceId']}&requestId=${request['id']}'),
                 style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFEF4444),
+                  backgroundColor: AppTheme.accentColor,
                   foregroundColor: Colors.white,
                   padding: const EdgeInsets.symmetric(vertical: 16),
                   shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
@@ -733,7 +734,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
     }
   }
 
-  Widget _buildInfoRow(String label, String value, AppLocalizations l10n) {
+  Widget _buildInfoRow(String label, String value, AppLocalizations l10n, {bool translate = false}) {
     return Padding(
       padding: const EdgeInsets.only(bottom: 16),
       child: Row(
@@ -751,14 +752,23 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             ),
           ),
           Expanded(
-            child: Text(
-              value,
-              style: const TextStyle(
-                fontSize: 14,
-                fontWeight: FontWeight.bold,
-                color: AppTheme.primaryColor,
-              ),
-            ),
+            child: translate
+                ? TranslatedText(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
+                  )
+                : Text(
+                    value,
+                    style: const TextStyle(
+                      fontSize: 14,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
           ),
         ],
       ),
