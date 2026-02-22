@@ -224,149 +224,181 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
     
     return Container(
       margin: const EdgeInsets.only(bottom: 24),
-      padding: const EdgeInsets.all(24),
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(
-          color: isPopular ? AppTheme.accentColor : const Color(0xFFDCE0E5),
-          width: isPopular ? 2 : 1,
-        ),
-        boxShadow: isPopular 
-          ? [BoxShadow(color: AppTheme.accentColor.withValues(alpha: 0.1), blurRadius: 20, offset: const Offset(0, 8))]
-          : [BoxShadow(color: Colors.black.withValues(alpha: 0.05), blurRadius: 8, offset: const Offset(0, 2))],
+        gradient: isPopular
+            ? LinearGradient(
+                colors: [AppTheme.primaryColor, AppTheme.accentColor],
+                begin: Alignment.topLeft,
+                end: Alignment.bottomRight,
+              )
+            : null,
+        color: isPopular ? null : Colors.white,
+        borderRadius: BorderRadius.circular(20),
+        boxShadow: [
+          BoxShadow(
+            color: isPopular 
+                ? AppTheme.accentColor.withValues(alpha: 0.3)
+                : Colors.black.withValues(alpha: 0.08),
+            blurRadius: 20,
+            offset: const Offset(0, 8),
+          ),
+        ],
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-            children: [
-              TranslatedText(
-                plan['name'] ?? 'Plan',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF111418)),
-              ),
-              if (isPopular)
-                Container(
-                  padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: AppTheme.accentColor,
-                    borderRadius: BorderRadius.circular(20),
-                  ),
-                  child: Text(
-                    AppLocalizations.of(context)?.mostPopular.toUpperCase() ?? 'MOST POPULAR',
-                    style: const TextStyle(fontSize: 10, fontWeight: FontWeight.bold, color: Colors.white),
+      child: Container(
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          border: isPopular ? Border.all(color: const Color(0xFF1E3A5F), width: 2) : null,
+          borderRadius: BorderRadius.circular(20),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (isPopular)
+              Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E3A5F),
+                  borderRadius: BorderRadius.circular(20),
+                ),
+                child: Text(
+                  AppLocalizations.of(context)?.mostPopular.toUpperCase() ?? 'MOST POPULAR',
+                  style: const TextStyle(
+                    fontSize: 10,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.primaryColor,
+                    letterSpacing: 1.5,
                   ),
                 ),
-            ],
-          ),
-          const SizedBox(height: 8),
-          if (plan['description'] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 8),
-              child: TranslatedText(
-                plan['description'],
-                style: const TextStyle(fontSize: 14, color: Color(0xFF637288)),
+              ),
+            TranslatedText(
+              plan['name'] ?? 'Plan',
+              style: TextStyle(
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: isPopular ? Colors.white : AppTheme.primaryColor,
               ),
             ),
-          Row(
-            crossAxisAlignment: CrossAxisAlignment.end,
-            children: [
-              Text(
-                '€${priceValue.toStringAsFixed(2)}',
-                style: const TextStyle(fontSize: 36, fontWeight: FontWeight.w900, color: Color(0xFF111418)),
+            const SizedBox(height: 8),
+            if (plan['description'] != null)
+              Padding(
+                padding: const EdgeInsets.only(bottom: 16),
+                child: TranslatedText(
+                  plan['description'],
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: isPopular ? Colors.white70 : const Color(0xFF637288),
+                  ),
+                ),
               ),
-              Text(
-                '/${isYearly ? (AppLocalizations.of(context)?.year ?? 'year') : (AppLocalizations.of(context)?.month ?? 'mo')}',
-                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: Color(0xFF637288)),
-              ),
-            ],
-          ),
-          const SizedBox(height: 20),
-          SizedBox(
-            width: double.infinity,
-            child: ElevatedButton(
-              onPressed: processingPlanId == plan['id'] ? null : () => _purchasePlan(plan['id']),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
-                foregroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 12),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                elevation: 0,
-              ),
-              child: processingPlanId == plan['id']
-                  ? const SizedBox(
-                      height: 20,
-                      width: 20,
-                      child: CircularProgressIndicator(
-                        strokeWidth: 2,
-                        valueColor: AlwaysStoppedAnimation<Color>(AppTheme.primaryColor),
+            Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Text(
+                  '€',
+                  style: TextStyle(
+                    fontSize: 20,
+                    fontWeight: FontWeight.bold,
+                    color: isPopular ? const Color(0xFF1E3A5F) : AppTheme.accentColor,
+                  ),
+                ),
+                Text(
+                  priceValue.toStringAsFixed(2),
+                  style: TextStyle(
+                    fontSize: 42,
+                    fontWeight: FontWeight.w900,
+                    color: isPopular ? Colors.white : AppTheme.primaryColor,
+                    height: 1,
+                  ),
+                ),
+                Padding(
+                  padding: const EdgeInsets.only(top: 8),
+                  child: Text(
+                    '/${isYearly ? (AppLocalizations.of(context)?.year ?? 'year') : (AppLocalizations.of(context)?.month ?? 'mo')}',
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.w600,
+                      color: isPopular ? Colors.white70 : const Color(0xFF637288),
+                    ),
+                  ),
+                ),
+              ],
+            ),
+            const SizedBox(height: 24),
+            SizedBox(
+              width: double.infinity,
+              child: ElevatedButton(
+                onPressed: processingPlanId == plan['id'] ? null : () => _purchasePlan(plan['id']),
+                style: ElevatedButton.styleFrom(
+                  backgroundColor: isPopular ? const Color(0xFF1E3A5F) : AppTheme.accentColor,
+                  foregroundColor: isPopular ? AppTheme.primaryColor : Colors.white,
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                  elevation: 0,
+                ),
+                child: processingPlanId == plan['id']
+                    ? SizedBox(
+                        height: 20,
+                        width: 20,
+                        child: CircularProgressIndicator(
+                          strokeWidth: 2,
+                          valueColor: AlwaysStoppedAnimation<Color>(
+                            isPopular ? AppTheme.primaryColor : Colors.white,
+                          ),
+                        ),
+                      )
+                    : Text(
+                        AppLocalizations.of(context)?.select ?? 'Select',
+                        style: const TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.bold,
+                          letterSpacing: 1,
+                        ),
                       ),
-                    )
-                  : Text(
-                      '${AppLocalizations.of(context)?.select ?? 'Select'} ${plan['name'] ?? 'Plan'}',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
+              ),
+            ),
+            const SizedBox(height: 12),
+            Center(
+              child: TextButton(
+                onPressed: () => context.push('/subscription-plan-details/${plan['id']}'),
+                child: Text(
+                  AppLocalizations.of(context)?.viewDetails ?? 'View Details',
+                  style: TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                    color: isPopular ? Colors.white70 : AppTheme.accentColor,
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(height: 24),
+            if (plan['features'] != null)
+              ...List<String>.from(plan['features']).map((feature) => Padding(
+                padding: const EdgeInsets.only(bottom: 12),
+                child: Row(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Icon(
+                      Icons.check_circle,
+                      color: isPopular ? const Color(0xFF1E3A5F) : const Color(0xFF10B981),
+                      size: 20,
                     ),
-            ),
-          ),
-          const SizedBox(height: 8),
-          TextButton(
-            onPressed: () => context.push('/subscription-plan-details/${plan['id']}'),
-            child: Text(
-              AppLocalizations.of(context)?.viewDetails ?? 'View Details',
-              style: const TextStyle(fontSize: 14, color: AppTheme.accentColor),
-            ),
-          ),
-          const SizedBox(height: 20),
-          if (plan['features'] != null)
-            ...List<String>.from(plan['features']).map((feature) => Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  Icon(
-                    Icons.check_circle,
-                    color: isPopular ? AppTheme.accentColor : const Color(0xFF10B981),
-                    size: 20,
-                  ),
-                  const SizedBox(width: 12),
-                  Expanded(
-                    child: TranslatedText(
-                      feature,
-                      style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
+                    const SizedBox(width: 12),
+                    Expanded(
+                      child: TranslatedText(
+                        feature,
+                        style: TextStyle(
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                          color: isPopular ? Colors.white : AppTheme.primaryColor,
+                        ),
+                      ),
                     ),
-                  ),
-                ],
-              ),
-            )),
-          if (plan['maxRequests'] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${plan['maxRequests']} ${AppLocalizations.of(context)?.requestsPerMonth ?? 'requests per month'}',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
-                  ),
-                ],
-              ),
-            ),
-          if (plan['supportLevel'] != null)
-            Padding(
-              padding: const EdgeInsets.only(bottom: 12),
-              child: Row(
-                children: [
-                  const Icon(Icons.check_circle, color: Color(0xFF10B981), size: 20),
-                  const SizedBox(width: 12),
-                  Text(
-                    '${plan['supportLevel']} ${AppLocalizations.of(context)?.support ?? 'support'}',
-                    style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
-                  ),
-                ],
-              ),
-            ),
-        ],
+                  ],
+                ),
+              )),
+          ],
+        ),
       ),
     );
   }

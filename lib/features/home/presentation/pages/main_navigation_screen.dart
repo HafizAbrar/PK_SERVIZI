@@ -50,7 +50,7 @@ class MainNavigationScreen extends ConsumerWidget {
         ),
         bottomNavigationBar: Container(
           decoration: BoxDecoration(
-            color: Colors.white,
+            color: AppTheme.primaryColor,
             boxShadow: [
               BoxShadow(
                 color: Colors.black.withValues(alpha: 0.1),
@@ -84,13 +84,13 @@ class MainNavigationScreen extends ConsumerWidget {
       child: Column(
         mainAxisSize: MainAxisSize.min,
         children: [
-          Icon(icon, color: isActive ? AppTheme.accentColor : Colors.grey, size: 24),
+          Icon(icon, color: isActive ? AppTheme.accentColor : Colors.white70, size: 24),
           const SizedBox(height: 4),
           Text(
             label,
             style: TextStyle(
               fontSize: 9,
-              color: isActive ? AppTheme.accentColor : Colors.grey,
+              color: isActive ? AppTheme.accentColor : Colors.white70,
               fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
             ),
           ),
@@ -111,16 +111,14 @@ class MainNavigationScreen extends ConsumerWidget {
           children: [
             DrawerHeader(
               decoration: const BoxDecoration(
-                gradient: LinearGradient(
-                  colors: [AppTheme.primaryColor, AppTheme.accentColor],
-                ),
+                color: Colors.white,
               ),
               child: profileAsync.when(
                 data: (profile) => Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
                       child: profile['profile']?['avatarUrl'] != null
                           ? Image.network(
                               profile['profile']['avatarUrl'],
@@ -147,7 +145,7 @@ class MainNavigationScreen extends ConsumerWidget {
                       style: const TextStyle(
                         fontSize: 18,
                         fontWeight: FontWeight.bold,
-                        color: Colors.white,
+                        color: AppTheme.primaryColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -156,7 +154,7 @@ class MainNavigationScreen extends ConsumerWidget {
                       profile['email'] ?? '',
                       style: const TextStyle(
                         fontSize: 12,
-                        color: AppTheme.goldLight,
+                        color: AppTheme.accentColor,
                       ),
                       maxLines: 1,
                       overflow: TextOverflow.ellipsis,
@@ -190,7 +188,7 @@ class MainNavigationScreen extends ConsumerWidget {
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
                     ClipRRect(
-                      borderRadius: BorderRadius.circular(12),
+                      borderRadius: BorderRadius.circular(30),
                       child: Image.asset(
                         'assets/logos/APP LOGO.jpeg',
                         width: 60,
@@ -244,11 +242,11 @@ class MainNavigationScreen extends ConsumerWidget {
     final isSelected = currentIndex == index;
     
     return ListTile(
-      leading: Icon(icon, color: isSelected ? AppTheme.goldLight : Colors.white70),
+      leading: Icon(icon, color: isSelected ? AppTheme.accentColor : Colors.white70),
       title: Text(
         title,
         style: TextStyle(
-          color: isSelected ? AppTheme.goldLight : Colors.white70,
+          color: isSelected ? AppTheme.accentColor : Colors.white70,
           fontWeight: isSelected ? FontWeight.bold : FontWeight.normal,
         ),
       ),

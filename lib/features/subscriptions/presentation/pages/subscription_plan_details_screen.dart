@@ -56,7 +56,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     final planAsync = ref.watch(planDetailsProvider(widget.planId));
     
     return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
+      backgroundColor: Colors.white,
       body: planAsync.when(
         data: (plan) => _buildContent(plan),
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.accentColor)),
@@ -70,13 +70,25 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     final priceValue = price is String ? double.tryParse(price) ?? 0.0 : (price?.toDouble() ?? 0.0);
     
     return Column(
+      mainAxisAlignment: MainAxisAlignment.start,
       children: [
         _buildAppBar(),
         Expanded(
           child: SingleChildScrollView(
             child: Column(
               children: [
-                _buildProfileHeader(plan),
+                const SizedBox(height: 30),
+                Center(
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(150),
+                    child: Image.asset(
+                      'assets/logos/APP LOGO.jpeg',
+                      width: 300,
+                      height: 100,
+                      fit: BoxFit.fitWidth,
+                    ),
+                  ),
+                ),
                 _buildBillingToggle(),
                 _buildPriceHeader(priceValue),
                 _buildFeatures(plan),
@@ -126,41 +138,6 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
     );
   }
 
-  Widget _buildProfileHeader(Map<String, dynamic> plan) {
-    return Padding(
-      padding: const EdgeInsets.all(20),
-      child: Column(
-        children: [
-          Container(
-            width: 128,
-            height: 128,
-            decoration: BoxDecoration(
-              color: AppTheme.primaryColor,
-              borderRadius: BorderRadius.circular(16),
-              border: Border.all(color: AppTheme.accentColor, width: 3),
-            ),
-            child: const Icon(
-              Icons.workspace_premium,
-              size: 64,
-              color: AppTheme.accentColor,
-            ),
-          ),
-          const SizedBox(height: 16),
-          TranslatedText(
-            plan['name'] ?? 'Professional',
-            style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-            textAlign: TextAlign.center,
-          ),
-          const SizedBox(height: 4),
-          TranslatedText(
-            plan['description'] ?? '',
-            style: TextStyle(fontSize: 16, color: Colors.grey[600]),
-            textAlign: TextAlign.center,
-          ),
-        ],
-      ),
-    );
-  }
 
   Widget _buildBillingToggle() {
     return Container(
@@ -227,7 +204,8 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
 
   Widget _buildPriceHeader(double price) {
     return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
+      width: double.infinity,
+      margin: const EdgeInsets.symmetric(vertical: 16),
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
         gradient: const LinearGradient(
@@ -235,10 +213,10 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
           begin: Alignment.topLeft,
           end: Alignment.bottomRight,
         ),
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
+        borderRadius: BorderRadius.circular(8),
+        boxShadow: const [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.1),
+            color: Colors.black12,
             blurRadius: 12,
           ),
         ],
