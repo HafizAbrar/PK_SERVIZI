@@ -78,10 +78,6 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                     fit: BoxFit.fitWidth,
                   ),
                 ),
-                const SizedBox(height: 24),
-                AppTheme.buildPKBranding(
-                  excellenceText: l10n?.excellenceInFiscalCare,
-                ),
               ],
             ),
           ),

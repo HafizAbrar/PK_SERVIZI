@@ -111,13 +111,14 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
             ),
           ),
           const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(12),
+            child: Image.asset(
+              'assets/logos/APP LOGO.jpeg',
+              width: 80,
+              height: 35,
+              fit: BoxFit.fitWidth,
             ),
-            child: const Icon(Icons.category, color: Colors.white, size: 24),
           ),
         ],
       ),

@@ -12,8 +12,10 @@ class ApiClient {
   static const _storage = FlutterSecureStorage();
   final Map<String, DateTime> _lastRequestTimes = {};
   static const _minRequestInterval = Duration(milliseconds: 500);
+  String? _locale;
 
   Dio get dio => _dio;
+  String? get locale => _locale;
 
   ApiClient() {
     _dio = Dio(BaseOptions(
@@ -33,6 +35,9 @@ class ApiClient {
         if (token != null) {
           options.headers['Authorization'] = 'Bearer $token';
         }
+        if (_locale != null) {
+          options.headers['Accept-Language'] = _locale;
+        }
         handler.next(options);
       },
       onError: (error, handler) async {
@@ -44,6 +49,16 @@ class ApiClient {
         handler.next(error);
       },
     ));
+    _loadLocale();
+  }
+
+  Future<void> _loadLocale() async {
+    _locale = await _storage.read(key: 'locale') ?? 'en';
+  }
+
+  Future<void> setLocale(String locale) async {
+    _locale = locale;
+    await _storage.write(key: 'locale', value: locale);
   }
 
   Future<void> _enforceRateLimit(String path) async {

@@ -6,6 +6,7 @@ class ApiService {
   late final Dio _dio;
   static const String baseUrl = 'https://api.pkservizi.com/api/v1';
   static const _storage = FlutterSecureStorage();
+  String? _locale;
   
   ApiService() {
     _dio = Dio(BaseOptions(
@@ -25,6 +26,10 @@ class ApiService {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
+          if (_locale == null) {
+            _locale = await _storage.read(key: 'locale') ?? 'en';
+          }
+          options.headers['Accept-Language'] = _locale;
           if (kDebugMode) {
             print('REQUEST: ${options.method} ${options.path}');
           }

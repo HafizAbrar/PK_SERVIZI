@@ -11,7 +11,10 @@ import '../../../../core/theme/app_theme.dart';
 final serviceFormProvider = FutureProvider.family<service_models.FormSchema, String>((ref, serviceId) async {
   debugPrint('Loading form schema for serviceId: $serviceId');
   final apiClient = ref.read(apiClientProvider);
-  final response = await apiClient.get('/api/v1/services/$serviceId/schema');
+  final response = await apiClient.get(
+    '/api/v1/services/$serviceId/schema',
+    queryParameters: {'locale': apiClient.locale},
+  );
   debugPrint('Form schema response: ${response.data}');
   return service_models.FormSchema.fromJson(response.data['data']);
 });

@@ -24,7 +24,11 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       return response.data;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 400) {
+      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout. Please check your internet connection and try again.');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection. Please check your network and try again.');
+      } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['message'] ?? 'Registration failed';
         if (message.contains('Operation could not be completed')) {
           throw ValidationException('User already exists with this email');
@@ -33,7 +37,7 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       } else if (e.response?.statusCode == 409) {
         throw ValidationException('User already exists');
       }
-      throw NetworkException('Registration failed');
+      throw NetworkException('Registration failed. Please try again.');
     }
   }
 
@@ -46,13 +50,17 @@ class AuthRemoteDataSourceImpl implements AuthRemoteDataSource {
       );
       return response.data;
     } on DioException catch (e) {
-      if (e.response?.statusCode == 401) {
+      if (e.type == DioExceptionType.connectionTimeout || e.type == DioExceptionType.receiveTimeout) {
+        throw NetworkException('Connection timeout. Please check your internet connection and try again.');
+      } else if (e.type == DioExceptionType.connectionError) {
+        throw NetworkException('No internet connection. Please check your network and try again.');
+      } else if (e.response?.statusCode == 401) {
         throw ValidationException('Incorrect email or Password!');
       } else if (e.response?.statusCode == 400) {
         final message = e.response?.data['message'] ?? 'Login failed';
         throw ValidationException(message);
       }
-      throw NetworkException('Login failed');
+      throw NetworkException('Login failed. Please try again.');
     }
   }
 

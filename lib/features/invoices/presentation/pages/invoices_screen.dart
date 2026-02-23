@@ -396,29 +396,25 @@ class _InvoicesScreenState extends ConsumerState<InvoicesScreen> {
 
   Future<void> _handlePaymentAction(BuildContext context, String paymentId, String action) async {
     try {
-      if (action == 'receipt') {
-        final apiClient = ref.read(apiClientProvider);
-        final response = await apiClient.dio.get(
-          '/api/v1/payments/$paymentId/receipt',
-          options: Options(responseType: ResponseType.bytes),
+      final apiClient = ref.read(apiClientProvider);
+      final endpoint = action == 'receipt' ? '/api/v1/payments/$paymentId/receipt' : '/api/v1/payments/$paymentId/invoice';
+      
+      final response = await apiClient.dio.get(
+        endpoint,
+        options: Options(responseType: ResponseType.bytes),
+      );
+      
+      final directory = await getApplicationDocumentsDirectory();
+      final fileName = action == 'receipt' ? 'receipt_$paymentId.pdf' : 'invoice_$paymentId.pdf';
+      final file = File('${directory.path}/$fileName');
+      await file.writeAsBytes(response.data);
+      
+      final result = await OpenFile.open(file.path);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message)),
         );
-        
-        final directory = await getApplicationDocumentsDirectory();
-        final file = File('${directory.path}/receipt_$paymentId.pdf');
-        await file.writeAsBytes(response.data);
-        
-        final result = await OpenFile.open(file.path);
-        
-        if (context.mounted) {
-          ScaffoldMessenger.of(context).showSnackBar(
-            SnackBar(content: Text(result.message)),
-          );
-        }
-      } else if (action == 'invoice') {
-        final dataSource = ref.read(invoiceDataSourceProvider);
-        final result = await dataSource.generatePaymentInvoice(paymentId);
-        final url = 'https://api.pkservizi.com${result['invoiceUrl']}';
-        await launchUrl(Uri.parse(url), mode: LaunchMode.externalApplication);
       }
     } catch (e) {
       if (context.mounted) {

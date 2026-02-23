@@ -2,8 +2,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:intl/intl.dart';
-import 'package:url_launcher/url_launcher.dart';
+import 'dart:io';
+import 'package:path_provider/path_provider.dart';
+import 'package:dio/dio.dart';
+import 'package:open_file/open_file.dart';
 import '../../../../generated/l10n/app_localizations.dart';
+import '../../../../core/network/api_client.dart';
 import '../../data/invoice_data_source.dart';
 import '../../data/invoice_model.dart';
 
@@ -259,11 +263,22 @@ class InvoiceDetailScreen extends ConsumerWidget {
 
   Future<void> _downloadPdf(BuildContext context, WidgetRef ref) async {
     try {
-      final dataSource = ref.read(invoiceDataSourceProvider);
-      final result = await dataSource.downloadInvoice(invoiceId);
-      final pdfUrl = 'https://api.pkservizi.com${result['pdfUrl']}';
-      if (await canLaunchUrl(Uri.parse(pdfUrl))) {
-        await launchUrl(Uri.parse(pdfUrl), mode: LaunchMode.externalApplication);
+      final apiClient = ref.read(apiClientProvider);
+      final response = await apiClient.dio.get(
+        '/api/v1/invoices/$invoiceId/download',
+        options: Options(responseType: ResponseType.bytes),
+      );
+      
+      final directory = await getApplicationDocumentsDirectory();
+      final file = File('${directory.path}/invoice_$invoiceId.pdf');
+      await file.writeAsBytes(response.data);
+      
+      final result = await OpenFile.open(file.path);
+      
+      if (context.mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(content: Text(result.message)),
+        );
       }
     } catch (e) {
       if (context.mounted) {
