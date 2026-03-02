@@ -1,5 +1,5 @@
 {
-  "appTitle": "PK Servizi",
+  "appTitle": "tuoCAF",
   "home": "Home",
   "services": "Services",
   "requests": "Requests",
@@ -28,7 +28,7 @@
   "enterValidEmail": "Enter a valid email",
   "accountCreated": "Account Created",
   "createAccount": "Create Account",
-  "welcomeToPKServizi": "Welcome to PK Servizi",
+  "welcomeToPKServizi": "Welcome to tuoCAF",
   "createAccountToContinue": "Create an account to continue",
   "fullName": "Full Name",
   "phone": "Phone",

@@ -186,7 +186,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                     ),
                   ),
                   const Text(
-                    'PK SERVIZI',
+                    'tuoCAF',
                     style: TextStyle(
                       fontSize: 18,
                       fontWeight: FontWeight.bold,
@@ -717,10 +717,10 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               ClipRRect(
                 borderRadius: BorderRadius.circular(28),
                 child: Image.asset(
-                  'assets/logos/APP LOGO.jpeg',
+                  'assets/logos/TuoCAF logo.png',
                   width: 70,
                   height: 30,
-                  fit: BoxFit.fitWidth,
+                  fit: BoxFit.contain,
                 ),
               ),
               const SizedBox(width: 16),

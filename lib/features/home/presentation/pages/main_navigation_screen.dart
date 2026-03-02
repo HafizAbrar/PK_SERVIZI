@@ -126,14 +126,14 @@ class MainNavigationScreen extends ConsumerWidget {
                               height: 60,
                               fit: BoxFit.cover,
                               errorBuilder: (context, error, stackTrace) => Image.asset(
-                                'assets/logos/APP LOGO.jpeg',
+                                'assets/logos/TuoCAF logo.png',
                                 width: 60,
                                 height: 60,
                                 fit: BoxFit.cover,
                               ),
                             )
                           : Image.asset(
-                              'assets/logos/APP LOGO.jpeg',
+                              'assets/logos/TuoCAF logo.png',
                               width: 60,
                               height: 60,
                               fit: BoxFit.cover,
@@ -167,7 +167,7 @@ class MainNavigationScreen extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(12),
                       child: Image.asset(
-                        'assets/logos/APP LOGO.jpeg',
+                        'assets/logos/TuoCAF logo.png',
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,
@@ -190,7 +190,7 @@ class MainNavigationScreen extends ConsumerWidget {
                     ClipRRect(
                       borderRadius: BorderRadius.circular(30),
                       child: Image.asset(
-                        'assets/logos/APP LOGO.jpeg',
+                        'assets/logos/TuoCAF logo.png',
                         width: 60,
                         height: 60,
                         fit: BoxFit.cover,

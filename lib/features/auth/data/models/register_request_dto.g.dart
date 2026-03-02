@@ -6,12 +6,15 @@ part of 'register_request_dto.dart';
 // JsonSerializableGenerator
 // **************************************************************************
 
+
+import 'package:tuoCAF/features/auth/data/models/register_request_dto.dart';
+
 RegisterRequestDto _$RegisterRequestDtoFromJson(Map<String, dynamic> json) =>
     RegisterRequestDto(
       email: json['email'] as String,
       password: json['password'] as String,
       fullName: json['fullName'] as String,
-      phone: json['phone'] as String,
+      phone: json['phone'] as String?,
     );
 
 Map<String, dynamic> _$RegisterRequestDtoToJson(RegisterRequestDto instance) =>

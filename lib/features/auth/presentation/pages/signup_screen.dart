@@ -16,8 +16,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
   final _formKey = GlobalKey<FormState>();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
-  final _fullNameController = TextEditingController();
-  final _phoneController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _surnameController = TextEditingController();
 
   bool isButtonEnabled = false;
   bool _obscurePassword = true;
@@ -32,16 +32,16 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     super.initState();
     _emailController.addListener(_validate);
     _passwordController.addListener(_validate);
-    _fullNameController.addListener(_validate);
-    _phoneController.addListener(_validate);
+    _firstNameController.addListener(_validate);
+    _surnameController.addListener(_validate);
   }
 
   @override
   void dispose() {
     _emailController.dispose();
     _passwordController.dispose();
-    _fullNameController.dispose();
-    _phoneController.dispose();
+    _firstNameController.dispose();
+    _surnameController.dispose();
     super.dispose();
   }
 
@@ -56,8 +56,8 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
       
       isButtonEnabled = _emailController.text.isNotEmpty &&
                        _passwordController.text.isNotEmpty &&
-                       _fullNameController.text.isNotEmpty &&
-                       _phoneController.text.isNotEmpty &&
+                       _firstNameController.text.isNotEmpty &&
+                       _surnameController.text.isNotEmpty &&
                        _hasMinLength &&
                        _hasUppercase &&
                        _hasLowercase &&
@@ -72,8 +72,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
     await ref.read(authStateProvider.notifier).register(
       email: _emailController.text,
       password: _passwordController.text,
-      fullName: _fullNameController.text,
-      phone: _phoneController.text,
+      fullName: '${_firstNameController.text} ${_surnameController.text}',
     );
   }
 
@@ -140,9 +139,9 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(150),
                     child: Image.asset(
-                      'assets/logos/APP LOGO.jpeg',
-                      width: 300,
-                      height: 100,
+                      'assets/logos/TuoCAF logo.png',
+                      height: 80,
+                      width: 500,
                       fit: BoxFit.fitWidth,
                     ),
                   ),
@@ -150,16 +149,15 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
 
                 const SizedBox(height: AppTheme.spacingXLarge),
                 _buildField(
-                  controller: _fullNameController,
-                  label: l10n.fullName,
+                  controller: _firstNameController,
+                  label: 'First Name',
                   icon: Icons.person_outline,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 _buildField(
-                  controller: _phoneController,
-                  label: l10n.phone,
-                  icon: Icons.phone_outlined,
-                  keyboard: TextInputType.phone,
+                  controller: _surnameController,
+                  label: 'Surname',
+                  icon: Icons.person_outline,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 _buildField(

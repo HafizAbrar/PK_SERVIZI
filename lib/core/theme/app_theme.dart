@@ -180,7 +180,7 @@ class AppTheme {
     return Column(
       children: [
         const Text(
-          'PK SERVIZI',
+          'tuoCAF',
           style: TextStyle(
             fontSize: 24,
             fontWeight: FontWeight.w600,

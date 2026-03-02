@@ -152,7 +152,7 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                   mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Text(
-                      'PK SERVIZI',
+                      'tuoCAF',
                       style: TextStyle(
                         fontSize: 24,
                         fontWeight: FontWeight.w600,

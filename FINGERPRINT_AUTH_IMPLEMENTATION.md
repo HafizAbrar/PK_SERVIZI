@@ -1,7 +1,7 @@
 # Fingerprint Authentication Implementation
 
 ## Overview
-This implementation adds fingerprint/biometric authentication to the PK Servizi app. The app now:
+This implementation adds fingerprint/biometric authentication to the tuoCAF app. The app now:
 1. Always shows the sign-in screen after the splash screen
 2. Automatically triggers fingerprint authentication for registered users
 3. Allows users to authenticate using their saved credentials via biometric authentication

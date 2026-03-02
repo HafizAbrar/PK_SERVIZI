@@ -34,7 +34,7 @@ class MyApp extends ConsumerWidget {
     final locale = ref.watch(languageProvider);
 
     return MaterialApp.router(
-      title: 'PK Servizi',
+      title: 'tuoCAF',
       routerConfig: AppRouter.router,
       locale: locale,
       theme: AppTheme.lightTheme,

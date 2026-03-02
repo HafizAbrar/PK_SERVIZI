@@ -129,7 +129,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
                   errorBuilder: (context, error, stackTrace) {
                     return ClipOval(
                       child: Image.asset(
-                        'assets/logos/APP LOGO.jpeg',
+                        'assets/logos/TuoCAF logo.png',
                         width: 100,
                         height: 100,
                         fit: BoxFit.cover,
@@ -144,7 +144,7 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
               )
             : ClipOval(
                 child: Image.asset(
-                  'assets/logos/APP LOGO.jpeg',
+                  'assets/logos/TuoCAF logo.png',
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,

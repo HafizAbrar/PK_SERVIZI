@@ -100,7 +100,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             child: ClipRRect(
               borderRadius: BorderRadius.circular(20),
               child: Image.asset(
-                'assets/logos/APP LOGO.jpeg',
+                'assets/logos/TuoCAF logo.png',
                 width: 70,
                 height: 30,
                 fit: BoxFit.fitWidth,

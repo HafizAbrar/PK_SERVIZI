@@ -1,4 +1,4 @@
-# PK Servizi - Flutter Backend Integration
+# tuoCAF - Flutter Backend Integration
 
 Complete boilerplate for connecting Flutter with backend services.
 

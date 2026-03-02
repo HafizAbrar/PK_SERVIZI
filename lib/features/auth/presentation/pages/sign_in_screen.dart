@@ -165,10 +165,9 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(150),
                     child: Image.asset(
-                      'assets/logos/APP LOGO.jpeg',
-                      height: 100,
-                      width: 300,
-                      //color: Colors.black,
+                      'assets/logos/TuoCAF logo.png',
+                      height: 80,
+                      width: 500,
                       fit: BoxFit.fitWidth,
                     ),
                   ),

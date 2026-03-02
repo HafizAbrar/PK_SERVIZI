@@ -82,7 +82,7 @@ class _SubscriptionPlanDetailsScreenState extends ConsumerState<SubscriptionPlan
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(150),
                     child: Image.asset(
-                      'assets/logos/APP LOGO.jpeg',
+                      'assets/logos/TuoCAF logo.png',
                       width: 300,
                       height: 100,
                       fit: BoxFit.fitWidth,

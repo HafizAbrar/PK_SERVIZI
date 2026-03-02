@@ -286,7 +286,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                   child: ClipRRect(
                     borderRadius: BorderRadius.circular(16),
                     child: Image.asset(
-                      'assets/logos/APP LOGO.jpeg',
+                      'assets/logos/TuoCAF logo.png',
                       width: 70,
                       height: 30,
                       fit: BoxFit.fitWidth,

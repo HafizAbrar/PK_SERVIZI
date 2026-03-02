@@ -1,4 +1,4 @@
-name: pk_servizi
+name: tuoCAF
 description: "A new Flutter project."
 publish_to: 'none'
 
@@ -56,6 +56,7 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logos/APP LOGO.jpeg"
-  adaptive_icon_background: "#FF9800"
-  adaptive_icon_foreground: "assets/logos/APP LOGO.jpeg"
+  image_path: "assets/logos/TuoCAF logo.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logos/TuoCAF logo.png"
+  remove_alpha_ios: true

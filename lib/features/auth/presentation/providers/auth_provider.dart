@@ -39,7 +39,6 @@ class AuthNotifier extends StateNotifier<AuthState> {
     required String email,
     required String password,
     required String fullName,
-    required String phone,
   }) async {
     state = const AuthStateLoading();
 
@@ -47,7 +46,7 @@ class AuthNotifier extends StateNotifier<AuthState> {
       email: email,
       password: password,
       fullName: fullName,
-      phone: phone,
+      phone: '',
     );
 
     switch (result) {

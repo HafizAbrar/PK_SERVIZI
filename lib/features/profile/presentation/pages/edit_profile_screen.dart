@@ -202,7 +202,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 child: _selectedImage == null 
                                     ? ClipOval(
                                         child: Image.asset(
-                                          'assets/logos/APP LOGO.jpeg',
+                                          'assets/logos/TuoCAF logo.png',
                                           width: 120,
                                           height: 120,
                                           fit: BoxFit.cover,

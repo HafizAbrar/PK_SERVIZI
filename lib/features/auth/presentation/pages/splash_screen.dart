@@ -72,10 +72,19 @@ class _SplashScreenState extends ConsumerState<SplashScreen> with SingleTickerPr
                 ClipRRect(
                   borderRadius: BorderRadius.circular(1500),
                   child: Image.asset(
-                    'assets/logos/APP LOGO.jpeg',
-                    width: 300,
-                    height: 100,
+                    'assets/logos/TuoCAF logo.png',
+                    width: 600,
+                    height: 80,
                     fit: BoxFit.fitWidth,
+                  ),
+                ),
+               // const SizedBox(height: 16),
+                const Text(
+                  '-----Excellence in Fiscal care-----',
+                  style: TextStyle(
+                    fontSize: 14,
+                    color: Color(0xFF1E3A5F),
+                    fontWeight: FontWeight.w500,
                   ),
                 ),
               ],
