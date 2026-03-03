@@ -38,7 +38,7 @@
   "failed": "Fallito",
   "recoveryAccess": "Recupero Accesso",
   "enterEmailToReset": "Inserisci la tua email per reimpostare la password",
-  "institutionalEmail": "Email Istituzionale",
+  "institutionalEmail": "Email Valida",
   "sendResetLink": "Invia Link di Reset",
   "passwordResetSuccessfully": "Password reimpostata con successo",
   "failedToResetPassword": "Impossibile reimpostare la password",
@@ -323,5 +323,7 @@
   "transactionId": "ID Transazione",
   "downloadPdfReceipt": "Scarica Ricevuta PDF",
   "transactionCard": "Carta Transazione",
-  "invalidDataPleasecheckYourInputs": "Dati non validi. Controlla i tuoi dati e riprova."
+  "invalidDataPleasecheckYourInputs": "Dati non validi. Controlla i tuoi dati e riprova.",
+  "emailNotFound": "Email non trovata. Controlla il tuo indirizzo email e riprova.",
+  "accessGranted": "Accesso consentito"
 }

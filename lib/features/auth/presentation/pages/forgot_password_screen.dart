@@ -34,14 +34,17 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
       
       if (mounted && result['token'] != null) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.passwordResetTokenSent)),
+          SnackBar(content: Text(l10n.accessGranted)),
         );
         context.go('/reset-password?token=${result['token']}');
       }
     } catch (e) {
       if (mounted) {
+        final errorMessage = e.toString().contains('404') || e.toString().toLowerCase().contains('not found')
+            ? l10n.emailNotFound
+            : '${l10n.failed}: ${e.toString().replaceAll('Exception: ', '')}';
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.failed}: ${e.toString().replaceAll('Exception: ', '')}')),
+          SnackBar(content: Text(errorMessage)),
         );
       }
     } finally {
@@ -79,7 +82,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
             child: Column(
               crossAxisAlignment: CrossAxisAlignment.start,
               children: [
-                const SizedBox(height: AppTheme.spacingSmall),
+                const SizedBox(height:40),
                 Text(
                   l10n.recoveryAccess,
                   style: TextStyle(

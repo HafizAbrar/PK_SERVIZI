@@ -323,5 +323,7 @@
   "transactionId": "Transaction ID",
   "downloadPdfReceipt": "Download PDF Receipt",
   "transactionCard": "Transaction Card",
-  "invalidDataPleasecheckYourInputs": "Invalid data. Please check your inputs and try again."
+  "invalidDataPleasecheckYourInputs": "Invalid data. Please check your inputs and try again.",
+  "emailNotFound": "Email not found. Please check your email address and try again.",
+  "accessGranted": "Access granted"
 }

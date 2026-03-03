@@ -38,7 +38,7 @@
   "failed": "Échoué",
   "recoveryAccess": "Récupération d'Accès",
   "enterEmailToReset": "Entrez votre email pour réinitialiser le mot de passe",
-  "institutionalEmail": "Email Institutionnel",
+  "institutionalEmail": "Email Valide",
   "sendResetLink": "Envoyer le Lien de Réinitialisation",
   "passwordResetSuccessfully": "Mot de passe réinitialisé avec succès",
   "failedToResetPassword": "Échec de la réinitialisation du mot de passe",
@@ -323,5 +323,7 @@
   "transactionId": "ID de Transaction",
   "downloadPdfReceipt": "Télécharger le Reçu PDF",
   "transactionCard": "Carte de Transaction",
-  "invalidDataPleasecheckYourInputs": "Données invalides. Veuillez vérifier vos entrées et réessayer."
+  "invalidDataPleasecheckYourInputs": "Données invalides. Veuillez vérifier vos entrées et réessayer.",
+  "emailNotFound": "Email introuvable. Veuillez vérifier votre adresse email et réessayer.",
+  "accessGranted": "Accès accordé"
 }

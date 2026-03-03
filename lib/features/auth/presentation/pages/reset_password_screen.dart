@@ -65,12 +65,17 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
     return Scaffold(
       backgroundColor: AppTheme.primaryColor,
       appBar: AppBar(
+        leading: IconButton(
+          icon: const Icon(Icons.arrow_back, color: Colors.white),
+          onPressed: () => context.go('/login'),
+        ),
         backgroundColor: Colors.transparent,
         elevation: 0,
         automaticallyImplyLeading: false,
         title: Text(l10n.resetPassword, style: const TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
       ),
       body: Container(
+        height: double.infinity,
         decoration: AppTheme.cardDecoration.copyWith(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
@@ -97,89 +102,15 @@ class _ResetPasswordScreenState extends ConsumerState<ResetPasswordScreen> {
                 ),
                 const SizedBox(height: AppTheme.spacingXLarge),
                 Center(
-                  child: Container(
-                    width: 96,
-                    height: 96,
-                    decoration: BoxDecoration(
-                      gradient: const LinearGradient(
-                        begin: Alignment.topLeft,
-                        end: Alignment.bottomRight,
-                        colors: [Color(0xFF0A1D37), Color(0xFF1E3A5F)],
-                      ),
-                      borderRadius: BorderRadius.circular(20),
-                      boxShadow: [
-                        BoxShadow(
-                          color: Colors.black.withValues(alpha: 0.3),
-                          blurRadius: 20,
-                          offset: const Offset(0, 10),
-                        ),
-                      ],
-                    ),
-                    child: Stack(
-                      children: [
-                        Container(
-                          decoration: BoxDecoration(
-                            gradient: LinearGradient(
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                              colors: [Colors.white.withValues(alpha: 0.1), Colors.transparent],
-                            ),
-                            borderRadius: BorderRadius.circular(20),
-                          ),
-                        ),
-                        Center(
-                          child: ShaderMask(
-                            shaderCallback: (bounds) => const LinearGradient(
-                              colors: [Color(0xFFD4AF37), Color(0xFF996515)],
-                            ).createShader(bounds),
-                            child: const Text(
-                              'PK',
-                              style: TextStyle(
-                                fontSize: 36,
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
-                                letterSpacing: -2,
-                              ),
-                            ),
-                          ),
-                        ),
-                      ],
+                  child: ClipRRect(
+                    borderRadius: BorderRadius.circular(150),
+                    child: Image.asset(
+                      'assets/logos/TuoCAF logo.png',
+                      height: 80,
+                      width: 500,
+                      fit: BoxFit.fitWidth,
                     ),
                   ),
-                ),
-                const SizedBox(height: 20),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(
-                      'tuoCAF',
-                      style: TextStyle(
-                        fontSize: 24,
-                        fontWeight: FontWeight.w600,
-                        letterSpacing: 6,
-                        color: Color(0xFF0A1D37),
-                      ),
-                    ),
-                  ],
-                ),
-                const SizedBox(height: 8),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
-                    const SizedBox(width: 12),
-                    const Text(
-                      'EXCELLENCE IN FISCAL CARE',
-                      style: TextStyle(
-                        fontSize: 9,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 3,
-                        color: Color(0xFF996515),
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Container(height: 1, width: 24, color: const Color(0xFFD4AF37).withValues(alpha: 0.5)),
-                  ],
                 ),
                 const SizedBox(height: AppTheme.spacingXLarge),
                 TextFormField(
