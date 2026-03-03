@@ -108,13 +108,14 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
             ),
           ),
           const Spacer(),
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(12),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.asset(
+              'assets/logos/outer logo.png',
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
             ),
-            child: const Icon(Icons.notifications, color: Colors.white, size: 24),
           ),
         ],
       ),
@@ -261,111 +262,120 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
       margin: const EdgeInsets.only(bottom: 16),
       decoration: BoxDecoration(
         color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
+        borderRadius: BorderRadius.circular(16),
         boxShadow: [
           BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+            color: Colors.black.withValues(alpha: 0.08),
+            blurRadius: 12,
+            offset: const Offset(0, 2),
           ),
         ],
       ),
       child: Padding(
         padding: const EdgeInsets.all(20),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             Row(
+              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 56,
                   height: 56,
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor,
-                    borderRadius: BorderRadius.circular(16),
+                    color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                    borderRadius: BorderRadius.circular(12),
                   ),
                   child: ClipRRect(
-                    borderRadius: BorderRadius.circular(16),
+                    borderRadius: BorderRadius.circular(12),
                     child: Image.asset(
-                      'assets/logos/TuoCAF logo.png',
-                      width: 70,
-                      height: 30,
-                      fit: BoxFit.fitWidth,
+                      'assets/logos/outer logo.png',
+                      fit: BoxFit.cover,
                     ),
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      TranslatedText(
-                        service['name'] ?? 'Service',
-                        style: const TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.bold,
-                          color: AppTheme.primaryColor,
-                        ),
-                      ),
-                      const SizedBox(height: 4),
-                      Text(
-                        service['price'] != null ? '€${service['price']}' : '',
-                        style: TextStyle(
-                          fontSize: 16,
-                          fontWeight: FontWeight.w600,
-                          color: AppTheme.accentColor,
-                        ),
-                      ),
-                    ],
+                  child: TranslatedText(
+                    service['name'] ?? 'Service',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                      height: 1.3,
+                    ),
+                    maxLines: 2,
+                    overflow: TextOverflow.ellipsis,
                   ),
                 ),
               ],
             ),
             const SizedBox(height: 16),
-            TranslatedText(
-              service['description'] ?? 'Professional service with expert guidance',
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-                height: 1.5,
-              ),
+            Container(
+              height: 1,
+              color: Colors.grey[200],
             ),
-            const SizedBox(height: 20),
+            const SizedBox(height: 16),
             Row(
+              mainAxisAlignment: MainAxisAlignment.spaceAround,
               children: [
-                Flexible(
-                  child: TextButton(
-                    onPressed: () => context.push('/services/${service['id']}'),
-                    child: Text(
-                      l10n.viewDetails,
-                      style: TextStyle(
-                        fontSize: 14,
-                        fontWeight: FontWeight.w600,
-                        color: AppTheme.accentColor,
-                      ),
-                    ),
+                Icon(
+                  Icons.euro,
+                  size: 20,
+                  color: AppTheme.accentColor,
+                ),
+                const SizedBox(width: 4),
+                Text(
+                  service['basePrice'] ?? '0.00',
+                  style: const TextStyle(
+                    fontSize: 22,
+                    fontWeight: FontWeight.bold,
+                    color: AppTheme.accentColor,
                   ),
                 ),
-                const SizedBox(width: 8),
-                Flexible(
-                  child: ElevatedButton(
-                    onPressed: () => _initiateServiceRequest(context, service['id']),
-                    style: ElevatedButton.styleFrom(
-                      backgroundColor: AppTheme.accentColor,
-                      foregroundColor: Colors.white,
-                      shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                      padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
-                      elevation: 0,
-                    ),
-                    child: Text(
-                      l10n.startService.toUpperCase(),
-                      style: const TextStyle(
-                        fontSize: 12,
-                        fontWeight: FontWeight.bold,
-                        letterSpacing: 1,
+                const Spacer(),
+                Column(
+                  crossAxisAlignment: CrossAxisAlignment.end,
+                  children: [
+                    ElevatedButton(
+                      onPressed: () => _initiateServiceRequest(context, service['id']),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.accentColor,
+                        foregroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                        elevation: 0,
+                        minimumSize: const Size(120, 36),
                       ),
-                      textAlign: TextAlign.center,
+                      child: Text(
+                        l10n.startService,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
                     ),
-                  ),
+                    const SizedBox(height: 8),
+                    TextButton.icon(
+                      onPressed: () => context.push('/services/${service['id']}'),
+                      icon: const Icon(
+                        Icons.info_outline,
+                        size: 16,
+                      ),
+                      label: Text(
+                        l10n.viewDetails,
+                        style: const TextStyle(
+                          fontSize: 13,
+                          fontWeight: FontWeight.w600,
+                        ),
+                      ),
+                      style: TextButton.styleFrom(
+                        foregroundColor: AppTheme.accentColor,
+                        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                        minimumSize: Size.zero,
+                        tapTargetSize: MaterialTapTargetSize.shrinkWrap,
+                      ),
+                    ),
+                  ],
                 ),
               ],
             ),

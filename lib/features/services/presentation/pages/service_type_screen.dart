@@ -103,7 +103,7 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
       child: Row(
         children: [
           Text(
-            AppLocalizations.of(context)?.services ?? 'Services',
+            AppLocalizations.of(context)?.services ?? 'Service types',
             style: const TextStyle(
               fontSize: 24,
               fontWeight: FontWeight.bold,
@@ -112,12 +112,12 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
           ),
           const Spacer(),
           ClipRRect(
-            borderRadius: BorderRadius.circular(12),
+            borderRadius: BorderRadius.circular(50),
             child: Image.asset(
-              'assets/logos/TuoCAF logo.png',
-              width: 80,
-              height: 35,
-              fit: BoxFit.fitWidth,
+              'assets/logos/outer logo.png',
+              width: 50,
+              height: 50,
+              fit: BoxFit.cover,
             ),
           ),
         ],
@@ -212,7 +212,7 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: TranslatedText(
+                  child: Text(
                     serviceType.name,
                     style: const TextStyle(
                       fontSize: 18,
