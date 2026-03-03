@@ -38,7 +38,7 @@
   "failed": "Failed",
   "recoveryAccess": "Recovery Access",
   "enterEmailToReset": "Enter your email to reset password",
-  "institutionalEmail": "Institutional Email",
+  "institutionalEmail": "Valid Email",
   "sendResetLink": "Send Reset Link",
   "passwordResetSuccessfully": "Password reset successfully",
   "failedToResetPassword": "Failed to reset password",

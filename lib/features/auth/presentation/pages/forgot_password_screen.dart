@@ -68,6 +68,7 @@ class _ForgotPasswordScreenState extends ConsumerState<ForgotPasswordScreen> {
         ),
       ),
       body: Container(
+        height: double.infinity,
         decoration: AppTheme.cardDecoration.copyWith(
           borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
         ),
