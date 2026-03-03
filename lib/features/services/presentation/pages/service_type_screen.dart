@@ -126,7 +126,7 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
   }
 
   Widget _buildServiceTypesList(BuildContext context, List<ServiceType> serviceTypes) {
-    final locale = Localizations.localeOf(context).languageCode;
+    final locale = 'it';
     
     final filteredTypes = serviceTypes.where((type) {
       if (_searchQuery.isEmpty) return true;
@@ -204,62 +204,21 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
                 ClipRRect(
                   borderRadius: BorderRadius.circular(28),
                   child: Image.asset(
-                    'assets/logos/TuoCAF logo.png',
-                    width: 70,
-                    height: 30,
-                    fit: BoxFit.fitWidth,
+                    'assets/logos/outer logo.png',
+                    width: 50,
+                    height: 60,
+                    fit: BoxFit.cover,
                   ),
                 ),
                 const SizedBox(width: 16),
                 Expanded(
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    children: [
-                      Row(
-                        children: [
-                          Expanded(
-                            child: TranslatedText(
-                              serviceType.name,
-                              style: const TextStyle(
-                                fontSize: 18,
-                                fontWeight: FontWeight.bold,
-                                color: AppTheme.primaryColor,
-                              ),
-                            ),
-                          ),
-                          Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                            decoration: BoxDecoration(
-                              color: serviceType.isActive
-                                  ? AppTheme.successColor.withValues(alpha: 0.1)
-                                  : Colors.grey[200],
-                              borderRadius: BorderRadius.circular(8),
-                            ),
-                            child: Text(
-                              serviceType.isActive
-                                  ? (AppLocalizations.of(context)?.active ?? 'Active')
-                                  : 'Inactive',
-                              style: TextStyle(
-                                fontSize: 10,
-                                fontWeight: FontWeight.bold,
-                                color: serviceType.isActive ? AppTheme.successColor : Colors.grey[600],
-                              ),
-                            ),
-                          ),
-                        ],
-                      ),
-                      const SizedBox(height: 6),
-                      TranslatedText(
-                        serviceType.description,
-                        style: TextStyle(
-                          fontSize: 14,
-                          color: Colors.grey[600],
-                          height: 1.4,
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
+                  child: TranslatedText(
+                    serviceType.name,
+                    style: const TextStyle(
+                      fontSize: 18,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
                   ),
                 ),
                 const SizedBox(width: 12),
