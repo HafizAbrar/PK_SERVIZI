@@ -411,28 +411,40 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildTextFormField(service_models.FormField field) {
-    return TextFormField(
-      controller: _controllers[field.name],
-      keyboardType: _getKeyboardType(field.type),
-      obscureText: field.type == 'password',
-      inputFormatters: _getInputFormatters(field.type),
-      decoration: InputDecoration(
-        hintText: _getFieldHint(field),
-        hintStyle: TextStyle(color: Colors.grey[400]),
-        suffixIcon: field.type == 'password' ? const Icon(Icons.visibility_off) : null,
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey[100]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
-        ),
-        contentPadding: const EdgeInsets.all(16),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      validator: (value) => _validateField(field, value),
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return TextFormField(
+          controller: _controllers[field.name],
+          keyboardType: _getKeyboardType(field.type),
+          obscureText: field.type == 'password',
+          inputFormatters: _getInputFormatters(field.type),
+          onChanged: (value) {
+            setModalState(() {
+              _formValues[field.name] = value;
+            });
+            setState(() {
+              _formValues[field.name] = value;
+            });
+          },
+          decoration: InputDecoration(
+            hintText: _getFieldHint(field),
+            hintStyle: TextStyle(color: Colors.grey[400]),
+            suffixIcon: field.type == 'password' ? const Icon(Icons.visibility_off) : null,
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey[100]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+            ),
+            contentPadding: const EdgeInsets.all(16),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          validator: (value) => _validateField(field, value),
+        );
+      },
     );
   }
 
@@ -460,119 +472,145 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildCheckboxField(service_models.FormField field) {
-    return CheckboxListTile(
-      title: Text('${field.label}${field.required ? ' *' : ''}'),
-      value: _formValues[field.name] ?? false,
-      onChanged: (value) => setState(() => _formValues[field.name] = value),
-      controlAffinity: ListTileControlAffinity.leading,
-      contentPadding: EdgeInsets.zero,
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return CheckboxListTile(
+          title: Text('${field.label}${field.required ? ' *' : ''}'),
+          value: _formValues[field.name] ?? false,
+          onChanged: (value) {
+            setModalState(() {
+              _formValues[field.name] = value;
+            });
+            setState(() {
+              _formValues[field.name] = value;
+            });
+          },
+          controlAffinity: ListTileControlAffinity.leading,
+          contentPadding: EdgeInsets.zero,
+        );
+      },
     );
   }
 
   Widget _buildRadioField(service_models.FormField field) {
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (field.required)
-          Text(
-            '${field.label} *',
-            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
-          ),
-        ...field.options?.map((option) => RadioListTile<String>(
-          title: Text(option),
-          value: option,
-          groupValue: _formValues[field.name],
-          onChanged: (value) => setState(() => _formValues[field.name] = value),
-          contentPadding: EdgeInsets.zero,
-        )).toList() ?? [],
-      ],
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (field.required)
+              Text(
+                '${field.label} *',
+                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
+              ),
+            ...field.options?.map((option) => RadioListTile<String>(
+              title: Text(option),
+              value: option,
+              groupValue: _formValues[field.name],
+              onChanged: (value) {
+                setModalState(() {
+                  _formValues[field.name] = value;
+                });
+                setState(() {
+                  _formValues[field.name] = value;
+                });
+              },
+              contentPadding: EdgeInsets.zero,
+            )).toList() ?? [],
+          ],
+        );
+      },
     );
   }
 
   Widget _buildFileField(service_models.FormField field) {
     final l10n = AppLocalizations.of(context)!;
-    final files = _uploadedFiles[field.name] ?? [];
-    return Column(
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        Row(
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        final files = _uploadedFiles[field.name] ?? [];
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            Expanded(
-              child: GestureDetector(
-                onTap: () => _pickFile(field.name),
-                child: Container(
-                  padding: const EdgeInsets.all(20),
-                  decoration: BoxDecoration(
-                    border: Border.all(color: Colors.grey[100]!),
-                    borderRadius: BorderRadius.circular(16),
-                    color: Colors.white,
-                  ),
-                  child: Column(
-                    children: [
-                      Container(
-                        padding: const EdgeInsets.all(12),
-                        decoration: BoxDecoration(
-                          color: AppTheme.primaryColor.withValues(alpha: 0.05),
-                          borderRadius: BorderRadius.circular(12),
-                        ),
-                        child: const Icon(Icons.upload_file, color: AppTheme.accentColor, size: 32),
-                      ),
-                      const SizedBox(height: 12),
-                      Text(
-                        l10n.chooseFile,
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-            const SizedBox(width: 12),
-            GestureDetector(
-              onTap: () => _pickImageFromCamera(field.name),
-              child: Container(
-                padding: const EdgeInsets.all(20),
-                decoration: BoxDecoration(
-                  border: Border.all(color: Colors.grey[100]!),
-                  borderRadius: BorderRadius.circular(16),
-                  color: Colors.white,
-                ),
-                child: Column(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(12),
-                      decoration: BoxDecoration(
-                        color: AppTheme.primaryColor.withValues(alpha: 0.05),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(Icons.camera_alt, color: AppTheme.accentColor, size: 32),
-                    ),
-                    const SizedBox(height: 12),
-                    Text(
-                      'Camera',
-                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ],
-        ),
-        if (files.isNotEmpty) ...
-          files.map((file) => Padding(
-            padding: const EdgeInsets.only(top: 8),
-            child: Row(
+            Row(
               children: [
-                const Icon(Icons.attach_file, size: 16, color: AppTheme.accentColor),
-                Expanded(child: Text(file.name, style: const TextStyle(fontSize: 12))),
-                IconButton(
-                  icon: const Icon(Icons.close, size: 16),
-                  onPressed: () => _removeFile(field.name, file),
+                Expanded(
+                  child: GestureDetector(
+                    onTap: () => _pickFile(field.name, setModalState),
+                    child: Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        border: Border.all(color: Colors.grey[100]!),
+                        borderRadius: BorderRadius.circular(16),
+                        color: Colors.white,
+                      ),
+                      child: Column(
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(12),
+                            decoration: BoxDecoration(
+                              color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                              borderRadius: BorderRadius.circular(12),
+                            ),
+                            child: const Icon(Icons.upload_file, color: AppTheme.accentColor, size: 32),
+                          ),
+                          const SizedBox(height: 12),
+                          Text(
+                            l10n.chooseFile,
+                            style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                          ),
+                        ],
+                      ),
+                    ),
+                  ),
+                ),
+                const SizedBox(width: 12),
+                GestureDetector(
+                  onTap: () => _pickImageFromCamera(field.name, setModalState),
+                  child: Container(
+                    padding: const EdgeInsets.all(20),
+                    decoration: BoxDecoration(
+                      border: Border.all(color: Colors.grey[100]!),
+                      borderRadius: BorderRadius.circular(16),
+                      color: Colors.white,
+                    ),
+                    child: Column(
+                      children: [
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          decoration: BoxDecoration(
+                            color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                            borderRadius: BorderRadius.circular(12),
+                          ),
+                          child: const Icon(Icons.camera_alt, color: AppTheme.accentColor, size: 32),
+                        ),
+                        const SizedBox(height: 12),
+                        Text(
+                          'Camera',
+                          style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ],
             ),
-          )),
-      ],
+            if (files.isNotEmpty) ...
+              files.map((file) => Padding(
+                padding: const EdgeInsets.only(top: 8),
+                child: Row(
+                  children: [
+                    const Icon(Icons.attach_file, size: 16, color: AppTheme.accentColor),
+                    Expanded(child: Text(file.name, style: const TextStyle(fontSize: 12))),
+                    IconButton(
+                      icon: const Icon(Icons.close, size: 16),
+                      onPressed: () => _removeFile(field.name, file, setModalState),
+                    ),
+                  ],
+                ),
+              )),
+          ],
+        );
+      },
     );
   }
 
@@ -655,19 +693,30 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildRangeField(service_models.FormField field) {
     final l10n = AppLocalizations.of(context)!;
-    final value = _formValues[field.name] ?? 0.0;
-    return Column(
-      children: [
-        Slider(
-          value: value,
-          min: 0,
-          max: 100,
-          divisions: 100,
-          label: value.round().toString(),
-          onChanged: (newValue) => setState(() => _formValues[field.name] = newValue),
-        ),
-        Text('${l10n.value}: ${value.round()}'),
-      ],
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        final value = _formValues[field.name] ?? 0.0;
+        return Column(
+          children: [
+            Slider(
+              value: value,
+              min: 0,
+              max: 100,
+              divisions: 100,
+              label: value.round().toString(),
+              onChanged: (newValue) {
+                setModalState(() {
+                  _formValues[field.name] = newValue;
+                });
+                setState(() {
+                  _formValues[field.name] = newValue;
+                });
+              },
+            ),
+            Text('${l10n.value}: ${value.round()}'),
+          ],
+        );
+      },
     );
   }
 
@@ -691,24 +740,35 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildDropdownField(service_models.FormField field) {
-    return DropdownButtonFormField<String>(
-      value: _formValues[field.name],
-      decoration: InputDecoration(
-        border: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: BorderSide(color: Colors.grey[100]!),
-        ),
-        focusedBorder: OutlineInputBorder(
-          borderRadius: BorderRadius.circular(16),
-          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
-        ),
-        contentPadding: const EdgeInsets.all(16),
-        filled: true,
-        fillColor: Colors.white,
-      ),
-      items: field.options?.map((option) => DropdownMenuItem(value: option, child: Text(option))).toList(),
-      onChanged: (value) => setState(() => _formValues[field.name] = value),
-      validator: (value) => _validateField(field, value?.toString()),
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return DropdownButtonFormField<String>(
+          value: _formValues[field.name],
+          decoration: InputDecoration(
+            border: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: BorderSide(color: Colors.grey[100]!),
+            ),
+            focusedBorder: OutlineInputBorder(
+              borderRadius: BorderRadius.circular(16),
+              borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+            ),
+            contentPadding: const EdgeInsets.all(16),
+            filled: true,
+            fillColor: Colors.white,
+          ),
+          items: field.options?.map((option) => DropdownMenuItem(value: option, child: Text(option))).toList(),
+          onChanged: (value) {
+            setModalState(() {
+              _formValues[field.name] = value;
+            });
+            setState(() {
+              _formValues[field.name] = value;
+            });
+          },
+          validator: (value) => _validateField(field, value?.toString()),
+        );
+      },
     );
   }
 
@@ -994,7 +1054,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     }
   }
 
-  Future<void> _pickImageFromCamera(String fieldName) async {
+  Future<void> _pickImageFromCamera(String fieldName, StateSetter setModalState) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
     
@@ -1007,6 +1067,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         path: image.path,
       );
       
+      setModalState(() {
+        _uploadedFiles[fieldName] ??= [];
+        _uploadedFiles[fieldName]!.add(platformFile);
+      });
       setState(() {
         _uploadedFiles[fieldName] ??= [];
         _uploadedFiles[fieldName]!.add(platformFile);
@@ -1014,20 +1078,26 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     }
   }
 
-  Future<void> _pickFile(String fieldName) async {
+  Future<void> _pickFile(String fieldName, StateSetter setModalState) async {
     final result = await FilePicker.platform.pickFiles(
       allowMultiple: true,
       type: FileType.any,
     );
     
     if (result != null) {
+      setModalState(() {
+        _uploadedFiles[fieldName] = result.files;
+      });
       setState(() {
         _uploadedFiles[fieldName] = result.files;
       });
     }
   }
 
-  void _removeFile(String fieldName, PlatformFile file) {
+  void _removeFile(String fieldName, PlatformFile file, StateSetter setModalState) {
+    setModalState(() {
+      _uploadedFiles[fieldName]?.remove(file);
+    });
     setState(() {
       _uploadedFiles[fieldName]?.remove(file);
     });
