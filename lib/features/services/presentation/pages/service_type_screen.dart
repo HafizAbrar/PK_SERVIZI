@@ -112,7 +112,7 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
           ),
           const Spacer(),
           ClipRRect(
-            borderRadius: BorderRadius.circular(50),
+            borderRadius: BorderRadius.circular(25),
             child: Image.asset(
               'assets/logos/outer logo.png',
               width: 50,
@@ -202,11 +202,11 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
             child: Row(
               children: [
                 ClipRRect(
-                  borderRadius: BorderRadius.circular(28),
+                  borderRadius: BorderRadius.circular(25),
                   child: Image.asset(
                     'assets/logos/outer logo.png',
                     width: 50,
-                    height: 60,
+                    height: 50,
                     fit: BoxFit.cover,
                   ),
                 ),

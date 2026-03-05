@@ -715,11 +715,11 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(25),
                 child: Image.asset(
                   'assets/logos/outer logo.png',
                   width: 50,
-                  height: 60,
+                  height: 50,
                   fit: BoxFit.cover,
                 ),
               ),

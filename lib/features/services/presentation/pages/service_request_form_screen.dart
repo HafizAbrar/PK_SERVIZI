@@ -233,7 +233,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
-          Text(
+          TranslatedText(
             schema.title,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
           ),
@@ -280,11 +280,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           child: Row(
             children: [
               ClipRRect(
-                borderRadius: BorderRadius.circular(28),
+                borderRadius: BorderRadius.circular(25),
                 child: Image.asset(
                   'assets/logos/outer logo.png',
                   width: 50,
-                  height: 60,
+                  height: 50,
                   fit: BoxFit.cover,
                 ),
               ),
@@ -293,7 +293,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    Text(
+                    TranslatedText(
                       section.title,
                       style: const TextStyle(
                         fontSize: 16,
@@ -370,7 +370,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               Row(
                 children: [
                   Expanded(
-                    child: Text(
+                    child: TranslatedText(
                       section.title,
                       style: const TextStyle(
                         fontSize: 20,
@@ -396,7 +396,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
-                          Text(
+                          TranslatedText(
                             '${field.label}${field.required ? ' *' : ''}',
                             style: const TextStyle(
                               fontSize: 14,
@@ -571,7 +571,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     return StatefulBuilder(
       builder: (context, setModalState) {
         return CheckboxListTile(
-          title: Text('${field.label}${field.required ? ' *' : ''}'),
+          title: TranslatedText('${field.label}${field.required ? ' *' : ''}'),
           value: _formValues[field.name] ?? false,
           onChanged: (value) {
             setModalState(() {
@@ -595,12 +595,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           crossAxisAlignment: CrossAxisAlignment.start,
           children: [
             if (field.required)
-              Text(
+              TranslatedText(
                 '${field.label} *',
                 style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
               ),
             ...field.options?.map((option) => RadioListTile<String>(
-              title: Text(option),
+              title: TranslatedText(option),
               value: option,
               groupValue: _formValues[field.name],
               onChanged: (value) {
@@ -853,7 +853,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             filled: true,
             fillColor: Colors.white,
           ),
-          items: field.options?.map((option) => DropdownMenuItem(value: option, child: Text(option))).toList(),
+          items: field.options?.map((option) => DropdownMenuItem(value: option, child: TranslatedText(option))).toList(),
           onChanged: (value) {
             setModalState(() {
               _formValues[field.name] = value;
