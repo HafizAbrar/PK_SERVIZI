@@ -3,6 +3,7 @@ import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
+import 'package:image_picker/image_picker.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../data/models/service.dart' as service_models;
@@ -494,34 +495,68 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     return Column(
       crossAxisAlignment: CrossAxisAlignment.start,
       children: [
-        GestureDetector(
-          onTap: () => _pickFile(field.name),
-          child: Container(
-            width: double.infinity,
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              border: Border.all(color: Colors.grey[100]!),
-              borderRadius: BorderRadius.circular(16),
-              color: Colors.white,
-            ),
-            child: Column(
-              children: [
-                Container(
-                  padding: const EdgeInsets.all(12),
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _pickFile(field.name),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
                   decoration: BoxDecoration(
-                    color: AppTheme.primaryColor.withValues(alpha: 0.05),
-                    borderRadius: BorderRadius.circular(12),
+                    border: Border.all(color: Colors.grey[100]!),
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
                   ),
-                  child: const Icon(Icons.upload_file, color: AppTheme.accentColor, size: 32),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.upload_file, color: AppTheme.accentColor, size: 32),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.chooseFile,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                      ),
+                    ],
+                  ),
                 ),
-                const SizedBox(height: 12),
-                Text(
-                  files.isEmpty ? l10n.chooseFile : '${files.length} ${l10n.filesSelected}',
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                ),
-              ],
+              ),
             ),
-          ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: () => _pickImageFromCamera(field.name),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[100]!),
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.camera_alt, color: AppTheme.accentColor, size: 32),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      'Camera',
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
         ),
         if (files.isNotEmpty) ...
           files.map((file) => Padding(
@@ -956,6 +991,26 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           case 'grossIncome': return l10n.enterGrossIncome;
           default: return '${l10n.enter} ${field.label.toLowerCase()}';
         }
+    }
+  }
+
+  Future<void> _pickImageFromCamera(String fieldName) async {
+    final ImagePicker picker = ImagePicker();
+    final XFile? image = await picker.pickImage(source: ImageSource.camera);
+    
+    if (image != null) {
+      final bytes = await image.readAsBytes();
+      final platformFile = PlatformFile(
+        name: image.name,
+        size: bytes.length,
+        bytes: bytes,
+        path: image.path,
+      );
+      
+      setState(() {
+        _uploadedFiles[fieldName] ??= [];
+        _uploadedFiles[fieldName]!.add(platformFile);
+      });
     }
   }
 
