@@ -38,7 +38,6 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, dynamic> _formValues = {};
   final Map<String, List<PlatformFile>> _uploadedFiles = {};
-  int _currentStep = 0;
 
   @override
   void dispose() {
@@ -67,12 +66,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildForm(service_models.FormSchema schema) {
     final sections = schema.sections;
-    final currentSection = sections[_currentStep];
     
     return Column(
       children: [
         _buildAppBar(),
-        _buildProgressBar(sections.length),
         Expanded(
           child: SingleChildScrollView(
             child: Form(
@@ -80,16 +77,15 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               child: Column(
                 crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
-                  _buildSectionHeader(currentSection),
-                  _buildFormFields(currentSection),
-                  if (_currentStep == 0) _buildInfoCard(),
+                  _buildFormHeader(schema),
+                  _buildSectionTiles(sections),
                   const SizedBox(height: 120),
                 ],
               ),
             ),
           ),
         ),
-        _buildBottomActions(sections.length),
+        _buildBottomActions(),
       ],
     );
   }
@@ -131,64 +127,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  Widget _buildProgressBar(int totalSteps) {
-    final l10n = AppLocalizations.of(context)!;
-    return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
-      transform: Matrix4.translationValues(0, -12, 0),
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withValues(alpha: 0.1),
-              blurRadius: 20,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          children: [
-            Row(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Text(
-                  '${l10n.step} ${_currentStep + 1}: ${_getSectionTitle(_currentStep)}',
-                  style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                ),
-                Text(
-                  '${_currentStep + 1} ${l10n.ofText} $totalSteps',
-                  style: TextStyle(fontSize: 14, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-            const SizedBox(height: 12),
-            Container(
-              height: 8,
-              decoration: BoxDecoration(
-                color: Colors.grey[100],
-                borderRadius: BorderRadius.circular(4),
-              ),
-              child: FractionallySizedBox(
-                alignment: Alignment.centerLeft,
-                widthFactor: (_currentStep + 1) / totalSteps,
-                child: Container(
-                  decoration: BoxDecoration(
-                    color: AppTheme.accentColor,
-                    borderRadius: BorderRadius.circular(4),
-                  ),
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
 
-  Widget _buildSectionHeader(service_models.FormSection section) {
+
+  Widget _buildFormHeader(service_models.FormSchema schema) {
     final l10n = AppLocalizations.of(context)!;
     return Padding(
       padding: const EdgeInsets.all(20),
@@ -196,7 +137,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            section.title,
+            schema.title,
             style: const TextStyle(fontSize: 24, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
           ),
           const SizedBox(height: 8),
@@ -209,32 +150,230 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  Widget _buildFormFields(service_models.FormSection section) {
-    return Column(
-      children: section.fields.map((field) => _buildFormField(field)).toList(),
+  Widget _buildSectionTiles(List<service_models.FormSection> sections) {
+    return Padding(
+      padding: const EdgeInsets.symmetric(horizontal: 20),
+      child: Column(
+        children: sections.map((section) => _buildSectionTile(section)).toList(),
+      ),
     );
   }
 
-  Widget _buildFormField(service_models.FormField field) {
-    if (field.type == 'hidden') return const SizedBox.shrink();
-    
-    _controllers[field.name] ??= TextEditingController();
+  Widget _buildSectionTile(service_models.FormSection section) {
+    final completedFields = _getSectionCompletedFields(section);
+    final totalFields = section.fields.where((f) => f.type != 'hidden').length;
     
     return Container(
-      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          if (field.type != 'checkbox')
-            Text(
-              '${field.label}${field.required ? ' *' : ''}',
-              style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-            ),
-          const SizedBox(height: 8),
-          _buildFieldWidget(field),
+      margin: const EdgeInsets.only(bottom: 12),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(16),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 10,
+          ),
         ],
       ),
+      child: InkWell(
+        onTap: () => _showSectionDialog(section),
+        borderRadius: BorderRadius.circular(16),
+        child: Padding(
+          padding: const EdgeInsets.all(20),
+          child: Row(
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(28),
+                child: Image.asset(
+                  'assets/logos/outer logo.png',
+                  width: 50,
+                  height: 60,
+                  fit: BoxFit.cover,
+                ),
+              ),
+              const SizedBox(width: 16),
+              Expanded(
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Text(
+                      section.title,
+                      style: const TextStyle(
+                        fontSize: 16,
+                        fontWeight: FontWeight.w600,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    const SizedBox(height: 4),
+                    Text(
+                      '$completedFields/$totalFields fields completed',
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                      ),
+                    ),
+                    if (section.fields.isNotEmpty) ...[
+                      const SizedBox(height: 4),
+                      Text(
+                        '${section.fields.length} fields',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.grey[500],
+                        ),
+                        maxLines: 2,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ],
+                ),
+              ),
+              Column(
+                children: [
+                  if (completedFields == totalFields)
+                    const Icon(Icons.check_circle, color: Colors.green, size: 24)
+                  else
+                    Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
+                ],
+              ),
+            ],
+          ),
+        ),
+      ),
     );
+  }
+
+  void _showSectionDialog(service_models.FormSection section) {
+    // Initialize controllers for all fields in the section
+    for (var field in section.fields) {
+      if (field.type != 'hidden') {
+        _controllers[field.name] ??= TextEditingController(
+          text: _formValues[field.name]?.toString() ?? '',
+        );
+      }
+    }
+
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => Padding(
+        padding: EdgeInsets.only(
+          bottom: MediaQuery.of(context).viewInsets.bottom,
+        ),
+        child: Container(
+          decoration: const BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+          ),
+          padding: const EdgeInsets.all(24),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Row(
+                children: [
+                  Expanded(
+                    child: Text(
+                      section.title,
+                      style: const TextStyle(
+                        fontSize: 20,
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                  ),
+                  IconButton(
+                    onPressed: () => Navigator.pop(context),
+                    icon: const Icon(Icons.close),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 16),
+              Expanded(
+                child: SingleChildScrollView(
+                  child: Column(
+                    children: section.fields
+                        .where((field) => field.type != 'hidden')
+                        .map((field) => Padding(
+                              padding: const EdgeInsets.only(bottom: 16),
+                              child: Column(
+                                crossAxisAlignment: CrossAxisAlignment.start,
+                                children: [
+                                  Text(
+                                    '${field.label}${field.required ? ' *' : ''}',
+                                    style: const TextStyle(
+                                      fontSize: 14,
+                                      fontWeight: FontWeight.w500,
+                                      color: AppTheme.primaryColor,
+                                    ),
+                                  ),
+                                  const SizedBox(height: 8),
+                                  _buildFieldWidget(field),
+                                ],
+                              ),
+                            ))
+                        .toList(),
+                  ),
+                ),
+              ),
+              const SizedBox(height: 16),
+              SizedBox(
+                width: double.infinity,
+                child: ElevatedButton(
+                  onPressed: () {
+                    setState(() {
+                      for (var field in section.fields) {
+                        switch (field.type) {
+                          case 'text':
+                          case 'email':
+                          case 'phone':
+                          case 'number':
+                          case 'date':
+                          case 'time':
+                          case 'datetime':
+                          case 'textarea':
+                          case 'url':
+                          case 'password':
+                            final value = _controllers[field.name]?.text;
+                            if (value?.isNotEmpty == true) {
+                              _formValues[field.name] = value;
+                            }
+                            break;
+                          // Other field types (checkbox, select, radio, file, etc.) are already handled in their respective widgets
+                        }
+                      }
+                    });
+                    Navigator.pop(context);
+                  },
+                  style: ElevatedButton.styleFrom(
+                    backgroundColor: AppTheme.accentColor,
+                    foregroundColor: Colors.white,
+                    padding: const EdgeInsets.symmetric(vertical: 16),
+                    shape: RoundedRectangleBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                  ),
+                  child: const Text(
+                    'Save',
+                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                  ),
+                ),
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+
+  String? _getFieldValue(service_models.FormField field) {
+    if (field.type == 'text' || field.type == 'email' || 
+        field.type == 'phone' || field.type == 'number' ||
+        field.type == 'date' || field.type == 'time') {
+      final value = _controllers[field.name]?.text;
+      return value?.isNotEmpty == true ? value : null;
+    }
+    return _formValues[field.name]?.toString();
   }
 
   Widget _buildFieldWidget(service_models.FormField field) {
@@ -574,51 +713,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  Widget _buildInfoCard() {
-    if (_currentStep != 0) return const SizedBox.shrink();
-    final l10n = AppLocalizations.of(context)!;
-    
-    return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(20),
-      decoration: BoxDecoration(
-        color: AppTheme.primaryColor.withValues(alpha: 0.05),
-        borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: AppTheme.accentColor.withValues(alpha: 0.2)),
-      ),
-      child: Row(
-        children: [
-          Container(
-            padding: const EdgeInsets.all(8),
-            decoration: BoxDecoration(
-              color: AppTheme.accentColor.withValues(alpha: 0.2),
-              borderRadius: BorderRadius.circular(8),
-            ),
-            child: const Icon(Icons.info, color: AppTheme.primaryColor, size: 20),
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  l10n.nextSteps,
-                  style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
-                ),
-                const SizedBox(height: 4),
-                Text(
-                  l10n.inStep2YoullBeAsked,
-                  style: TextStyle(fontSize: 12, color: Colors.grey[600]),
-                ),
-              ],
-            ),
-          ),
-        ],
-      ),
-    );
-  }
 
-  Widget _buildBottomActions(int totalSteps) {
+
+  Widget _buildBottomActions() {
     final l10n = AppLocalizations.of(context)!;
     return Container(
       padding: const EdgeInsets.all(20),
@@ -632,56 +729,29 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           ),
         ],
       ),
-      child: Row(
-        children: [
-          if (_currentStep > 0)
-            Expanded(
-              child: OutlinedButton(
-                onPressed: () => setState(() => _currentStep--),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: AppTheme.primaryColor,
-                  side: BorderSide(color: AppTheme.primaryColor),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                ),
-                child: Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    const Icon(Icons.arrow_back, size: 20),
-                    const SizedBox(width: 8),
-                    Text(
-                      'Back',
-                      style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          if (_currentStep > 0) const SizedBox(width: 12),
-          Expanded(
-            child: ElevatedButton(
-              onPressed: () => _nextStep(totalSteps),
-              style: ElevatedButton.styleFrom(
-                backgroundColor: AppTheme.accentColor,
-                foregroundColor: AppTheme.primaryColor,
-                padding: const EdgeInsets.symmetric(vertical: 16),
-                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-                elevation: 0,
-              ),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.center,
-                children: [
-                  Text(
-                    _currentStep == totalSteps - 1 ? l10n.submit : l10n.continueButton,
-                    style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                  const SizedBox(width: 8),
-                  Icon(_currentStep == totalSteps - 1 ? Icons.check : Icons.arrow_forward, size: 20),
-                ],
-              ),
-            ),
+      child: SizedBox(
+        width: double.infinity,
+        child: ElevatedButton(
+          onPressed: _submitForm,
+          style: ElevatedButton.styleFrom(
+            backgroundColor: AppTheme.accentColor,
+            foregroundColor: AppTheme.primaryColor,
+            padding: const EdgeInsets.symmetric(vertical: 16),
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
+            elevation: 0,
           ),
-        ],
+          child: Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Text(
+                l10n.submit,
+                style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+              ),
+              const SizedBox(width: 8),
+              const Icon(Icons.check, size: 20),
+            ],
+          ),
+        ),
       ),
     );
   }
@@ -725,15 +795,42 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  void _nextStep(int totalSteps) {
-    if (_formKey.currentState?.validate() == true) {
-      if (_currentStep < totalSteps - 1) {
-        setState(() => _currentStep++);
-      } else {
-        // Submit form with serviceRequestId
-        _submitForm();
+  int _getSectionCompletedFields(service_models.FormSection section) {
+    int completed = 0;
+    for (var field in section.fields) {
+      if (field.type == 'hidden') continue;
+      
+      bool hasValue = false;
+      
+      switch (field.type) {
+        case 'checkbox':
+          hasValue = _formValues[field.name] == true;
+          break;
+        case 'select':
+        case 'radio':
+          hasValue = _formValues[field.name] != null;
+          break;
+        case 'file':
+          hasValue = _uploadedFiles[field.name]?.isNotEmpty == true;
+          break;
+        case 'range':
+          hasValue = _formValues[field.name] != null;
+          break;
+        case 'color':
+          hasValue = _formValues[field.name] != null;
+          break;
+        default:
+          // For text, email, phone, number, date, time, etc.
+          final controllerValue = _controllers[field.name]?.text;
+          final formValue = _formValues[field.name]?.toString();
+          hasValue = (controllerValue?.isNotEmpty == true) || (formValue?.isNotEmpty == true);
+      }
+      
+      if (hasValue) {
+        completed++;
       }
     }
+    return completed;
   }
 
   Future<void> _submitForm() async {
@@ -794,15 +891,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     }
   }
 
-  String _getSectionTitle(int step) {
-    final l10n = AppLocalizations.of(context)!;
-    switch (step) {
-      case 0: return l10n.personalData;
-      case 1: return l10n.incomeInformation;
-      case 2: return l10n.additionalDetails;
-      default: return l10n.information;
-    }
-  }
+
 
   TextInputType _getKeyboardType(String type) {
     switch (type) {

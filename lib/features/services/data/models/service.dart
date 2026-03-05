@@ -10,7 +10,8 @@ class Service {
   final String description;
   final String category;
   final String basePrice;
-  final List<RequiredDocument> requiredDocuments;
+  final List<String> requiredDocuments;
+  final String? documentRequirements;
   final FormSchema? formSchema;
   final bool isActive;
   final String serviceTypeId;
@@ -26,6 +27,7 @@ class Service {
     required this.category,
     required this.basePrice,
     required this.requiredDocuments,
+    this.documentRequirements,
     this.formSchema,
     required this.isActive,
     required this.serviceTypeId,

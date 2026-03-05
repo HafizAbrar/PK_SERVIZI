@@ -8,15 +8,41 @@ import '../../../../core/widgets/translated_text.dart';
 import '../../../../core/theme/app_theme.dart';
 
 final serviceDetailProvider = FutureProvider.family<Service, String>((ref, serviceId) async {
+  debugPrint('Loading service details for serviceId: $serviceId');
   final apiClient = ref.read(apiClientProvider);
-  final response = await apiClient.get('/api/v1/services/$serviceId');
-  return Service.fromJson(response.data['data']);
+  try {
+    final response = await apiClient.get('/api/v1/services/$serviceId');
+    debugPrint('Service detail response: ${response.data}');
+    debugPrint('Service detail status code: ${response.statusCode}');
+    
+    if (response.data == null) {
+      throw Exception('Response data is null');
+    }
+    
+    final data = response.data['data'];
+    if (data == null) {
+      throw Exception('Service data is null in response');
+    }
+    
+    return Service.fromJson(data);
+  } catch (e, stackTrace) {
+    debugPrint('Error loading service details: $e');
+    debugPrint('Stack trace: $stackTrace');
+    rethrow;
+  }
 });
 
 final serviceFaqsProvider = FutureProvider.family<List<Map<String, dynamic>>, String>((ref, serviceId) async {
+  debugPrint('Loading FAQs for serviceId: $serviceId');
   final apiClient = ref.read(apiClientProvider);
-  final response = await apiClient.get('/api/v1/faqs/service/$serviceId');
-  return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+  try {
+    final response = await apiClient.get('/api/v1/faqs/service/$serviceId');
+    debugPrint('FAQs response: ${response.data}');
+    return List<Map<String, dynamic>>.from(response.data['data'] ?? []);
+  } catch (e) {
+    debugPrint('Error loading FAQs: $e');
+    return [];
+  }
 });
 
 class ServiceDetailScreen extends ConsumerWidget {
@@ -353,7 +379,7 @@ class ServiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildDocumentTile(RequiredDocument doc, AppLocalizations l10n) {
+  Widget _buildDocumentTile(String doc, AppLocalizations l10n) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
@@ -364,48 +390,34 @@ class ServiceDetailScreen extends ConsumerWidget {
       ),
       child: Row(
         children: [
-          Icon(
-            doc.required ? Icons.check_circle : Icons.info_outline,
+          const Icon(
+            Icons.check_circle,
             size: 24,
-            color: doc.required ? const Color(0xFF10B981) : Colors.grey[400],
+            color: Color(0xFF10B981),
           ),
           const SizedBox(width: 12),
           Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                TranslatedText(
-                  doc.name,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.w600,
-                    color: AppTheme.primaryColor,
-                  ),
-                ),
-                Text(
-                  '${l10n.category}: ${doc.category}',
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[600],
-                  ),
-                ),
-              ],
+            child: TranslatedText(
+              doc,
+              style: const TextStyle(
+                fontSize: 14,
+                fontWeight: FontWeight.w600,
+                color: AppTheme.primaryColor,
+              ),
             ),
           ),
           Container(
             padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
             decoration: BoxDecoration(
-              color: doc.required 
-                  ? const Color(0xFF10B981).withValues(alpha: 0.1)
-                  : Colors.grey[100],
+              color: const Color(0xFF10B981).withValues(alpha: 0.1),
               borderRadius: BorderRadius.circular(8),
             ),
             child: Text(
-              doc.required ? l10n.required : l10n.optional,
-              style: TextStyle(
+              l10n.required,
+              style: const TextStyle(
                 fontSize: 10,
                 fontWeight: FontWeight.bold,
-                color: doc.required ? const Color(0xFF10B981) : Colors.grey[600],
+                color: Color(0xFF10B981),
               ),
             ),
           ),
@@ -535,8 +547,6 @@ class ServiceDetailScreen extends ConsumerWidget {
   }
 
   void _showFAQs(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
-    final faqsAsync = ref.watch(serviceFaqsProvider(serviceId));
-
     showModalBottomSheet(
       context: context,
       isScrollControlled: true,
@@ -591,26 +601,31 @@ class ServiceDetailScreen extends ConsumerWidget {
                 ),
               ),
               Expanded(
-                child: faqsAsync.when(
-                  data: (faqs) => faqs.isEmpty
-                      ? Center(
-                          child: Text(
-                            l10n.noFaqsAvailable,
-                            style: TextStyle(color: Colors.grey[600]),
-                          ),
-                        )
-                      : ListView(
-                          controller: scrollController,
-                          padding: const EdgeInsets.all(20),
-                          children: faqs.map((faq) => _buildFAQItem(faq['question'] ?? '', faq['answer'] ?? '')).toList(),
+                child: Consumer(
+                  builder: (context, ref, child) {
+                    final faqsAsync = ref.watch(serviceFaqsProvider(serviceId));
+                    return faqsAsync.when(
+                      data: (faqs) => faqs.isEmpty
+                          ? Center(
+                              child: Text(
+                                l10n.noFaqsAvailable,
+                                style: TextStyle(color: Colors.grey[600]),
+                              ),
+                            )
+                          : ListView(
+                              controller: scrollController,
+                              padding: const EdgeInsets.all(20),
+                              children: faqs.map((faq) => _buildFAQItem(faq['question'] ?? '', faq['answer'] ?? '')).toList(),
+                            ),
+                      loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+                      error: (_, __) => Center(
+                        child: Text(
+                          l10n.failedToLoadFaqs,
+                          style: TextStyle(color: Colors.grey[600]),
                         ),
-                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-                  error: (_, __) => Center(
-                    child: Text(
-                      l10n.failedToLoadFaqs,
-                      style: TextStyle(color: Colors.grey[600]),
-                    ),
-                  ),
+                      ),
+                    );
+                  },
                 ),
               ),
             ],

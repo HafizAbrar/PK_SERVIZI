@@ -14,8 +14,9 @@ Service _$ServiceFromJson(Map<String, dynamic> json) => Service(
   category: json['category'] as String,
   basePrice: json['basePrice'] as String,
   requiredDocuments: (json['requiredDocuments'] as List<dynamic>)
-      .map((e) => RequiredDocument.fromJson(e as Map<String, dynamic>))
+      .map((e) => e as String)
       .toList(),
+  documentRequirements: json['documentRequirements'] as String?,
   formSchema: json['formSchema'] == null
       ? null
       : FormSchema.fromJson(json['formSchema'] as Map<String, dynamic>),
@@ -36,6 +37,7 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
   'category': instance.category,
   'basePrice': instance.basePrice,
   'requiredDocuments': instance.requiredDocuments,
+  'documentRequirements': instance.documentRequirements,
   'formSchema': instance.formSchema,
   'isActive': instance.isActive,
   'serviceTypeId': instance.serviceTypeId,
