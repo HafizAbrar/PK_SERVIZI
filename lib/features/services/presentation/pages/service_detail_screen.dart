@@ -106,7 +106,7 @@ class ServiceDetailScreen extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, Service service) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 48, 20, 32),
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
       decoration: BoxDecoration(
         color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
@@ -122,6 +122,7 @@ class ServiceDetailScreen extends ConsumerWidget {
         ],
       ),
       child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Row(
             children: [
@@ -130,24 +131,23 @@ class ServiceDetailScreen extends ConsumerWidget {
                 icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                 padding: EdgeInsets.zero,
               ),
-              const Spacer(),
+              const SizedBox(width: 90),
+              ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Image.asset(
+                  'assets/logos/outer logo.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
             ],
           ),
-          const SizedBox(height: 16),
-          ClipRRect(
-              borderRadius: BorderRadius.circular(50),
-              child: Image.asset(
-                'assets/logos/outer logo.png',
-                width: 100,
-                height: 100,
-                fit: BoxFit.cover,
-              ),
-            ),
-          const SizedBox(height: 16),
+          const SizedBox(height: 12),
           TranslatedText(
             service.name,
             style: const TextStyle(
-              fontSize: 24,
+              fontSize: 20,
               fontWeight: FontWeight.bold,
               color: Colors.white,
             ),

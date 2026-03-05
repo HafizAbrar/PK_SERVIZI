@@ -56,7 +56,5 @@ flutter:
 flutter_launcher_icons:
   android: true
   ios: true
-  image_path: "assets/logos/TuoCAF logo.png"
-  adaptive_icon_background: "#FFFFFF"
-  adaptive_icon_foreground: "assets/logos/TuoCAF logo.png"
+  image_path: "assets/logos/outer logo.png"
   remove_alpha_ios: true
