@@ -8,6 +8,8 @@ import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../data/models/service.dart' as service_models;
 import '../../../../core/theme/app_theme.dart';
+import '../../../../core/widgets/translated_text.dart';
+import 'service_detail_screen.dart';
 
 final serviceFormProvider = FutureProvider.family<service_models.FormSchema, String>((ref, serviceId) async {
   debugPrint('Loading form schema for serviceId: $serviceId');
@@ -23,9 +25,9 @@ final serviceFormProvider = FutureProvider.family<service_models.FormSchema, Str
 class ServiceRequestFormScreen extends ConsumerStatefulWidget {
   final String serviceId;
   final String? serviceRequestId;
-  
+
   const ServiceRequestFormScreen({
-    super.key, 
+    super.key,
     required this.serviceId,
     this.serviceRequestId,
   });
@@ -51,11 +53,16 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   @override
   Widget build(BuildContext context) {
     final schemaAsync = ref.watch(serviceFormProvider(widget.serviceId));
-    
+    final serviceAsync = ref.watch(serviceDetailProvider(widget.serviceId));
+
     return Scaffold(
       backgroundColor: AppTheme.backgroundLight,
       body: schemaAsync.when(
-        data: (schema) => _buildForm(schema),
+        data: (schema) => serviceAsync.when(
+          data: (service) => _buildForm(schema, service),
+          loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+          error: (_, __) => _buildForm(schema, null),
+        ),
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
         error: (error, stackTrace) {
           debugPrint('Error loading form schema: $error');
@@ -65,12 +72,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  Widget _buildForm(service_models.FormSchema schema) {
+  Widget _buildForm(service_models.FormSchema schema, service_models.Service? service) {
     final sections = schema.sections;
-    
+
     return Column(
       children: [
-        _buildAppBar(),
+        _buildAppBar(service),
+        _buildProgressBar(),
         Expanded(
           child: SingleChildScrollView(
             child: Form(
@@ -91,10 +99,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  Widget _buildAppBar() {
+  Widget _buildAppBar(service_models.Service? service) {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 32),
       decoration: BoxDecoration(
         color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
@@ -109,22 +117,108 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          IconButton(
-            onPressed: () => context.go('/home'),
-            icon: const Icon(Icons.arrow_back_ios, color: Colors.white, size: 24),
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => context.go('/home'),
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                padding: EdgeInsets.zero,
+              ),
+              const Spacer(),
+            ],
           ),
-          Expanded(
-            child: Text(
-              l10n.serviceRequest,
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-              textAlign: TextAlign.center,
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.asset(
+              'assets/logos/outer logo.png',
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
             ),
           ),
-          const SizedBox(width: 48),
+          const SizedBox(height: 16),
+          if (service != null)
+            TranslatedText(
+              service.name,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            )
+          else
+            Text(
+              l10n.serviceRequest,
+              style: const TextStyle(
+                fontSize: 24,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+              ),
+              textAlign: TextAlign.center,
+            ),
         ],
       ),
+    );
+  }
+
+  Widget _buildProgressBar() {
+    final l10n = AppLocalizations.of(context)!;
+    return Container(
+      padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+      color: Colors.white,
+      child: Row(
+        children: [
+          _buildProgressStep(1, l10n.payment, true, true),
+          Expanded(child: Container(height: 2, color: AppTheme.accentColor)),
+          _buildProgressStep(2, '${l10n.form} & ${l10n.documents}', true, false),
+          Expanded(child: Container(height: 2, color: Colors.grey[300])),
+          _buildProgressStep(3, l10n.submit, false, false),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildProgressStep(int step, String label, bool isCompleted, bool isPast) {
+    return Column(
+      children: [
+        Container(
+          width: 32,
+          height: 32,
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            color: isCompleted ? AppTheme.accentColor : Colors.grey[300],
+            border: Border.all(
+              color: isCompleted ? AppTheme.accentColor : Colors.grey[300]!,
+              width: 2,
+            ),
+          ),
+          child: Center(
+            child: isPast
+                ? const Icon(Icons.check, color: Colors.white, size: 16)
+                : Text(
+                    step.toString(),
+                    style: TextStyle(
+                      color: isCompleted ? Colors.white : Colors.grey[600],
+                      fontWeight: FontWeight.bold,
+                      fontSize: 14,
+                    ),
+                  ),
+          ),
+        ),
+        const SizedBox(height: 4),
+        Text(
+          label,
+          style: TextStyle(
+            fontSize: 12,
+            color: isCompleted ? AppTheme.primaryColor : Colors.grey[600],
+            fontWeight: isCompleted ? FontWeight.w600 : FontWeight.normal,
+          ),
+        ),
+      ],
     );
   }
 
@@ -163,7 +257,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   Widget _buildSectionTile(service_models.FormSection section) {
     final completedFields = _getSectionCompletedFields(section);
     final totalFields = section.fields.where((f) => f.type != 'hidden').length;
-    
+
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       decoration: BoxDecoration(
@@ -296,23 +390,23 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                     children: section.fields
                         .where((field) => field.type != 'hidden')
                         .map((field) => Padding(
-                              padding: const EdgeInsets.only(bottom: 16),
-                              child: Column(
-                                crossAxisAlignment: CrossAxisAlignment.start,
-                                children: [
-                                  Text(
-                                    '${field.label}${field.required ? ' *' : ''}',
-                                    style: const TextStyle(
-                                      fontSize: 14,
-                                      fontWeight: FontWeight.w500,
-                                      color: AppTheme.primaryColor,
-                                    ),
-                                  ),
-                                  const SizedBox(height: 8),
-                                  _buildFieldWidget(field),
-                                ],
-                              ),
-                            ))
+                      padding: const EdgeInsets.only(bottom: 16),
+                      child: Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            '${field.label}${field.required ? ' *' : ''}',
+                            style: const TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w500,
+                              color: AppTheme.primaryColor,
+                            ),
+                          ),
+                          const SizedBox(height: 8),
+                          _buildFieldWidget(field),
+                        ],
+                      ),
+                    ))
                         .toList(),
                   ),
                 ),
@@ -340,7 +434,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                               _formValues[field.name] = value;
                             }
                             break;
-                          // Other field types (checkbox, select, radio, file, etc.) are already handled in their respective widgets
+                        // Other field types (checkbox, select, radio, file, etc.) are already handled in their respective widgets
                         }
                       }
                     });
@@ -368,7 +462,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   String? _getFieldValue(service_models.FormField field) {
-    if (field.type == 'text' || field.type == 'email' || 
+    if (field.type == 'text' || field.type == 'email' ||
         field.type == 'phone' || field.type == 'number' ||
         field.type == 'date' || field.type == 'time') {
       final value = _controllers[field.name]?.text;
@@ -595,19 +689,19 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               ],
             ),
             if (files.isNotEmpty) ...
-              files.map((file) => Padding(
-                padding: const EdgeInsets.only(top: 8),
-                child: Row(
-                  children: [
-                    const Icon(Icons.attach_file, size: 16, color: AppTheme.accentColor),
-                    Expanded(child: Text(file.name, style: const TextStyle(fontSize: 12))),
-                    IconButton(
-                      icon: const Icon(Icons.close, size: 16),
-                      onPressed: () => _removeFile(field.name, file, setModalState),
-                    ),
-                  ],
-                ),
-              )),
+            files.map((file) => Padding(
+              padding: const EdgeInsets.only(top: 8),
+              child: Row(
+                children: [
+                  const Icon(Icons.attach_file, size: 16, color: AppTheme.accentColor),
+                  Expanded(child: Text(file.name, style: const TextStyle(fontSize: 12))),
+                  IconButton(
+                    icon: const Icon(Icons.close, size: 16),
+                    onPressed: () => _removeFile(field.name, file, setModalState),
+                  ),
+                ],
+              ),
+            )),
           ],
         );
       },
@@ -894,9 +988,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     int completed = 0;
     for (var field in section.fields) {
       if (field.type == 'hidden') continue;
-      
+
       bool hasValue = false;
-      
+
       switch (field.type) {
         case 'checkbox':
           hasValue = _formValues[field.name] == true;
@@ -915,12 +1009,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           hasValue = _formValues[field.name] != null;
           break;
         default:
-          // For text, email, phone, number, date, time, etc.
+        // For text, email, phone, number, date, time, etc.
           final controllerValue = _controllers[field.name]?.text;
           final formValue = _formValues[field.name]?.toString();
           hasValue = (controllerValue?.isNotEmpty == true) || (formValue?.isNotEmpty == true);
       }
-      
+
       if (hasValue) {
         completed++;
       }
@@ -940,10 +1034,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
     try {
       final apiClient = ref.read(apiClientProvider);
-      
+
       // Prepare form data with proper structure
       final formData = <String, dynamic>{};
-      
+
       // Add text field values
       for (var entry in _controllers.entries) {
         final value = entry.value.text.trim();
@@ -951,30 +1045,30 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           formData[entry.key] = value;
         }
       }
-      
+
       // Add other form values (checkboxes, radios, dropdowns, etc.)
       for (var entry in _formValues.entries) {
         if (entry.value != null) {
           formData[entry.key] = entry.value;
         }
       }
-      
+
       debugPrint('Submitting to: /api/v1/service-requests/${widget.serviceRequestId}/questionnaire');
       debugPrint('Form data: $formData');
-      
+
       // Submit form data
       final response = await apiClient.patch(
         '/api/v1/service-requests/${widget.serviceRequestId}/questionnaire',
         data: formData,
       );
-      
+
       debugPrint('Submit response: ${response.data}');
-      
+
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(content: Text(l10n.formSubmittedSuccessfully)),
         );
-        context.go('/document-upload?serviceId=${widget.serviceId}&requestId=${widget.serviceRequestId}');
+        context.go('/request-submission?serviceId=${widget.serviceId}&requestId=${widget.serviceRequestId}');
       }
     } catch (e) {
       debugPrint('Form submission error: $e');
@@ -1011,7 +1105,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     if (field.required && (value == null || value.isEmpty)) {
       return l10n.thisFieldIsRequired;
     }
-    
+
     if (value != null && value.isNotEmpty) {
       switch (field.type) {
         case 'email':
@@ -1031,7 +1125,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           break;
       }
     }
-    
+
     return null;
   }
 
@@ -1057,7 +1151,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   Future<void> _pickImageFromCamera(String fieldName, StateSetter setModalState) async {
     final ImagePicker picker = ImagePicker();
     final XFile? image = await picker.pickImage(source: ImageSource.camera);
-    
+
     if (image != null) {
       final bytes = await image.readAsBytes();
       final platformFile = PlatformFile(
@@ -1066,15 +1160,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         bytes: bytes,
         path: image.path,
       );
+
+      _uploadedFiles[fieldName] ??= [];
+      _uploadedFiles[fieldName]!.add(platformFile);
       
-      setModalState(() {
-        _uploadedFiles[fieldName] ??= [];
-        _uploadedFiles[fieldName]!.add(platformFile);
-      });
-      setState(() {
-        _uploadedFiles[fieldName] ??= [];
-        _uploadedFiles[fieldName]!.add(platformFile);
-      });
+      setModalState(() {});
+      setState(() {});
     }
   }
 
@@ -1083,7 +1174,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       allowMultiple: true,
       type: FileType.any,
     );
-    
+
     if (result != null) {
       setModalState(() {
         _uploadedFiles[fieldName] = result.files;
@@ -1112,7 +1203,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       Colors.yellow, Colors.amber, Colors.orange, Colors.deepOrange,
       Colors.brown, Colors.grey, Colors.blueGrey, Colors.black,
     ];
-    
+
     showDialog(
       context: context,
       builder: (context) => AlertDialog(

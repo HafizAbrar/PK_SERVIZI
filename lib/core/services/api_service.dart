@@ -26,9 +26,7 @@ class ApiService {
           if (token != null) {
             options.headers['Authorization'] = 'Bearer $token';
           }
-          if (_locale == null) {
-            _locale = await _storage.read(key: 'locale') ?? 'en';
-          }
+          _locale ??= await _storage.read(key: 'locale') ?? 'en';
           options.headers['Accept-Language'] = _locale;
           if (kDebugMode) {
             print('REQUEST: ${options.method} ${options.path}');

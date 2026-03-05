@@ -325,5 +325,10 @@
   "transactionCard": "Carta Transazione",
   "invalidDataPleasecheckYourInputs": "Dati non validi. Controlla i tuoi dati e riprova.",
   "emailNotFound": "Email non trovata. Controlla il tuo indirizzo email e riprova.",
-  "accessGranted": "Accesso consentito"
+  "accessGranted": "Accesso consentito",
+  "payment": "Pagamento",
+  "form": "Modulo",
+  "paymentCompleted": "Pagamento completato con successo",
+  "formAndDocumentsCompleted": "Modulo e documenti completati",
+  "inProgress": "In Corso"
 }

@@ -45,7 +45,6 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
                 _buildStatusCard(request, l10n),
                 _buildServiceInfo(service, l10n),
                 _buildProgressTimeline(request, l10n),
-                if (request['documents'] != null) _buildDocuments(request['documents'], l10n),
                 _buildActionButtons(context, request, ref, l10n),
                 const SizedBox(height: 100),
               ],
@@ -58,7 +57,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
 
   Widget _buildHeader(BuildContext context, String title, AppLocalizations l10n) {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 48, 20, 32),
       decoration: BoxDecoration(
         color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
@@ -73,25 +72,37 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
           ),
         ],
       ),
-      child: Row(
+      child: Column(
         children: [
-          IconButton(
-            onPressed: () => context.pop(),
-            icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-            padding: EdgeInsets.zero,
-          ),
-          const SizedBox(width: 12),
-          Expanded(
-            child: TranslatedText(
-              title,
-              style: const TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
+          Row(
+            children: [
+              IconButton(
+                onPressed: () => context.pop(),
+                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
+                padding: EdgeInsets.zero,
               ),
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+              const Spacer(),
+            ],
+          ),
+          const SizedBox(height: 16),
+          ClipRRect(
+            borderRadius: BorderRadius.circular(50),
+            child: Image.asset(
+              'assets/logos/outer logo.png',
+              width: 100,
+              height: 100,
+              fit: BoxFit.cover,
             ),
+          ),
+          const SizedBox(height: 16),
+          TranslatedText(
+            title,
+            style: const TextStyle(
+              fontSize: 24,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),
@@ -189,8 +200,6 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
           ),
           const SizedBox(height: 20),
           _buildInfoRow(l10n.service, service['name'] ?? 'N/A', l10n, translate: true),
-          _buildInfoRow(l10n.code, service['code'] ?? 'N/A', l10n),
-          _buildInfoRow(l10n.category, service['category'] ?? 'N/A', l10n),
           _buildInfoRow(l10n.price, '€${service['basePrice'] ?? '0.00'}', l10n),
         ],
       ),
@@ -198,7 +207,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
   }
 
   Widget _buildProgressTimeline(Map<String, dynamic> request, AppLocalizations l10n) {
-    final statusHistory = request['statusHistory'] as List<dynamic>? ?? [];
+    final status = request['status'] ?? 'pending';
     
     return Container(
       margin: const EdgeInsets.all(20),
@@ -225,72 +234,150 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             ),
           ),
           const SizedBox(height: 20),
-          if (statusHistory.isEmpty)
-            Text(
-              l10n.noTimelineUpdates,
-              style: TextStyle(
-                fontSize: 14,
-                color: Colors.grey[600],
-              ),
-            )
-          else
-            ...statusHistory.map((history) => _buildTimelineItem(history, l10n)),
+          _buildTimelineStep(
+            1,
+            l10n.payment,
+            _getStepStatus(status, 'payment'),
+            l10n.paymentCompleted,
+            request['createdAt'],
+            l10n,
+          ),
+          _buildTimelineStep(
+            2,
+            '${l10n.form} & ${l10n.documents}',
+            _getStepStatus(status, 'form'),
+            l10n.formAndDocumentsCompleted,
+            request['formCompletedAt'],
+            l10n,
+          ),
+          _buildTimelineStep(
+            3,
+            l10n.submit,
+            _getStepStatus(status, 'submit'),
+            l10n.requestSubmittedSuccessfully,
+            request['completedAt'],
+            l10n,
+            isLast: true,
+          ),
         ],
       ),
     );
   }
 
-  Widget _buildTimelineItem(Map<String, dynamic> history, AppLocalizations l10n) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 20),
-      child: Row(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Container(
-            width: 16,
-            height: 16,
-            margin: const EdgeInsets.only(top: 2),
-            decoration: const BoxDecoration(
-              color: AppTheme.accentColor,
-              shape: BoxShape.circle,
-            ),
-          ),
-          const SizedBox(width: 16),
-          Expanded(
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
+  String _getStepStatus(String requestStatus, String step) {
+    switch (step) {
+      case 'payment':
+        return (requestStatus == 'payment_pending') ? 'pending' : 'completed';
+      case 'form':
+        if (requestStatus == 'payment_pending') return 'pending';
+        if (requestStatus == 'awaiting_form') return 'current';
+        if (requestStatus == 'awaiting_documents' || requestStatus == 'ready_to_submit' || requestStatus == 'submitted' || requestStatus == 'processing' || requestStatus == 'completed') return 'completed';
+        return 'pending';
+      case 'submit':
+        if (requestStatus == 'submitted' || requestStatus == 'processing' || requestStatus == 'completed') return 'completed';
+        if (requestStatus == 'ready_to_submit') return 'current';
+        return 'pending';
+      default:
+        return 'pending';
+    }
+  }
+
+  Widget _buildTimelineStep(
+    int stepNumber,
+    String title,
+    String status,
+    String description,
+    String? completedAt,
+    AppLocalizations l10n,
+    {bool isLast = false}
+  ) {
+    final isCompleted = status == 'completed';
+    final isCurrent = status == 'current';
+    final isPending = status == 'pending';
+
+    return Column(
+      children: [
+        Row(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Column(
               children: [
-                Text(
-                  '${_getStatusText(history['fromStatus'], l10n)} → ${_getStatusText(history['toStatus'], l10n)}',
-                  style: const TextStyle(
-                    fontSize: 15,
-                    fontWeight: FontWeight.bold,
-                    color: AppTheme.primaryColor,
+                Container(
+                  width: 40,
+                  height: 40,
+                  decoration: BoxDecoration(
+                    color: isCompleted
+                        ? const Color(0xFF10B981)
+                        : isCurrent
+                            ? AppTheme.accentColor
+                            : Colors.grey[300],
+                    shape: BoxShape.circle,
+                  ),
+                  child: Center(
+                    child: isCompleted
+                        ? const Icon(Icons.check, color: Colors.white, size: 20)
+                        : Text(
+                            stepNumber.toString(),
+                            style: TextStyle(
+                              color: isCurrent ? Colors.white : Colors.grey[600],
+                              fontWeight: FontWeight.bold,
+                              fontSize: 16,
+                            ),
+                          ),
                   ),
                 ),
-                if (history['notes'] != null) ...[
+                if (!isLast)
+                  Container(
+                    width: 2,
+                    height: 60,
+                    color: isCompleted ? const Color(0xFF10B981) : Colors.grey[300],
+                  ),
+              ],
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  Text(
+                    title,
+                    style: TextStyle(
+                      fontSize: 16,
+                      fontWeight: FontWeight.bold,
+                      color: isCompleted || isCurrent
+                          ? AppTheme.primaryColor
+                          : Colors.grey[600],
+                    ),
+                  ),
                   const SizedBox(height: 4),
                   Text(
-                    history['notes'],
+                    isCompleted
+                        ? description
+                        : isCurrent
+                            ? l10n.inProgress
+                            : l10n.pending,
                     style: TextStyle(
                       fontSize: 13,
                       color: Colors.grey[600],
                     ),
                   ),
+                  if (isCompleted && completedAt != null) ...[
+                    const SizedBox(height: 4),
+                    Text(
+                      _formatDate(completedAt),
+                      style: TextStyle(
+                        fontSize: 12,
+                        color: Colors.grey[500],
+                      ),
+                    ),
+                  ],
                 ],
-                const SizedBox(height: 4),
-                Text(
-                  _formatDate(history['createdAt']),
-                  style: TextStyle(
-                    fontSize: 12,
-                    color: Colors.grey[500],
-                  ),
-                ),
-              ],
+              ),
             ),
-          ),
-        ],
-      ),
+          ],
+        ),
+        if (!isLast) const SizedBox(height: 0),
+      ],
     );
   }
 
@@ -384,72 +471,6 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
         children: [
-          if (price != 0 && status != 'submitted' && status != 'completed')
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => _cancelRequest(context, request, ref, l10n),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: const Text(
-                  'Cancel Request',
-                  style: TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-            ),
-          if (price != 0 && status != 'submitted' && status != 'completed') const SizedBox(height: 12),
-          if (price == 0 && status != 'completed')
-            SizedBox(
-              width: double.infinity,
-              child: OutlinedButton(
-                onPressed: () => _deleteRequest(context, request, ref, l10n),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: Colors.red,
-                  side: const BorderSide(color: Colors.red),
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                ),
-                child: Text(
-                  'Delete Request',
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-            ),
-          if (price == 0 && status != 'completed') const SizedBox(height: 12),
-          if (status == 'draft')
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => _submitRequest(context, request, ref, l10n),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentColor,
-                  foregroundColor: AppTheme.primaryColor,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  l10n.submitRequest,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-            ),
           if (status == 'payment_pending')
             SizedBox(
               width: double.infinity,
@@ -494,33 +515,11 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
                 ),
               ),
             ),
-          if (status == 'awaiting_documents')
+          if (status == 'awaiting_documents' || status == 'ready_to_submit')
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => context.push('/document-upload?serviceId=${request['serviceId']}&requestId=${request['id']}'),
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: AppTheme.accentColor,
-                  foregroundColor: Colors.white,
-                  padding: const EdgeInsets.symmetric(vertical: 16),
-                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
-                  elevation: 0,
-                ),
-                child: Text(
-                  l10n.uploadDocuments,
-                  style: const TextStyle(
-                    fontSize: 14,
-                    fontWeight: FontWeight.bold,
-                    letterSpacing: 1,
-                  ),
-                ),
-              ),
-            ),
-          if (status == 'ready_to_submit')
-            SizedBox(
-              width: double.infinity,
-              child: ElevatedButton(
-                onPressed: () => context.push('/request-submission/${request['id']}'),
+                onPressed: () => _submitRequest(context, request, ref, l10n),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentColor,
                   foregroundColor: AppTheme.primaryColor,
@@ -538,6 +537,36 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
                 ),
               ),
             ),
+          if (status != 'submitted' && status != 'processing' && status != 'completed') ...[
+            if (status == 'payment_pending' || status == 'awaiting_form' || status == 'awaiting_documents' || status == 'ready_to_submit')
+              const SizedBox(height: 12),
+            SizedBox(
+              width: double.infinity,
+              child: OutlinedButton(
+                onPressed: () {
+                  if (price != 0 && status != 'payment_pending') {
+                    _cancelRequest(context, request, ref, l10n);
+                  } else {
+                    _deleteRequest(context, request, ref, l10n);
+                  }
+                },
+                style: OutlinedButton.styleFrom(
+                  foregroundColor: Colors.red,
+                  side: const BorderSide(color: Colors.red),
+                  padding: const EdgeInsets.symmetric(vertical: 16),
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+                child: Text(
+                  price != 0 && status != 'payment_pending' ? 'Cancel Request' : 'Delete Request',
+                  style: const TextStyle(
+                    fontSize: 14,
+                    fontWeight: FontWeight.bold,
+                    letterSpacing: 1,
+                  ),
+                ),
+              ),
+            ),
+          ],
         ],
       ),
     );
@@ -693,10 +722,22 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
         );
       }
     } catch (e) {
+      debugPrint('Submit error: $e');
       if (context.mounted) {
+        String errorMessage = l10n.error;
+        if (e.toString().contains('400')) {
+          errorMessage = 'Please complete all required steps before submitting';
+        } else if (e.toString().contains('DioException')) {
+          try {
+            final dioError = e as dynamic;
+            if (dioError.response?.data != null) {
+              errorMessage = dioError.response.data['message'] ?? dioError.response.data['error'] ?? errorMessage;
+            }
+          } catch (_) {}
+        }
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
-            content: Text('${l10n.error}: $e'),
+            content: Text(errorMessage),
             backgroundColor: const Color(0xFFEF4444),
             behavior: SnackBarBehavior.floating,
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),

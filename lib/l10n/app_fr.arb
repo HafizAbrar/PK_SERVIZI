@@ -325,5 +325,10 @@
   "transactionCard": "Carte de Transaction",
   "invalidDataPleasecheckYourInputs": "Données invalides. Veuillez vérifier vos entrées et réessayer.",
   "emailNotFound": "Email introuvable. Veuillez vérifier votre adresse email et réessayer.",
-  "accessGranted": "Accès accordé"
+  "accessGranted": "Accès accordé",
+  "payment": "Paiement",
+  "form": "Formulaire",
+  "paymentCompleted": "Paiement complété avec succès",
+  "formAndDocumentsCompleted": "Formulaire et documents complétés",
+  "inProgress": "En Cours"
 }
