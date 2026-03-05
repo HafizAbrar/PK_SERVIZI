@@ -276,7 +276,6 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
         child: Column(
           children: [
             Row(
-              crossAxisAlignment: CrossAxisAlignment.start,
               children: [
                 Container(
                   width: 56,
@@ -301,7 +300,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primaryColor,
-                      height: 3.5,
+                      height: 1.2,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
