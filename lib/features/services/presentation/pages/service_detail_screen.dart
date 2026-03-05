@@ -45,12 +45,29 @@ class ServiceDetailScreen extends ConsumerWidget {
         _buildHeader(context, service),
         Expanded(
           child: SingleChildScrollView(
+            padding: const EdgeInsets.all(20),
             child: Column(
               children: [
-                _buildServiceInfo(service, l10n),
-                _buildRequiredDocuments(service, l10n),
-                _buildFormSections(service, l10n),
-                _buildFAQs(ref, l10n),
+                _buildSectionTile(
+                  context,
+                  icon: Icons.info_outline,
+                  title: l10n.serviceDetails,
+                  onTap: () => _showServiceInfo(context, service, l10n),
+                ),
+                const SizedBox(height: 12),
+                _buildSectionTile(
+                  context,
+                  icon: Icons.description_outlined,
+                  title: l10n.requiredDocuments,
+                  onTap: () => _showRequiredDocuments(context, service, l10n),
+                ),
+                const SizedBox(height: 12),
+                _buildSectionTile(
+                  context,
+                  icon: Icons.help_outline,
+                  title: l10n.frequentlyAskedQuestions,
+                  onTap: () => _showFAQs(context, ref, l10n),
+                ),
                 const SizedBox(height: 100),
               ],
             ),
@@ -91,22 +108,15 @@ class ServiceDetailScreen extends ConsumerWidget {
             ],
           ),
           const SizedBox(height: 16),
-          Container(
-            padding: const EdgeInsets.all(20),
-            decoration: BoxDecoration(
-              color: Colors.white.withValues(alpha: 0.1),
-              borderRadius: BorderRadius.circular(20),
-            ),
-            child: ClipRRect(
-              borderRadius: BorderRadius.circular(20),
+          ClipRRect(
+              borderRadius: BorderRadius.circular(50),
               child: Image.asset(
-                'assets/logos/TuoCAF logo.png',
-                width: 70,
-                height: 30,
-                fit: BoxFit.fitWidth,
+                'assets/logos/outer logo.png',
+                width: 100,
+                height: 100,
+                fit: BoxFit.cover,
               ),
             ),
-          ),
           const SizedBox(height: 16),
           TranslatedText(
             service.name,
@@ -122,45 +132,124 @@ class ServiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildServiceInfo(Service service, AppLocalizations l10n) {
-    return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-          ),
-        ],
+  Widget _buildSectionTile(BuildContext context, {required IconData icon, required String title, required VoidCallback onTap}) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(16),
+      child: Container(
+        padding: const EdgeInsets.all(20),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(16),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Row(
+          children: [
+            ClipRRect(
+              borderRadius: BorderRadius.circular(28),
+              child: Image.asset(
+                'assets/logos/outer logo.png',
+                width: 50,
+                height: 60,
+                fit: BoxFit.cover,
+              ),
+            ),
+            const SizedBox(width: 16),
+            Expanded(
+              child: Text(
+                title,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryColor,
+                ),
+              ),
+            ),
+            Icon(Icons.chevron_right, color: Colors.grey[400], size: 24),
+          ],
+        ),
       ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.serviceDetails,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            ),
+    );
+  }
+
+  void _showServiceInfo(BuildContext context, Service service, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.backgroundLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-          const SizedBox(height: 20),
-          _buildDetailRow(l10n.code, service.code, l10n),
-          _buildDetailRow(l10n.category, service.category, l10n),
-          _buildDetailRow(l10n.price, '€${service.basePrice}', l10n),
-          const SizedBox(height: 16),
-          TranslatedText(
-            service.description,
-            style: TextStyle(
-              fontSize: 14,
-              color: Colors.grey[600],
-              height: 1.5,
-            ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                          padding: EdgeInsets.zero,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.serviceDetails,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  children: [
+                    TranslatedText(
+                      service.description,
+                      style: TextStyle(
+                        fontSize: 14,
+                        color: Colors.grey[600],
+                        height: 1.5,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ],
           ),
-        ],
+        ),
       ),
     );
   }
@@ -196,34 +285,70 @@ class ServiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildRequiredDocuments(Service service, AppLocalizations l10n) {
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+  void _showRequiredDocuments(BuildContext context, Service service, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.backgroundLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.requiredDocuments,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                          padding: EdgeInsets.zero,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.requiredDocuments,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  children: service.requiredDocuments.map((doc) => _buildDocumentTile(doc, l10n)).toList(),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          ...service.requiredDocuments.map((doc) => _buildDocumentTile(doc, l10n)),
-        ],
+        ),
       ),
     );
   }
@@ -289,47 +414,87 @@ class ServiceDetailScreen extends ConsumerWidget {
     );
   }
 
-  Widget _buildFormSections(Service service, AppLocalizations l10n) {
-    if (service.formSchema == null) return const SizedBox.shrink();
-    
-    return Container(
-      margin: const EdgeInsets.all(20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+  void _showFormSections(BuildContext context, Service service, AppLocalizations l10n) {
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.backgroundLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.requiredInformation,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                          padding: EdgeInsets.zero,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.requiredInformation,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: ListView(
+                  controller: scrollController,
+                  padding: const EdgeInsets.all(20),
+                  children: service.formSchema!.sections.map((section) => _buildFormSectionTile(section, l10n)).toList(),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          ...service.formSchema!.sections.map((section) => _buildSectionTile(section, l10n)),
-        ],
+        ),
       ),
     );
   }
 
-  Widget _buildSectionTile(FormSection section, AppLocalizations l10n) {
+  Widget _buildFormSectionTile(FormSection section, AppLocalizations l10n) {
     return Container(
       margin: const EdgeInsets.only(bottom: 12),
       padding: const EdgeInsets.all(16),
       decoration: BoxDecoration(
-        color: AppTheme.backgroundLight,
+        color: Colors.white,
         borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
+        ],
       ),
       child: Row(
         children: [
@@ -364,58 +529,114 @@ class ServiceDetailScreen extends ConsumerWidget {
               ],
             ),
           ),
-          Icon(Icons.chevron_right, color: Colors.grey[400]),
         ],
       ),
     );
   }
 
-  Widget _buildFAQs(WidgetRef ref, AppLocalizations l10n) {
+  void _showFAQs(BuildContext context, WidgetRef ref, AppLocalizations l10n) {
     final faqsAsync = ref.watch(serviceFaqsProvider(serviceId));
 
-    return Container(
-      margin: const EdgeInsets.symmetric(horizontal: 20),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(20),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => DraggableScrollableSheet(
+        initialChildSize: 0.7,
+        minChildSize: 0.5,
+        maxChildSize: 0.95,
+        builder: (context, scrollController) => Container(
+          decoration: const BoxDecoration(
+            color: AppTheme.backgroundLight,
+            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
           ),
-        ],
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Text(
-            l10n.frequentlyAskedQuestions,
-            style: const TextStyle(
-              fontSize: 18,
-              fontWeight: FontWeight.bold,
-              color: AppTheme.primaryColor,
-            ),
+          child: Column(
+            children: [
+              Container(
+                padding: const EdgeInsets.all(20),
+                decoration: const BoxDecoration(
+                  color: Colors.white,
+                  borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      width: 40,
+                      height: 4,
+                      decoration: BoxDecoration(
+                        color: Colors.grey[300],
+                        borderRadius: BorderRadius.circular(2),
+                      ),
+                    ),
+                    const SizedBox(height: 16),
+                    Row(
+                      children: [
+                        IconButton(
+                          onPressed: () => Navigator.pop(context),
+                          icon: const Icon(Icons.close),
+                          padding: EdgeInsets.zero,
+                        ),
+                        const SizedBox(width: 8),
+                        Text(
+                          l10n.frequentlyAskedQuestions,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ],
+                ),
+              ),
+              Expanded(
+                child: faqsAsync.when(
+                  data: (faqs) => faqs.isEmpty
+                      ? Center(
+                          child: Text(
+                            l10n.noFaqsAvailable,
+                            style: TextStyle(color: Colors.grey[600]),
+                          ),
+                        )
+                      : ListView(
+                          controller: scrollController,
+                          padding: const EdgeInsets.all(20),
+                          children: faqs.map((faq) => _buildFAQItem(faq['question'] ?? '', faq['answer'] ?? '')).toList(),
+                        ),
+                  loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+                  error: (_, __) => Center(
+                    child: Text(
+                      l10n.failedToLoadFaqs,
+                      style: TextStyle(color: Colors.grey[600]),
+                    ),
+                  ),
+                ),
+              ),
+            ],
           ),
-          const SizedBox(height: 16),
-          faqsAsync.when(
-            data: (faqs) => faqs.isEmpty 
-                ? Text(l10n.noFaqsAvailable, style: TextStyle(color: Colors.grey[600]))
-                : Column(children: faqs.map((faq) => _buildFAQItem(faq['question'] ?? '', faq['answer'] ?? '')).toList()),
-            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-            error: (_, __) => Text(l10n.failedToLoadFaqs, style: TextStyle(color: Colors.grey[600])),
-          ),
-        ],
+        ),
       ),
     );
   }
 
   Widget _buildFAQItem(String question, String answer) {
     return Container(
-      margin: const EdgeInsets.only(bottom: 16),
+      margin: const EdgeInsets.only(bottom: 12),
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(12),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withValues(alpha: 0.05),
+            blurRadius: 8,
+          ),
+        ],
+      ),
       child: ExpansionTile(
         tilePadding: EdgeInsets.zero,
-        childrenPadding: const EdgeInsets.only(bottom: 12),
+        childrenPadding: const EdgeInsets.only(top: 12),
         title: TranslatedText(
           question,
           style: const TextStyle(
@@ -430,6 +651,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             style: TextStyle(
               fontSize: 14,
               color: Colors.grey[600],
+              height: 1.5,
             ),
           ),
         ],

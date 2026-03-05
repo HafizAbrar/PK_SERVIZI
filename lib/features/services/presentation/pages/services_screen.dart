@@ -301,7 +301,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                       fontSize: 16,
                       fontWeight: FontWeight.bold,
                       color: AppTheme.primaryColor,
-                      height: 1.3,
+                      height: 3.5,
                     ),
                     maxLines: 2,
                     overflow: TextOverflow.ellipsis,
