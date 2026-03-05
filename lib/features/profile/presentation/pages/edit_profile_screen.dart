@@ -200,13 +200,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                                 backgroundColor: AppTheme.primaryColor,
                                 backgroundImage: _selectedImage != null ? FileImage(_selectedImage!) : null,
                                 child: _selectedImage == null 
-                                    ? ClipOval(
-                                        child: Image.asset(
-                                          'assets/logos/TuoCAF logo.png',
-                                          width: 120,
-                                          height: 120,
-                                          fit: BoxFit.cover,
-                                        ),
+                                    ? const Icon(
+                                        Icons.person,
+                                        size: 60,
+                                        color: Colors.white,
                                       )
                                     : null,
                               ),

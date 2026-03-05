@@ -1,10 +1,13 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../providers/profile_provider.dart';
 import '../../../auth/presentation/providers/auth_provider.dart';
+import '../../../../core/network/api_client.dart';
 
 class ProfileScreen extends ConsumerStatefulWidget {
   const ProfileScreen({super.key});
@@ -105,53 +108,115 @@ class _ProfileScreenState extends ConsumerState<ProfileScreen> {
   }
 
   Widget _buildAvatar(Map<String, dynamic> profile) {
-    return Container(
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.2),
-            blurRadius: 20,
-            offset: const Offset(0, 10),
-          ),
-        ],
-      ),
-      child: CircleAvatar(
-        radius: 50,
-        backgroundColor: Colors.white,
-        child: (profile['profile']?['avatarUrl'] != null && profile['profile']['avatarUrl'].toString().isNotEmpty)
-            ? ClipOval(
-                child: Image.network(
-                  profile['profile']['avatarUrl'],
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                  errorBuilder: (context, error, stackTrace) {
-                    return ClipOval(
-                      child: Image.asset(
-                        'assets/logos/TuoCAF logo.png',
-                        width: 100,
-                        height: 100,
-                        fit: BoxFit.cover,
-                      ),
-                    );
-                  },
-                  loadingBuilder: (context, child, loadingProgress) {
-                    if (loadingProgress == null) return child;
-                    return CircularProgressIndicator(color: AppTheme.primaryColor);
-                  },
-                ),
-              )
-            : ClipOval(
-                child: Image.asset(
-                  'assets/logos/TuoCAF logo.png',
-                  width: 100,
-                  height: 100,
-                  fit: BoxFit.cover,
-                ),
+    return Stack(
+      children: [
+        Container(
+          decoration: BoxDecoration(
+            shape: BoxShape.circle,
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withValues(alpha: 0.2),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
               ),
-      ),
+            ],
+          ),
+          child: CircleAvatar(
+            radius: 50,
+            backgroundColor: Colors.white,
+            child: (profile['profile']?['avatarUrl'] != null && profile['profile']['avatarUrl'].toString().isNotEmpty)
+                ? ClipOval(
+                    child: Image.network(
+                      profile['profile']['avatarUrl'],
+                      width: 100,
+                      height: 100,
+                      fit: BoxFit.cover,
+                      errorBuilder: (context, error, stackTrace) {
+                        return Icon(
+                          Icons.person,
+                          size: 50,
+                          color: AppTheme.primaryColor.withValues(alpha: 0.5),
+                        );
+                      },
+                      loadingBuilder: (context, child, loadingProgress) {
+                        if (loadingProgress == null) return child;
+                        return CircularProgressIndicator(color: AppTheme.primaryColor);
+                      },
+                    ),
+                  )
+                : Icon(
+                    Icons.person,
+                    size: 50,
+                    color: AppTheme.primaryColor.withValues(alpha: 0.5),
+                  ),
+          ),
+        ),
+        Positioned(
+          bottom: 0,
+          right: 0,
+          child: GestureDetector(
+            onTap: _pickAndUploadAvatar,
+            child: Container(
+              width: 36,
+              height: 36,
+              decoration: BoxDecoration(
+                color: AppTheme.accentColor,
+                shape: BoxShape.circle,
+                border: Border.all(color: Colors.white, width: 3),
+                boxShadow: [
+                  BoxShadow(
+                    color: Colors.black.withValues(alpha: 0.15),
+                    blurRadius: 8,
+                    offset: const Offset(0, 2),
+                  ),
+                ],
+              ),
+              child: const Icon(
+                Icons.camera_alt,
+                color: Colors.white,
+                size: 18,
+              ),
+            ),
+          ),
+        ),
+      ],
     );
+  }
+
+  Future<void> _pickAndUploadAvatar() async {
+    final l10n = AppLocalizations.of(context)!;
+    final picker = ImagePicker();
+    final pickedFile = await picker.pickImage(source: ImageSource.gallery);
+    
+    if (pickedFile == null) return;
+    
+    try {
+      final apiClient = ref.read(apiClientProvider);
+      final formData = FormData.fromMap({
+        'file': await MultipartFile.fromFile(pickedFile.path),
+      });
+      
+      await apiClient.post('/api/v1/users/avatar', data: formData);
+      
+      if (mounted) {
+        ref.invalidate(profileProvider);
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('Profile photo updated successfully'),
+            backgroundColor: const Color(0xFF10B981),
+          ),
+        );
+      }
+    } catch (e) {
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text('${l10n.errorUploadingAvatar}: $e'),
+            backgroundColor: const Color(0xFFEF4444),
+          ),
+        );
+      }
+    }
   }
 
   Widget _buildProfileContent(Map<String, dynamic> profile) {
