@@ -131,7 +131,7 @@ class ServiceDetailScreen extends ConsumerWidget {
                 icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                 padding: EdgeInsets.zero,
               ),
-              const SizedBox(width: 90),
+              const SizedBox(width: 75),
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(
@@ -675,6 +675,11 @@ class ServiceDetailScreen extends ConsumerWidget {
   }
 
   Widget _buildActionButton(BuildContext context, Service service, WidgetRef ref, AppLocalizations l10n) {
+    final price = double.tryParse(service.basePrice) ?? 0;
+    final buttonText = price > 0 
+        ? '${l10n.startService} - €${service.basePrice}'
+        : l10n.startService;
+    
     return Container(
       padding: const EdgeInsets.all(20),
       decoration: BoxDecoration(
@@ -699,7 +704,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             elevation: 0,
           ),
           child: Text(
-            '${l10n.startService} - €${service.basePrice}',
+            buttonText,
             style: const TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
@@ -722,13 +727,17 @@ class ServiceDetailScreen extends ConsumerWidget {
       
       if (context.mounted) {
         if (response.data['success'] == true) {
-          final paymentUrl = response.data['data']['paymentUrl'] as String;
+          final paymentUrl = response.data['data']['paymentUrl'] as String?;
           final serviceRequestId = response.data['data']['serviceRequestId'] as String?;
           
           debugPrint('Payment URL: $paymentUrl');
           debugPrint('Service Request ID: $serviceRequestId');
           
-          context.push('/payment-checkout?url=${Uri.encodeComponent(paymentUrl)}&serviceId=$serviceId&serviceRequestId=${serviceRequestId ?? ""}');
+          if (paymentUrl != null && paymentUrl.isNotEmpty) {
+            context.push('/payment-checkout?url=${Uri.encodeComponent(paymentUrl)}&serviceId=$serviceId&serviceRequestId=${serviceRequestId ?? ""}');
+          } else if (serviceRequestId != null) {
+            context.push('/service-request-form?serviceId=$serviceId&serviceRequestId=$serviceRequestId');
+          }
         }
       }
     } catch (e) {

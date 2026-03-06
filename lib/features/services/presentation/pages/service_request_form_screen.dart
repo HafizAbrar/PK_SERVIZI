@@ -128,7 +128,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 padding: EdgeInsets.zero,
               ),
               //const Spacer(),
-              const SizedBox(width: 90),
+              const SizedBox(width: 75),
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(
@@ -169,6 +169,26 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildProgressBar() {
     final l10n = AppLocalizations.of(context)!;
+    final serviceAsync = ref.watch(serviceDetailProvider(widget.serviceId));
+    final isFreeService = serviceAsync.maybeWhen(
+      data: (service) => double.tryParse(service.basePrice) == 0,
+      orElse: () => false,
+    );
+
+    if (isFreeService) {
+      return Container(
+        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+        color: Colors.white,
+        child: Row(
+          children: [
+            _buildProgressStep(1, '${l10n.form} & ${l10n.documents}', true, false),
+            Expanded(child: Container(height: 2, color: Colors.grey[300])),
+            _buildProgressStep(2, l10n.submit, false, false),
+          ],
+        ),
+      );
+    }
+
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
       color: Colors.white,

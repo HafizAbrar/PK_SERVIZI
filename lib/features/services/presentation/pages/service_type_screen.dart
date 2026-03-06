@@ -5,7 +5,6 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/api_client.dart';
 import '../../data/models/service_type.dart';
 import '../../../../generated/l10n/app_localizations.dart';
-import '../../../../core/widgets/translated_text.dart';
 import '../../../../core/services/translation_service.dart';
 
 final serviceTypesProvider = FutureProvider<List<ServiceType>>((ref) async {
@@ -112,7 +111,7 @@ class _ServiceTypeScreenState extends ConsumerState<ServiceTypeScreen> {
           ),
           const Spacer(),
           ClipRRect(
-            borderRadius: BorderRadius.circular(25),
+            borderRadius: BorderRadius.circular(50),
             child: Image.asset(
               'assets/logos/outer logo.png',
               width: 50,

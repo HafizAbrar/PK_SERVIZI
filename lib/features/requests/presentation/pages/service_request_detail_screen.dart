@@ -82,7 +82,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
                 icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                 padding: EdgeInsets.zero,
               ),
-              const SizedBox(width: 90),
+              const SizedBox(width: 75),
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(
@@ -208,6 +208,64 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
 
   Widget _buildProgressTimeline(Map<String, dynamic> request, AppLocalizations l10n) {
     final status = request['status'] ?? 'pending';
+    final service = request['service'] as Map<String, dynamic>;
+    final basePrice = service['basePrice'];
+    
+    debugPrint('Service basePrice: $basePrice (type: ${basePrice.runtimeType})');
+    
+    final isFreeService = (basePrice is int && basePrice == 0) || 
+                          (basePrice is double && basePrice == 0.0) || 
+                          (basePrice is String && (basePrice == '0' || basePrice == '0.0' || double.tryParse(basePrice) == 0));
+    
+    debugPrint('Is free service: $isFreeService');
+    
+    if (isFreeService) {
+      return Container(
+        margin: const EdgeInsets.all(20),
+        padding: const EdgeInsets.all(24),
+        decoration: BoxDecoration(
+          color: Colors.white,
+          borderRadius: BorderRadius.circular(20),
+          boxShadow: [
+            BoxShadow(
+              color: Colors.black.withValues(alpha: 0.05),
+              blurRadius: 10,
+            ),
+          ],
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Text(
+              l10n.progressTimeline,
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: AppTheme.primaryColor,
+              ),
+            ),
+            const SizedBox(height: 20),
+            _buildTimelineStep(
+              1,
+              '${l10n.form} & ${l10n.documents}',
+              _getStepStatus(status, 'form'),
+              l10n.formAndDocumentsCompleted,
+              request['formCompletedAt'],
+              l10n,
+            ),
+            _buildTimelineStep(
+              2,
+              l10n.submit,
+              _getStepStatus(status, 'submit'),
+              l10n.requestSubmittedSuccessfully,
+              request['completedAt'],
+              l10n,
+              isLast: true,
+            ),
+          ],
+        ),
+      );
+    }
     
     return Container(
       margin: const EdgeInsets.all(20),
@@ -578,31 +636,74 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
       builder: (context) {
         final reasonController = TextEditingController();
         return AlertDialog(
-          title: const Text('Cancel Request'),
-          content: Column(
-            mainAxisSize: MainAxisSize.min,
+          backgroundColor: Colors.white,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(20)),
+          title: Row(
             children: [
-              const Text('Are you sure you want to cancel this request? Refund will be processed immediately.'),
-              const SizedBox(height: 16),
-              TextField(
-                controller: reasonController,
-                decoration: const InputDecoration(
-                  labelText: 'Reason for cancellation *',
-                  border: OutlineInputBorder(),
+              Container(
+                padding: const EdgeInsets.all(8),
+                decoration: BoxDecoration(
+                  color: const Color(0xFFEF4444).withValues(alpha: 0.1),
+                  borderRadius: BorderRadius.circular(8),
                 ),
-                maxLines: 3,
+                child: const Icon(Icons.warning_amber_rounded, color: Color(0xFFEF4444), size: 24),
+              ),
+              const SizedBox(width: 12),
+              const Expanded(
+                child: Text(
+                  'Cancel Request',
+                  style: TextStyle(fontSize: 18, fontWeight: FontWeight.bold),
+                ),
               ),
             ],
+          ),
+          content: SingleChildScrollView(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                const Text(
+                  'Are you sure you want to cancel this request? Refund will be processed immediately.',
+                  style: TextStyle(fontSize: 14, height: 1.5),
+                ),
+                const SizedBox(height: 20),
+                TextField(
+                  controller: reasonController,
+                  decoration: InputDecoration(
+                    labelText: 'Reason for cancellation *',
+                    hintText: 'Please provide a reason...',
+                    border: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                    ),
+                    focusedBorder: OutlineInputBorder(
+                      borderRadius: BorderRadius.circular(12),
+                      borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+                    ),
+                    filled: true,
+                    fillColor: Colors.white,
+                  ),
+                  maxLines: 3,
+                ),
+              ],
+            ),
           ),
           actions: [
             TextButton(
               onPressed: () => Navigator.of(context).pop(null),
-              child: Text(l10n.cancel),
+              style: TextButton.styleFrom(
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+              ),
+              child: Text(l10n.cancel, style: const TextStyle(fontSize: 14)),
             ),
-            TextButton(
+            ElevatedButton(
               onPressed: () => Navigator.of(context).pop(reasonController.text),
-              style: TextButton.styleFrom(foregroundColor: Colors.red),
-              child: const Text('Cancel Request'),
+              style: ElevatedButton.styleFrom(
+                backgroundColor: const Color(0xFFEF4444),
+                foregroundColor: Colors.white,
+                padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 12),
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(8)),
+              ),
+              child: const Text('Cancel Request', style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold)),
             ),
           ],
         );
