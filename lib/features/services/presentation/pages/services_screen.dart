@@ -483,14 +483,44 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
         'serviceId': serviceId,
       });
       
+      debugPrint('Initiate service response: ${response.data}');
+      
       if (context.mounted) {
         if (response.data['success'] == true) {
-          final paymentUrl = response.data['data']['paymentUrl'] as String;
-          final serviceRequestId = response.data['data']['serviceRequestId'] as String;
-          context.push('/payment-checkout?url=${Uri.encodeComponent(paymentUrl)}&serviceRequestId=$serviceRequestId&serviceId=$serviceId');
+          final data = response.data['data'];
+          final paymentUrl = data?['paymentUrl'] as String?;
+          final serviceRequestId = data?['serviceRequestId'] as String?;
+          
+          debugPrint('Payment URL: $paymentUrl');
+          debugPrint('Service Request ID: $serviceRequestId');
+          
+          if (paymentUrl != null && paymentUrl.isNotEmpty) {
+            context.push('/payment-checkout?url=${Uri.encodeComponent(paymentUrl)}&serviceId=$serviceId&serviceRequestId=${serviceRequestId ?? ""}');
+          } else if (serviceRequestId != null && serviceRequestId.isNotEmpty) {
+            context.push('/service-request-form?serviceId=$serviceId&serviceRequestId=$serviceRequestId');
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(
+                content: Text(l10n.failedToInitiateServiceRequest),
+                backgroundColor: const Color(0xFFEF4444),
+                behavior: SnackBarBehavior.floating,
+                shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+              ),
+            );
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(
+              content: Text(l10n.failedToInitiateServiceRequest),
+              backgroundColor: const Color(0xFFEF4444),
+              behavior: SnackBarBehavior.floating,
+              shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            ),
+          );
         }
       }
     } catch (e) {
+      debugPrint('Error initiating service request: $e');
       if (context.mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(

@@ -79,22 +79,28 @@ class MainNavigationScreen extends ConsumerWidget {
     final currentIndex = ref.watch(navigationIndexProvider);
     final isActive = currentIndex == index;
     
-    return GestureDetector(
+    return InkWell(
       onTap: () => ref.read(navigationIndexProvider.notifier).state = index,
-      child: Column(
-        mainAxisSize: MainAxisSize.min,
-        children: [
-          Icon(icon, color: isActive ? AppTheme.accentColor : Colors.white70, size: 24),
-          const SizedBox(height: 4),
-          Text(
-            label,
-            style: TextStyle(
-              fontSize: 9,
-              color: isActive ? AppTheme.accentColor : Colors.white70,
-              fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+      splashColor: AppTheme.accentColor.withValues(alpha: 0.3),
+      highlightColor: AppTheme.accentColor.withValues(alpha: 0.1),
+      borderRadius: BorderRadius.circular(12),
+      child: Container(
+        padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 8),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            Icon(icon, color: isActive ? AppTheme.accentColor : Colors.white70, size: 24),
+            const SizedBox(height: 4),
+            Text(
+              label,
+              style: TextStyle(
+                fontSize: 9,
+                color: isActive ? AppTheme.accentColor : Colors.white70,
+                fontWeight: isActive ? FontWeight.bold : FontWeight.normal,
+              ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }

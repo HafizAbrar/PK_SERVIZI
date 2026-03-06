@@ -128,7 +128,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 padding: EdgeInsets.zero,
               ),
               //const Spacer(),
-              const SizedBox(width: 75),
+              const SizedBox(width: 60),
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(

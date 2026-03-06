@@ -53,9 +53,13 @@ flutter:
     - assets/images/
     - assets/flags/
 
-flutter_launcher_icons:
+
+
+flutter_icons:
   android: true
   ios: true
-  image_path: "assets/logos/app icon.png"
-  remove_alpha_ios: true
+  image_path: "assets/logos/outer_logo_padded.png"
+  adaptive_icon_background: "#FFFFFF"
+  adaptive_icon_foreground: "assets/logos/outer_logo_padded.png"
   min_sdk_android: 21
+  remove_alpha_ios: true
