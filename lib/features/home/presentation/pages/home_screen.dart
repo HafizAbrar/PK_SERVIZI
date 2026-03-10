@@ -470,20 +470,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
   Widget _buildEmptyRequests() {
     final l10n = AppLocalizations.of(context)!;
     
-    return Container(
-      width: 280,
-      margin: const EdgeInsets.only(right: 16),
-      padding: const EdgeInsets.all(24),
-      decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(16),
-        boxShadow: [
-          BoxShadow(
-            color: Colors.black.withValues(alpha: 0.05),
-            blurRadius: 10,
-          ),
-        ],
-      ),
+    return Center(
       child: Column(
         mainAxisAlignment: MainAxisAlignment.center,
         children: [
@@ -493,16 +480,25 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
               color: AppTheme.primaryColor.withValues(alpha: 0.05),
               borderRadius: BorderRadius.circular(12),
             ),
-            child: const Icon(Icons.description, color: AppTheme.primaryColor, size: 32),
+            child: const Icon(Icons.description, color: AppTheme.primaryColor, size: 48),
           ),
-          const SizedBox(height: 12),
+          const SizedBox(height: 16),
           Text(
             l10n.noActiveRequests,
             style: const TextStyle(
-              fontSize: 14,
+              fontSize: 16,
               fontWeight: FontWeight.bold,
               color: AppTheme.primaryColor,
             ),
+          ),
+          const SizedBox(height: 8),
+          Text(
+            'Start a new service request to see it here',
+            style: TextStyle(
+              fontSize: 14,
+              color: Colors.grey[600],
+            ),
+            textAlign: TextAlign.center,
           ),
         ],
       ),

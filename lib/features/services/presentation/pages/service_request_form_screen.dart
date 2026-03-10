@@ -41,6 +41,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   final Map<String, TextEditingController> _controllers = {};
   final Map<String, dynamic> _formValues = {};
   final Map<String, List<PlatformFile>> _uploadedFiles = {};
+  service_models.FormSection? _currentSection;
 
   @override
   void dispose() {
@@ -360,6 +361,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   void _showSectionDialog(service_models.FormSection section) {
+    _currentSection = section;
     // Initialize controllers for all fields in the section
     for (var field in section.fields) {
       if (field.type != 'hidden') {
@@ -373,113 +375,167 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       context: context,
       isScrollControlled: true,
       backgroundColor: Colors.transparent,
-      builder: (context) => Padding(
-        padding: EdgeInsets.only(
-          bottom: MediaQuery.of(context).viewInsets.bottom,
-        ),
-        child: Container(
-          decoration: const BoxDecoration(
-            color: Colors.white,
-            borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
-          ),
-          padding: const EdgeInsets.all(24),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              Row(
+      builder: (context) => StatefulBuilder(
+        builder: (context, setModalState) {
+          return Padding(
+            padding: EdgeInsets.only(
+              bottom: MediaQuery.of(context).viewInsets.bottom,
+            ),
+            child: Container(
+              decoration: const BoxDecoration(
+                color: Colors.white,
+                borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              padding: const EdgeInsets.all(24),
+              child: Column(
+                mainAxisSize: MainAxisSize.min,
+                crossAxisAlignment: CrossAxisAlignment.start,
                 children: [
+                  Row(
+                    children: [
+                      Expanded(
+                        child: TranslatedText(
+                          section.title,
+                          style: const TextStyle(
+                            fontSize: 20,
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                      ),
+                      IconButton(
+                        onPressed: () => Navigator.pop(context),
+                        icon: const Icon(Icons.close),
+                      ),
+                    ],
+                  ),
+                  const SizedBox(height: 16),
                   Expanded(
-                    child: TranslatedText(
-                      section.title,
-                      style: const TextStyle(
-                        fontSize: 20,
-                        fontWeight: FontWeight.bold,
-                        color: AppTheme.primaryColor,
+                    child: SingleChildScrollView(
+                      child: Column(
+                        children: section.fields
+                            .where((field) => field.type != 'hidden')
+                            .map((field) => Padding(
+                          padding: const EdgeInsets.only(bottom: 16),
+                          child: Column(
+                            crossAxisAlignment: CrossAxisAlignment.start,
+                            children: [
+                              TranslatedText(
+                                '${field.label}${field.required ? ' *' : ''}',
+                                style: const TextStyle(
+                                  fontSize: 14,
+                                  fontWeight: FontWeight.w500,
+                                  color: AppTheme.primaryColor,
+                                ),
+                              ),
+                              const SizedBox(height: 8),
+                              _buildFieldWidgetWithConditionModal(field, section.fields, setModalState),
+                            ],
+                          ),
+                        ))
+                            .toList(),
                       ),
                     ),
                   ),
-                  IconButton(
-                    onPressed: () => Navigator.pop(context),
-                    icon: const Icon(Icons.close),
+                  const SizedBox(height: 16),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      onPressed: () {
+                        setState(() {
+                          for (var field in section.fields) {
+                            switch (field.type) {
+                              case 'text':
+                              case 'email':
+                              case 'phone':
+                              case 'number':
+                              case 'date':
+                              case 'time':
+                              case 'datetime':
+                              case 'textarea':
+                              case 'url':
+                              case 'password':
+                                final value = _controllers[field.name]?.text;
+                                if (value?.isNotEmpty == true) {
+                                  _formValues[field.name] = value;
+                                }
+                                break;
+                            }
+                          }
+                        });
+                        Navigator.pop(context);
+                      },
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: AppTheme.accentColor,
+                        foregroundColor: Colors.white,
+                        padding: const EdgeInsets.symmetric(vertical: 16),
+                        shape: RoundedRectangleBorder(
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                      ),
+                      child: const Text(
+                        'Save',
+                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      ),
+                    ),
                   ),
                 ],
               ),
-              const SizedBox(height: 16),
-              Expanded(
-                child: SingleChildScrollView(
-                  child: Column(
-                    children: section.fields
-                        .where((field) => field.type != 'hidden')
-                        .map((field) => Padding(
-                      padding: const EdgeInsets.only(bottom: 16),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          TranslatedText(
-                            '${field.label}${field.required ? ' *' : ''}',
-                            style: const TextStyle(
-                              fontSize: 14,
-                              fontWeight: FontWeight.w500,
-                              color: AppTheme.primaryColor,
-                            ),
-                          ),
-                          const SizedBox(height: 8),
-                          _buildFieldWidget(field),
-                        ],
-                      ),
-                    ))
-                        .toList(),
-                  ),
-                ),
-              ),
-              const SizedBox(height: 16),
-              SizedBox(
-                width: double.infinity,
-                child: ElevatedButton(
-                  onPressed: () {
-                    setState(() {
-                      for (var field in section.fields) {
-                        switch (field.type) {
-                          case 'text':
-                          case 'email':
-                          case 'phone':
-                          case 'number':
-                          case 'date':
-                          case 'time':
-                          case 'datetime':
-                          case 'textarea':
-                          case 'url':
-                          case 'password':
-                            final value = _controllers[field.name]?.text;
-                            if (value?.isNotEmpty == true) {
-                              _formValues[field.name] = value;
-                            }
-                            break;
-                        // Other field types (checkbox, select, radio, file, etc.) are already handled in their respective widgets
-                        }
-                      }
-                    });
-                    Navigator.pop(context);
-                  },
-                  style: ElevatedButton.styleFrom(
-                    backgroundColor: AppTheme.accentColor,
-                    foregroundColor: Colors.white,
-                    padding: const EdgeInsets.symmetric(vertical: 16),
-                    shape: RoundedRectangleBorder(
-                      borderRadius: BorderRadius.circular(12),
-                    ),
-                  ),
-                  child: const Text(
-                    'Save',
-                    style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
-                  ),
-                ),
-              ),
-            ],
-          ),
-        ),
+            ),
+          );
+        },
       ),
+    );
+  }
+
+  Widget _buildFieldWidgetWithConditionModal(service_models.FormField field, List<service_models.FormField> allFields, StateSetter setModalState) {
+    if (field.type == 'file' || field.type == 'text' || field.type == 'textarea') {
+      for (var radioField in allFields) {
+        if (radioField.type == 'radio') {
+          if (field.name.toLowerCase().contains(radioField.name.toLowerCase())) {
+            final selectedValue = _formValues[radioField.name];
+            
+            if (radioField.name.toLowerCase().contains('alone') && 
+                field.name.toLowerCase().contains('member')) {
+              final isAlone = selectedValue == 'Yes' || selectedValue == 'yes';
+              if (isAlone) return const SizedBox.shrink();
+            } else if (selectedValue == 'No' || selectedValue == 'no') {
+              return const SizedBox.shrink();
+            }
+            break;
+          }
+        }
+      }
+    }
+    return _buildFieldWidgetModal(field, setModalState);
+  }
+
+  Widget _buildFieldWidgetModal(service_models.FormField field, StateSetter setModalState) {
+    switch (field.type) {
+      case 'radio':
+        return _buildRadioFieldModal(field, setModalState);
+      default:
+        return _buildFieldWidget(field);
+    }
+  }
+
+  Widget _buildRadioFieldModal(service_models.FormField field, StateSetter setModalState) {
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...field.options?.map((option) => RadioListTile<String>(
+          title: TranslatedText(option),
+          value: option,
+          groupValue: _formValues[field.name],
+          onChanged: (value) {
+            setState(() {
+              _formValues[field.name] = value;
+            });
+            setModalState(() {});
+          },
+          contentPadding: EdgeInsets.zero,
+        )).toList() ?? [],
+      ],
     );
   }
 
@@ -609,33 +665,21 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildRadioField(service_models.FormField field) {
-    return StatefulBuilder(
-      builder: (context, setModalState) {
-        return Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
-          children: [
-            if (field.required)
-              TranslatedText(
-                '${field.label} *',
-                style: const TextStyle(fontSize: 14, fontWeight: FontWeight.w500, color: Color(0xFF111418)),
-              ),
-            ...field.options?.map((option) => RadioListTile<String>(
-              title: TranslatedText(option),
-              value: option,
-              groupValue: _formValues[field.name],
-              onChanged: (value) {
-                setModalState(() {
-                  _formValues[field.name] = value;
-                });
-                setState(() {
-                  _formValues[field.name] = value;
-                });
-              },
-              contentPadding: EdgeInsets.zero,
-            )).toList() ?? [],
-          ],
-        );
-      },
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        ...field.options?.map((option) => RadioListTile<String>(
+          title: TranslatedText(option),
+          value: option,
+          groupValue: _formValues[field.name],
+          onChanged: (value) {
+            setState(() {
+              _formValues[field.name] = value;
+            });
+          },
+          contentPadding: EdgeInsets.zero,
+        )).toList() ?? [],
+      ],
     );
   }
 

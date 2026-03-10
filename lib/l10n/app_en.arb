@@ -330,5 +330,7 @@
   "form": "Form",
   "paymentCompleted": "Payment completed successfully",
   "formAndDocumentsCompleted": "Form and documents completed",
-  "inProgress": "In Progress"
+  "inProgress": "In Progress",
+  "firstName": "First Name",
+  "surname": "Surname"
 }

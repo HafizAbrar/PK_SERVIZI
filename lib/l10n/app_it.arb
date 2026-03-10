@@ -330,5 +330,7 @@
   "form": "Modulo",
   "paymentCompleted": "Pagamento completato con successo",
   "formAndDocumentsCompleted": "Modulo e documenti completati",
-  "inProgress": "In Corso"
+  "inProgress": "In Corso",
+  "firstName": "Nome",
+  "surname": "Cognome"
 }

@@ -330,5 +330,7 @@
   "form": "Formulaire",
   "paymentCompleted": "Paiement complété avec succès",
   "formAndDocumentsCompleted": "Formulaire et documents complétés",
-  "inProgress": "En Cours"
+  "inProgress": "En Cours",
+  "firstName": "Prénom",
+  "surname": "Nom de famille"
 }

@@ -18,10 +18,12 @@ class EditProfileScreen extends ConsumerStatefulWidget {
 
 class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
   final _formKey = GlobalKey<FormState>();
-  final _nameController = TextEditingController();
+  final _firstNameController = TextEditingController();
+  final _surnameController = TextEditingController();
   final _emailController = TextEditingController();
   final _phoneController = TextEditingController();
   final _fiscalCodeController = TextEditingController();
+  String _selectedCountryCode = '+39';
   File? _selectedImage;
   bool isLoading = false;
   bool isLoadingProfile = true;
@@ -34,7 +36,8 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
 
   @override
   void dispose() {
-    _nameController.dispose();
+    _firstNameController.dispose();
+    _surnameController.dispose();
     _emailController.dispose();
     _phoneController.dispose();
     _fiscalCodeController.dispose();
@@ -79,9 +82,21 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       final profile = response.data;
       
       setState(() {
-        _nameController.text = profile?['fullName'] ?? '';
+        final fullName = profile?['fullName'] ?? '';
+        final nameParts = fullName.split(' ');
+        _firstNameController.text = nameParts.isNotEmpty ? nameParts.first : '';
+        _surnameController.text = nameParts.length > 1 ? nameParts.sublist(1).join(' ') : '';
         _emailController.text = profile?['email'] ?? '';
-        _phoneController.text = profile?['phone'] ?? '';
+        final phone = profile?['phone'] ?? '';
+        if (phone.startsWith('+')) {
+          final parts = phone.split(' ');
+          if (parts.isNotEmpty) {
+            _selectedCountryCode = parts[0];
+            _phoneController.text = parts.length > 1 ? parts.sublist(1).join(' ') : '';
+          }
+        } else {
+          _phoneController.text = phone;
+        }
         _fiscalCodeController.text = profile?['fiscalCode'] ?? '';
         isLoadingProfile = false;
       });
@@ -108,9 +123,9 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       }
       
       final profileData = {
-        'fullName': _nameController.text,
+        'fullName': '${_firstNameController.text} ${_surnameController.text}'.trim(),
         'email': _emailController.text,
-        'phone': _phoneController.text,
+        'phone': '$_selectedCountryCode ${_phoneController.text}',
         'fiscalCode': _fiscalCodeController.text,
       };
 
@@ -222,8 +237,14 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                       ),
                       const SizedBox(height: AppTheme.spacingXLarge),
                       _buildField(
-                        controller: _nameController,
-                        label: l10n.fullName,
+                        controller: _firstNameController,
+                        label: l10n.firstName,
+                        icon: Icons.person_outline,
+                      ),
+                      const SizedBox(height: AppTheme.spacingMedium),
+                      _buildField(
+                        controller: _surnameController,
+                        label: l10n.surname,
                         icon: Icons.person_outline,
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
@@ -234,12 +255,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                         keyboard: TextInputType.emailAddress,
                       ),
                       const SizedBox(height: AppTheme.spacingMedium),
-                      _buildField(
-                        controller: _phoneController,
-                        label: l10n.phoneNumber,
-                        icon: Icons.phone_outlined,
-                        keyboard: TextInputType.phone,
-                      ),
+                      _buildPhoneField(),
                       const SizedBox(height: AppTheme.spacingMedium),
                       _buildField(
                         controller: _fiscalCodeController,
@@ -276,6 +292,41 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
                 ),
               ),
       ),
+    );
+  }
+
+  Widget _buildPhoneField() {
+    final l10n = AppLocalizations.of(context)!;
+    
+    return Row(
+      children: [
+        SizedBox(
+          width: 110,
+          child: DropdownButtonFormField<String>(
+            value: _selectedCountryCode,
+            decoration: AppTheme.inputDecoration('Code'),
+            items: const [
+              DropdownMenuItem(value: '+39', child: Text('+39')),
+              DropdownMenuItem(value: '+1', child: Text('+1')),
+              DropdownMenuItem(value: '+44', child: Text('+44')),
+              DropdownMenuItem(value: '+33', child: Text('+33')),
+              DropdownMenuItem(value: '+49', child: Text('+49')),
+            ],
+            onChanged: (value) {
+              setState(() => _selectedCountryCode = value!);
+            },
+          ),
+        ),
+        const SizedBox(width: 12),
+        Expanded(
+          child: _buildField(
+            controller: _phoneController,
+            label: l10n.phoneNumber,
+            icon: Icons.phone_outlined,
+            keyboard: TextInputType.phone,
+          ),
+        ),
+      ],
     );
   }
 
