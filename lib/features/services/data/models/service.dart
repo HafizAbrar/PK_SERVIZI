@@ -91,6 +91,16 @@ class FormField {
   final String label;
   final bool required;
   final List<String>? options;
+  final List<FormField>? subFields;
+  final Map<String, dynamic>? dependsOn;
+  final Map<String, dynamic>? conditionalOn;
+  final String? placeholder;
+  final String? description;
+  final int? order;
+  final int? maxLength;
+  final String? defaultValue;
+  final String? accept;
+  final bool? multiple;
 
   const FormField({
     required this.name,
@@ -98,6 +108,16 @@ class FormField {
     required this.label,
     required this.required,
     this.options,
+    this.subFields,
+    this.dependsOn,
+    this.conditionalOn,
+    this.placeholder,
+    this.description,
+    this.order,
+    this.maxLength,
+    this.defaultValue,
+    this.accept,
+    this.multiple,
   });
 
   factory FormField.fromJson(Map<String, dynamic> json) => _$FormFieldFromJson(json);

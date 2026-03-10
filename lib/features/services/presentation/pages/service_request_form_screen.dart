@@ -223,13 +223,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             child: isPast
                 ? const Icon(Icons.check, color: Colors.white, size: 16)
                 : Text(
-                    step.toString(),
-                    style: TextStyle(
-                      color: isCompleted ? Colors.white : Colors.grey[600],
-                      fontWeight: FontWeight.bold,
-                      fontSize: 14,
-                    ),
-                  ),
+              step.toString(),
+              style: TextStyle(
+                color: isCompleted ? Colors.white : Colors.grey[600],
+                fontWeight: FontWeight.bold,
+                fontSize: 14,
+              ),
+            ),
           ),
         ),
         const SizedBox(height: 4),
@@ -489,25 +489,42 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildFieldWidgetWithConditionModal(service_models.FormField field, List<service_models.FormField> allFields, StateSetter setModalState) {
-    if (field.type == 'file' || field.type == 'text' || field.type == 'textarea') {
+    final fieldNameLower = field.name.toLowerCase();
+    final fieldLabelLower = field.label.toLowerCase();
+    
+    // Check if field contains documentation/receipt keywords
+    final hasDocKeyword = fieldNameLower.contains('document') || 
+                         fieldNameLower.contains('receipt') ||
+                         fieldLabelLower.contains('document') ||
+                         fieldLabelLower.contains('receipt');
+    
+    if (hasDocKeyword) {
+      // Find related radio button
       for (var radioField in allFields) {
         if (radioField.type == 'radio') {
-          if (field.name.toLowerCase().contains(radioField.name.toLowerCase())) {
-            final selectedValue = _formValues[radioField.name];
-            
-            if (radioField.name.toLowerCase().contains('alone') && 
-                field.name.toLowerCase().contains('member')) {
-              final isAlone = selectedValue == 'Yes' || selectedValue == 'yes';
-              if (isAlone) return const SizedBox.shrink();
-            } else if (selectedValue == 'No' || selectedValue == 'no') {
-              return const SizedBox.shrink();
-            }
-            break;
+          final selectedValue = _formValues[radioField.name];
+          final radioNameLower = radioField.name.toLowerCase();
+          final radioLabelLower = radioField.label.toLowerCase();
+          
+          // Check if radio is related to this field by shared keywords
+          final fieldKeywords = _extractKeywords(fieldNameLower + ' ' + fieldLabelLower);
+          final radioKeywords = _extractKeywords(radioNameLower + ' ' + radioLabelLower);
+          final hasCommonKeyword = fieldKeywords.any((kw) => radioKeywords.contains(kw));
+          
+          if (hasCommonKeyword && (selectedValue == 'No' || selectedValue == 'no')) {
+            return const SizedBox.shrink();
           }
         }
       }
     }
     return _buildFieldWidgetModal(field, setModalState);
+  }
+
+  List<String> _extractKeywords(String text) {
+    return text
+        .split(RegExp(r'[\s_-]+'))
+        .where((word) => word.length > 2 && !['the', 'and', 'for', 'you', 'are', 'have', 'do', 'or'].contains(word))
+        .toList();
   }
 
   Widget _buildFieldWidgetModal(service_models.FormField field, StateSetter setModalState) {
@@ -1229,7 +1246,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
       _uploadedFiles[fieldName] ??= [];
       _uploadedFiles[fieldName]!.add(platformFile);
-      
+
       setModalState(() {});
       setState(() {});
     }

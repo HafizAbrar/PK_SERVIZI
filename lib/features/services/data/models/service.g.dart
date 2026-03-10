@@ -88,6 +88,18 @@ FormField _$FormFieldFromJson(Map<String, dynamic> json) => FormField(
   options: (json['options'] as List<dynamic>?)
       ?.map((e) => e as String)
       .toList(),
+  subFields: (json['subFields'] as List<dynamic>?)
+      ?.map((e) => FormField.fromJson(e as Map<String, dynamic>))
+      .toList(),
+  dependsOn: json['dependsOn'] as Map<String, dynamic>?,
+  conditionalOn: json['conditionalOn'] as Map<String, dynamic>?,
+  placeholder: json['placeholder'] as String?,
+  description: json['description'] as String?,
+  order: (json['order'] as num?)?.toInt(),
+  maxLength: (json['maxLength'] as num?)?.toInt(),
+  defaultValue: json['defaultValue'] as String?,
+  accept: json['accept'] as String?,
+  multiple: json['multiple'] as bool?,
 );
 
 Map<String, dynamic> _$FormFieldToJson(FormField instance) => <String, dynamic>{
@@ -96,6 +108,16 @@ Map<String, dynamic> _$FormFieldToJson(FormField instance) => <String, dynamic>{
   'label': instance.label,
   'required': instance.required,
   'options': instance.options,
+  'subFields': instance.subFields,
+  'dependsOn': instance.dependsOn,
+  'conditionalOn': instance.conditionalOn,
+  'placeholder': instance.placeholder,
+  'description': instance.description,
+  'order': instance.order,
+  'maxLength': instance.maxLength,
+  'defaultValue': instance.defaultValue,
+  'accept': instance.accept,
+  'multiple': instance.multiple,
 };
 
 ServiceTypeInfo _$ServiceTypeInfoFromJson(Map<String, dynamic> json) =>
