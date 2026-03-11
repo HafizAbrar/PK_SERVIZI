@@ -324,7 +324,7 @@ class _ServicesScreenState extends ConsumerState<ServicesScreen> {
                 ),
                 const SizedBox(width: 4),
                 Text(
-                  service['basePrice'] ?? '0.00',
+                  '€${(service['basePrice'] is double ? service['basePrice'] : double.tryParse(service['basePrice']?.toString() ?? '0') ?? 0).toStringAsFixed(2)}',
                   style: const TextStyle(
                     fontSize: 22,
                     fontWeight: FontWeight.bold,

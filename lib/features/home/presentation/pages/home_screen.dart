@@ -641,6 +641,17 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     final l10n = AppLocalizations.of(context)!;
     final serviceTypes = _cachedServiceTypes ?? [];
     
+    // Filter to show only these 4 service types
+    final filteredServices = serviceTypes.where((service) {
+      final name = (service['name'] ?? '').toString().toLowerCase();
+      return name.contains('730') || 
+             name.contains('isee') || 
+             name.contains('disoccupazione') || 
+             name.contains('naspi') ||
+             name.contains('permesso') || 
+             name.contains('soggiorno');
+    }).toList();
+    
     return Padding(
       padding: const EdgeInsets.symmetric(horizontal: 20),
       child: Column(
@@ -655,22 +666,22 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
             ),
           ),
           const SizedBox(height: 16),
-          if (serviceTypes.isEmpty)
+          if (filteredServices.isEmpty)
             Column(
               children: [
-                _buildServiceListTile(l10n.isee2024, l10n.socialBenefits, Icons.family_restroom, true),
+                _buildServiceListTile(l10n.modello730, l10n.incomeTax, Icons.receipt_long, true, null),
                 const SizedBox(height: 12),
-                _buildServiceListTile(l10n.modello730, l10n.incomeTax, Icons.receipt_long, true),
+                _buildServiceListTile(l10n.isee2024, l10n.socialBenefits, Icons.family_restroom, true, null),
                 const SizedBox(height: 12),
-                _buildServiceListTile(l10n.imuTari, l10n.propertyTax, Icons.home_work, true),
+                _buildServiceListTile('Disoccupazione/NASPI', 'Unemployment Benefits', Icons.work_off, true, null),
                 const SizedBox(height: 12),
-                _buildServiceListTile(l10n.successions, l10n.inheritance, Icons.history_edu, true),
+                _buildServiceListTile('Permesso/Carta di Soggiorno', 'Residence Permit', Icons.card_travel, true, null),
               ],
             )
           else
             Column(
-              children: serviceTypes.take(4).map((service) {
-                final index = serviceTypes.indexOf(service);
+              children: filteredServices.take(4).map((service) {
+                final index = filteredServices.indexOf(service);
                 final isActive = service['isActive'] ?? true;
                 return Column(
                   children: [
@@ -679,8 +690,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
                       service['description'] ?? '',
                       _getServiceIcon(service['name']),
                       isActive,
+                      service['id'],
                     ),
-                    if (index < serviceTypes.take(4).length - 1) const SizedBox(height: 12),
+                    if (index < filteredServices.take(4).length - 1) const SizedBox(height: 12),
                   ],
                 );
               }).toList(),
@@ -690,9 +702,9 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
     );
   }
 
-  Widget _buildServiceListTile(String title, String subtitle, IconData icon, bool isActive) {
+  Widget _buildServiceListTile(String title, String subtitle, IconData icon, bool isActive, String? serviceTypeId) {
     return GestureDetector(
-      onTap: isActive ? () => ref.read(navigationIndexProvider.notifier).state = 1 : null,
+      onTap: isActive && serviceTypeId != null ? () => context.push('/services/$serviceTypeId') : null,
       child: Opacity(
         opacity: isActive ? 1.0 : 0.5,
         child: Container(
