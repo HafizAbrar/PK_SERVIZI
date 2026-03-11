@@ -332,5 +332,6 @@
   "formAndDocumentsCompleted": "Formulaire et documents complétés",
   "inProgress": "En Cours",
   "firstName": "Prénom",
-  "surname": "Nom de famille"
+  "surname": "Nom de famille",
+  "fieldsCompleted": "champs complétés"
 }

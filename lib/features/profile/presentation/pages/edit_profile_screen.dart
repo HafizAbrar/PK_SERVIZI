@@ -8,6 +8,7 @@ import '../../../../generated/l10n/app_localizations.dart';
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/network/api_client.dart';
 import '../providers/profile_provider.dart';
+import '../widgets/country_code_picker_dialog.dart';
 
 class EditProfileScreen extends ConsumerStatefulWidget {
   const EditProfileScreen({super.key});
@@ -122,11 +123,12 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         await _uploadAvatar();
       }
       
+      final phone = _phoneController.text.trim();
       final profileData = {
-        'fullName': '${_firstNameController.text} ${_surnameController.text}'.trim(),
-        'email': _emailController.text,
-        'phone': '$_selectedCountryCode ${_phoneController.text}',
-        'fiscalCode': _fiscalCodeController.text,
+        'fullName': '${_firstNameController.text.trim()} ${_surnameController.text.trim()}'.trim(),
+        'email': _emailController.text.trim(),
+        'phone': phone.isNotEmpty ? '$_selectedCountryCode$phone' : '',
+        'fiscalCode': _fiscalCodeController.text.trim().toUpperCase(),
       };
 
       final apiClient = ref.read(apiClientProvider);
@@ -145,17 +147,25 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         final l10n = AppLocalizations.of(context)!;
         String errorMessage = l10n.errorUpdatingProfile;
         
-        if (e is DioException && e.response?.statusCode == 400) {
-          final responseData = e.response?.data;
-          if (responseData is Map && responseData['message'] != null) {
-            errorMessage = responseData['message'];
-          } else {
-            errorMessage = l10n.invalidDataPleasecheckYourInputs;
+        if (e is DioException) {
+          if (e.response?.statusCode == 400) {
+            final responseData = e.response?.data;
+            if (responseData is Map && responseData['message'] != null) {
+              errorMessage = responseData['message'];
+            } else if (responseData is Map && responseData['errors'] != null) {
+              errorMessage = responseData['errors'].toString();
+            } else {
+              errorMessage = l10n.invalidDataPleasecheckYourInputs;
+            }
           }
+          print('Error updating profile: ${e.response?.data}');
         }
         
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(errorMessage)),
+          SnackBar(
+            content: Text(errorMessage),
+            duration: const Duration(seconds: 5),
+          ),
         );
       }
     } finally {
@@ -300,21 +310,30 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     
     return Row(
       children: [
-        SizedBox(
-          width: 110,
-          child: DropdownButtonFormField<String>(
-            value: _selectedCountryCode,
-            decoration: AppTheme.inputDecoration('Code'),
-            items: const [
-              DropdownMenuItem(value: '+39', child: Text('+39')),
-              DropdownMenuItem(value: '+1', child: Text('+1')),
-              DropdownMenuItem(value: '+44', child: Text('+44')),
-              DropdownMenuItem(value: '+33', child: Text('+33')),
-              DropdownMenuItem(value: '+49', child: Text('+49')),
-            ],
-            onChanged: (value) {
-              setState(() => _selectedCountryCode = value!);
-            },
+        GestureDetector(
+          onTap: () => _showCountryCodePicker(),
+          child: Container(
+            width: 110,
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 16),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            child: Row(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Text(
+                  _selectedCountryCode,
+                  style: const TextStyle(
+                    fontSize: 16,
+                    fontWeight: FontWeight.w500,
+                    color: AppTheme.primaryColor,
+                  ),
+                ),
+                const Icon(Icons.arrow_drop_down, color: AppTheme.primaryColor),
+              ],
+            ),
           ),
         ),
         const SizedBox(width: 12),
@@ -330,12 +349,28 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
     );
   }
 
+  void _showCountryCodePicker() {
+    final l10n = AppLocalizations.of(context)!;
+    showModalBottomSheet(
+      context: context,
+      isScrollControlled: true,
+      backgroundColor: Colors.transparent,
+      builder: (context) => CountryCodePickerDialog(
+        selectedCode: _selectedCountryCode,
+        onSelect: (code) {
+          setState(() => _selectedCountryCode = code);
+        },
+      ),
+    );
+  }
+
   Widget _buildField({
     required TextEditingController controller,
     required String label,
     required IconData icon,
     TextInputType keyboard = TextInputType.text,
     int maxLines = 1,
+    bool isRequired = true,
   }) {
     final l10n = AppLocalizations.of(context)!;
     
@@ -343,13 +378,26 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       controller: controller,
       keyboardType: keyboard,
       maxLines: maxLines,
+      textCapitalization: label == l10n.fiscalCode ? TextCapitalization.characters : TextCapitalization.none,
       decoration: AppTheme.inputDecoration(label).copyWith(
         prefixIcon: Icon(icon, color: AppTheme.primaryColor),
+        helperText: label == l10n.fiscalCode ? '16 characters' : null,
       ),
       validator: (v) {
-        if (v!.isEmpty) return l10n.thisFieldIsRequired;
-        if (label == l10n.email && !v.contains('@')) {
+        if (isRequired && (v == null || v.trim().isEmpty)) {
+          return l10n.thisFieldIsRequired;
+        }
+        if (label == l10n.email && v != null && v.isNotEmpty && !v.contains('@')) {
           return l10n.enterAValidEmail;
+        }
+        if (label == l10n.fiscalCode && v != null && v.isNotEmpty) {
+          final fiscalCode = v.trim().toUpperCase();
+          if (fiscalCode.length != 16) {
+            return 'Fiscal code must be exactly 16 characters';
+          }
+          if (!RegExp(r'^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$').hasMatch(fiscalCode)) {
+            return 'Invalid fiscal code format';
+          }
         }
         return null;
       },

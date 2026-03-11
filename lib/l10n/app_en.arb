@@ -332,5 +332,6 @@
   "formAndDocumentsCompleted": "Form and documents completed",
   "inProgress": "In Progress",
   "firstName": "First Name",
-  "surname": "Surname"
+  "surname": "Surname",
+  "fieldsCompleted": "fields completed"
 }

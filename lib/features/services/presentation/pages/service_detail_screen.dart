@@ -135,7 +135,7 @@ class ServiceDetailScreen extends ConsumerWidget {
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(
-                  'assets/logos/outer logo.png',
+                  'assets/logos/circular_logo.png',
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
@@ -179,7 +179,7 @@ class ServiceDetailScreen extends ConsumerWidget {
             ClipRRect(
               borderRadius: BorderRadius.circular(25),
               child: Image.asset(
-                'assets/logos/outer logo.png',
+                'assets/logos/circular_logo.png',
                 width: 50,
                 height: 50,
                 fit: BoxFit.cover,

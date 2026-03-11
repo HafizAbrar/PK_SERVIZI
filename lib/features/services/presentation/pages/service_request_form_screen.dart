@@ -134,7 +134,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(
-                  'assets/logos/outer logo.png',
+                  'assets/logos/circular_logo.png',
                   width: 100,
                   height: 100,
                   fit: BoxFit.cover,
@@ -279,6 +279,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildSectionTile(service_models.FormSection section) {
+    final l10n = AppLocalizations.of(context)!;
     final completedFields = _getSectionCompletedFields(section);
     final totalFields = section.fields.where((f) => f.type != 'hidden').length;
 
@@ -304,7 +305,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
               ClipRRect(
                 borderRadius: BorderRadius.circular(25),
                 child: Image.asset(
-                  'assets/logos/outer logo.png',
+                  'assets/logos/circular_logo.png',
                   width: 50,
                   height: 50,
                   fit: BoxFit.cover,
@@ -325,24 +326,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                     ),
                     const SizedBox(height: 4),
                     Text(
-                      '$completedFields/$totalFields fields completed',
+                      '$completedFields/$totalFields ${l10n.fieldsCompleted}',
                       style: TextStyle(
                         fontSize: 14,
                         color: Colors.grey[600],
                       ),
                     ),
-                    if (section.fields.isNotEmpty) ...[
-                      const SizedBox(height: 4),
-                      Text(
-                        '${section.fields.length} fields',
-                        style: TextStyle(
-                          fontSize: 12,
-                          color: Colors.grey[500],
-                        ),
-                        maxLines: 2,
-                        overflow: TextOverflow.ellipsis,
-                      ),
-                    ],
                   ],
                 ),
               ),
@@ -362,6 +351,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   void _showSectionDialog(service_models.FormSection section) {
+    final l10n = AppLocalizations.of(context)!;
     _currentSection = section;
     // Initialize controllers for all fields in the section
     for (var field in section.fields) {
@@ -482,9 +472,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                           borderRadius: BorderRadius.circular(12),
                         ),
                       ),
-                      child: const Text(
-                        'Save',
-                        style: TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
+                      child: Text(
+                        l10n.saveDraft,
+                        style: const TextStyle(fontSize: 16, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -712,7 +702,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             });
           },
           decoration: InputDecoration(
-            hintText: _getFieldHint(field),
+            hintText: field.placeholder ?? _getFieldHint(field),
             hintStyle: TextStyle(color: Colors.grey[400]),
             suffixIcon: field.type == 'password' ? const Icon(Icons.visibility_off) : null,
             border: OutlineInputBorder(
@@ -738,7 +728,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       maxLines: 4,
       decoration: InputDecoration(
-        hintText: _getFieldHint(field),
+        hintText: field.placeholder ?? _getFieldHint(field),
         hintStyle: TextStyle(color: Colors.grey[400]),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -858,7 +848,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                         ),
                         const SizedBox(height: 12),
                         Text(
-                          'Camera',
+                          l10n.camera,
                           style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
                         ),
                       ],
@@ -893,7 +883,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: l10n.selectTime,
+        hintText: field.placeholder ?? l10n.selectTime,
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.access_time, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -927,7 +917,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: l10n.selectDateAndTime,
+        hintText: field.placeholder ?? l10n.selectDateAndTime,
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.event, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -1051,7 +1041,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: l10n.selectDate,
+        hintText: field.placeholder ?? l10n.selectDate,
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.calendar_today, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -1133,6 +1123,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildDynamicListField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     final items = _formValues[field.name] as List<Map<String, dynamic>>? ?? [];
     
     return StatefulBuilder(
@@ -1164,7 +1155,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                       mainAxisAlignment: MainAxisAlignment.spaceBetween,
                       children: [
                         Text(
-                          'Item ${index + 1}',
+                          '${l10n.information} ${index + 1}',
                           style: const TextStyle(
                             fontWeight: FontWeight.bold,
                             color: AppTheme.primaryColor,
@@ -1219,7 +1210,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 setState(() {});
               },
               icon: const Icon(Icons.add),
-              label: Text('Add ${field.label}'),
+              label: Row(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  Text('${l10n.enter} '),
+                  TranslatedText(field.label),
+                ],
+              ),
               style: OutlinedButton.styleFrom(
                 foregroundColor: AppTheme.accentColor,
                 side: const BorderSide(color: AppTheme.accentColor),
@@ -1232,10 +1229,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   Widget _buildSignatureField(service_models.FormField field) {
+    final l10n = AppLocalizations.of(context)!;
     return TextFormField(
       controller: _controllers[field.name],
       decoration: InputDecoration(
-        hintText: field.placeholder ?? 'Enter your full name',
+        hintText: field.placeholder ?? l10n.enterYourFullName,
         hintStyle: TextStyle(color: Colors.grey[400]),
         prefixIcon: const Icon(Icons.edit, color: AppTheme.accentColor),
         border: OutlineInputBorder(

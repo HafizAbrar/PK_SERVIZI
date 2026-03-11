@@ -332,5 +332,6 @@
   "formAndDocumentsCompleted": "Modulo e documenti completati",
   "inProgress": "In Corso",
   "firstName": "Nome",
-  "surname": "Cognome"
+  "surname": "Cognome",
+  "fieldsCompleted": "campi completati"
 }
