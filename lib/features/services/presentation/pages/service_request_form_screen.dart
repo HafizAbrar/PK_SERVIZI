@@ -495,10 +495,28 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   bool _shouldHideField(service_models.FormField field, List<service_models.FormField> allFields) {
+    // Check API-provided dependsOn condition first
+    if (field.dependsOn != null) {
+      final dependsOn = field.dependsOn!;
+      final dependentFieldValue = _formValues[dependsOn['field']]?.toString();
+      
+      if (dependsOn.containsKey('value')) {
+        // Show only if dependent field equals specified value
+        if (dependentFieldValue != dependsOn['value']) {
+          return true;
+        }
+      } else if (dependsOn.containsKey('isNot') && dependsOn['isNot'] == true) {
+        // Show only if dependent field does NOT equal specified value
+        if (dependentFieldValue == dependsOn['value']) {
+          return true;
+        }
+      }
+    }
+    
+    // Fallback to keyword-matching logic for backward compatibility
     final fieldNameLower = field.name.toLowerCase();
     final fieldLabelLower = field.label.toLowerCase();
     
-    // Check if field contains documentation/receipt keywords
     final hasDocKeyword = fieldNameLower.contains('document') || 
                          fieldNameLower.contains('receipt') ||
                          fieldLabelLower.contains('document') ||
@@ -506,20 +524,21 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                          fieldNameLower.contains('file') ||
                          fieldNameLower.contains('upload');
     
-    if (hasDocKeyword) {
-      // Find related radio button
-      for (var radioField in allFields) {
-        if (radioField.type == 'radio') {
-          final selectedValue = _formValues[radioField.name]?.toString().toLowerCase();
-          final radioNameLower = radioField.name.toLowerCase();
-          final radioLabelLower = radioField.label.toLowerCase();
-          
-          // Check if radio is related to this field by shared keywords
-          final fieldKeywords = _extractKeywords(fieldNameLower + ' ' + fieldLabelLower);
-          final radioKeywords = _extractKeywords(radioNameLower + ' ' + radioLabelLower);
-          final hasCommonKeyword = fieldKeywords.any((kw) => radioKeywords.contains(kw));
-          
-          if (hasCommonKeyword && (selectedValue == 'no' || selectedValue == 'false' || selectedValue == '0')) {
+    for (var radioField in allFields) {
+      if (radioField.type == 'radio') {
+        final selectedValue = _formValues[radioField.name]?.toString().toLowerCase();
+        final radioNameLower = radioField.name.toLowerCase();
+        final radioLabelLower = radioField.label.toLowerCase();
+        
+        final fieldKeywords = _extractKeywords(fieldNameLower + ' ' + fieldLabelLower);
+        final radioKeywords = _extractKeywords(radioNameLower + ' ' + radioLabelLower);
+        final hasCommonKeyword = fieldKeywords.any((kw) => radioKeywords.contains(kw));
+        
+        if (hasCommonKeyword) {
+          if (hasDocKeyword && (selectedValue == 'no' || selectedValue == 'false' || selectedValue == '0' || selectedValue == 'sì')) {
+            return selectedValue == 'no' || selectedValue == 'false' || selectedValue == '0';
+          }
+          if (!hasDocKeyword && field.type != 'radio' && (selectedValue == 'no' || selectedValue == 'false' || selectedValue == '0')) {
             return true;
           }
         }
