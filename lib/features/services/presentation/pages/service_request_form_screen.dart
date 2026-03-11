@@ -417,9 +417,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                         children: section.fields
                             .where((field) => field.type != 'hidden')
                             .map((field) {
-                              // Check if field should be hidden
-                              if (_shouldHideField(field, section.fields)) {
-                                return const SizedBox.shrink();
+                              // Check if field should be hidden based on dependencies
+                              if (field.dependsOn != null || field.conditionalOn != null) {
+                                if (_shouldHideField(field, section.fields)) {
+                                  return const SizedBox.shrink();
+                                }
                               }
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
@@ -594,8 +596,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             const SizedBox(height: 12),
           ],
           ...?field.subFields?.map((subField) {
-            if (_shouldHideField(subField, field.subFields ?? [])) {
-              return const SizedBox.shrink();
+            // Only check if the subField itself should be hidden, not the parent group
+            if (subField.dependsOn != null || subField.conditionalOn != null) {
+              if (_shouldHideField(subField, field.subFields ?? [])) {
+                return const SizedBox.shrink();
+              }
             }
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
@@ -1097,8 +1102,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             const SizedBox(height: 12),
           ],
           ...?field.subFields?.map((subField) {
-            if (_shouldHideField(subField, field.subFields ?? [])) {
-              return const SizedBox.shrink();
+            // Only check if the subField itself should be hidden, not the parent group
+            if (subField.dependsOn != null || subField.conditionalOn != null) {
+              if (_shouldHideField(subField, field.subFields ?? [])) {
+                return const SizedBox.shrink();
+              }
             }
             return Padding(
               padding: const EdgeInsets.only(bottom: 12),
