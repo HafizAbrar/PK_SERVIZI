@@ -125,7 +125,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           Row(
             children: [
               IconButton(
-                onPressed: () => context.pop(),
+                onPressed: () {
+                  if (context.canPop()) {
+                    context.pop();
+                  } else {
+                    context.go('/home');
+                  }
+                },
                 icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
                 padding: EdgeInsets.zero,
               ),
@@ -359,6 +365,14 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         _controllers[field.name] ??= TextEditingController(
           text: _formValues[field.name]?.toString() ?? '',
         );
+        // Initialize controllers for subfields in group fields
+        if (field.type == 'group' && field.subFields != null) {
+          for (var subField in field.subFields!) {
+            _controllers[subField.name] ??= TextEditingController(
+              text: _formValues[subField.name]?.toString() ?? '',
+            );
+          }
+        }
       }
     }
 
@@ -457,6 +471,30 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                                 final value = _controllers[field.name]?.text;
                                 if (value?.isNotEmpty == true) {
                                   _formValues[field.name] = value;
+                                }
+                                break;
+                              case 'group':
+                                // Save subfield values for group fields
+                                if (field.subFields != null) {
+                                  for (var subField in field.subFields!) {
+                                    switch (subField.type) {
+                                      case 'text':
+                                      case 'email':
+                                      case 'phone':
+                                      case 'number':
+                                      case 'date':
+                                      case 'time':
+                                      case 'datetime':
+                                      case 'textarea':
+                                      case 'url':
+                                      case 'password':
+                                        final value = _controllers[subField.name]?.text;
+                                        if (value?.isNotEmpty == true) {
+                                          _formValues[subField.name] = value;
+                                        }
+                                        break;
+                                    }
+                                  }
                                 }
                                 break;
                             }
@@ -562,6 +600,8 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         return _buildGroupFieldModal(field, setModalState);
       case 'dynamic_list':
         return _buildDynamicListField(field);
+      case 'date':
+        return _buildDateFieldModal(field, setModalState);
       default:
         return _buildFieldWidget(field);
     }
@@ -586,6 +626,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             const SizedBox(height: 12),
           ],
           ...?field.subFields?.map((subField) {
+            // Initialize controller for subfield if not exists
+            _controllers[subField.name] ??= TextEditingController(
+              text: _formValues[subField.name]?.toString() ?? '',
+            );
+            
             // Only check if the subField itself should be hidden, not the parent group
             if (subField.dependsOn != null || subField.conditionalOn != null) {
               if (_shouldHideField(subField, field.subFields ?? [])) {
@@ -633,6 +678,59 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           contentPadding: EdgeInsets.zero,
         )).toList() ?? [],
       ],
+    );
+  }
+
+  Widget _buildDateFieldModal(service_models.FormField field, StateSetter setModalState) {
+    final l10n = AppLocalizations.of(context)!;
+    final fieldNameLower = field.name.toLowerCase();
+    final fieldLabelLower = field.label.toLowerCase();
+    final isExpiryDate = fieldNameLower.contains('expiry') || 
+                         fieldNameLower.contains('expiration') ||
+                         fieldLabelLower.contains('expiry') ||
+                         fieldLabelLower.contains('expiration') ||
+                         fieldLabelLower.contains('scadenza');
+    
+    // Ensure controller exists
+    _controllers[field.name] ??= TextEditingController(
+      text: _formValues[field.name]?.toString() ?? '',
+    );
+    
+    return TextFormField(
+      controller: _controllers[field.name],
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: field.placeholder ?? l10n.selectDate,
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        suffixIcon: const Icon(Icons.calendar_today, color: AppTheme.accentColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: isExpiryDate ? DateTime(2100) : DateTime.now(),
+        );
+        if (date != null) {
+          final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+          _controllers[field.name]!.text = formattedDate;
+          _formValues[field.name] = formattedDate;
+          setModalState(() {});
+          setState(() {});
+        }
+      },
+      validator: (value) => _validateField(field, value),
     );
   }
 
@@ -687,19 +785,16 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildTextFormField(service_models.FormField field) {
     return StatefulBuilder(
-      builder: (context, setModalState) {
+      builder: (context, setLocalState) {
         return TextFormField(
           controller: _controllers[field.name],
           keyboardType: _getKeyboardType(field.type),
           obscureText: field.type == 'password',
           inputFormatters: _getInputFormatters(field.type),
           onChanged: (value) {
-            setModalState(() {
-              _formValues[field.name] = value;
-            });
-            setState(() {
-              _formValues[field.name] = value;
-            });
+            _formValues[field.name] = value;
+            setLocalState(() {});
+            setState(() {});
           },
           decoration: InputDecoration(
             hintText: field.placeholder ?? _getFieldHint(field),
@@ -1037,6 +1132,19 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildDateField(service_models.FormField field) {
     final l10n = AppLocalizations.of(context)!;
+    final fieldNameLower = field.name.toLowerCase();
+    final fieldLabelLower = field.label.toLowerCase();
+    final isExpiryDate = fieldNameLower.contains('expiry') || 
+                         fieldNameLower.contains('expiration') ||
+                         fieldLabelLower.contains('expiry') ||
+                         fieldLabelLower.contains('expiration') ||
+                         fieldLabelLower.contains('scadenza');
+    
+    // Ensure controller exists
+    _controllers[field.name] ??= TextEditingController(
+      text: _formValues[field.name]?.toString() ?? '',
+    );
+    
     return TextFormField(
       controller: _controllers[field.name],
       readOnly: true,
@@ -1061,10 +1169,14 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           context: context,
           initialDate: DateTime.now(),
           firstDate: DateTime(1900),
-          lastDate: DateTime.now(),
+          lastDate: isExpiryDate ? DateTime(2100) : DateTime.now(),
         );
-        if (date != null && mounted) {
-          _controllers[field.name]!.text = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+        if (date != null) {
+          final formattedDate = '${date.day.toString().padLeft(2, '0')}/${date.month.toString().padLeft(2, '0')}/${date.year}';
+          setState(() {
+            _controllers[field.name]!.text = formattedDate;
+            _formValues[field.name] = formattedDate;
+          });
         }
       },
       validator: (value) => _validateField(field, value),
@@ -1388,9 +1500,16 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     final l10n = AppLocalizations.of(context)!;
     if (widget.serviceRequestId == null || widget.serviceRequestId!.isEmpty) {
       debugPrint('ERROR: serviceRequestId is null or empty');
-      ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text(l10n.serviceRequestIdMissing)),
-      );
+      if (mounted) {
+        ScaffoldMessenger.of(context).showSnackBar(
+          SnackBar(
+            content: Text(l10n.serviceRequestIdMissing),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
+        );
+      }
       return;
     }
 
@@ -1428,15 +1547,46 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text(l10n.formSubmittedSuccessfully)),
+          SnackBar(
+            content: Text(l10n.formSubmittedSuccessfully),
+            backgroundColor: Colors.green,
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+          ),
         );
         context.go('/request-submission?serviceId=${widget.serviceId}&requestId=${widget.serviceRequestId}');
       }
     } catch (e) {
       debugPrint('Form submission error: $e');
       if (mounted) {
+        String errorMessage;
+        
+        // Parse error and provide user-friendly message
+        final errorString = e.toString().toLowerCase();
+        if (errorString.contains('401')) {
+          errorMessage = 'Your session has expired. Please log in again.';
+        } else if (errorString.contains('403')) {
+          errorMessage = 'You do not have permission to perform this action.';
+        } else if (errorString.contains('404')) {
+          errorMessage = 'The requested resource was not found.';
+        } else if (errorString.contains('500') || errorString.contains('502') || errorString.contains('503')) {
+          errorMessage = 'Server error. Please try again later.';
+        } else if (errorString.contains('network') || errorString.contains('socket')) {
+          errorMessage = 'Network error. Please check your internet connection.';
+        } else if (errorString.contains('timeout')) {
+          errorMessage = 'Request timeout. Please try again.';
+        } else {
+          errorMessage = '${l10n.errorSubmittingForm}. ${l10n.pleaseTryAgain}';
+        }
+        
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('${l10n.errorSubmittingForm}: $e')),
+          SnackBar(
+            content: Text(errorMessage),
+            backgroundColor: const Color(0xFFEF4444),
+            behavior: SnackBarBehavior.floating,
+            shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+            duration: const Duration(seconds: 4),
+          ),
         );
       }
     }

@@ -704,7 +704,7 @@ class _HomeScreenState extends ConsumerState<HomeScreen> {
 
   Widget _buildServiceListTile(String title, String subtitle, IconData icon, bool isActive, String? serviceTypeId) {
     return GestureDetector(
-      onTap: isActive && serviceTypeId != null ? () => context.push('/services/$serviceTypeId') : null,
+      onTap: isActive && serviceTypeId != null ? () => context.push('/services?serviceTypeId=$serviceTypeId') : null,
       child: Opacity(
         opacity: isActive ? 1.0 : 0.5,
         child: Container(
