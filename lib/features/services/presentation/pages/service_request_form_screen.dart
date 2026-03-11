@@ -14,12 +14,13 @@ import 'service_detail_screen.dart';
 final serviceFormProvider = FutureProvider.family<service_models.FormSchema, String>((ref, serviceId) async {
   debugPrint('Loading form schema for serviceId: $serviceId');
   final apiClient = ref.read(apiClientProvider);
-  final response = await apiClient.get(
-    '/api/v1/services/$serviceId/schema',
-    queryParameters: {'locale': apiClient.locale},
-  );
-  debugPrint('Form schema response: ${response.data}');
-  return service_models.FormSchema.fromJson(response.data['data']);
+  final response = await apiClient.get('/api/v1/services/$serviceId');
+  debugPrint('Service response: ${response.data}');
+  final serviceData = response.data['data'];
+  if (serviceData['formSchema'] == null) {
+    throw Exception('Form schema not available');
+  }
+  return service_models.FormSchema.fromJson(serviceData['formSchema']);
 });
 
 class ServiceRequestFormScreen extends ConsumerStatefulWidget {
@@ -565,9 +566,59 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     switch (field.type) {
       case 'radio':
         return _buildRadioFieldModal(field, setModalState);
+      case 'group':
+        return _buildGroupFieldModal(field, setModalState);
+      case 'dynamic_list':
+        return _buildDynamicListField(field);
       default:
         return _buildFieldWidget(field);
     }
+  }
+
+  Widget _buildGroupFieldModal(service_models.FormField field, StateSetter setModalState) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[50],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (field.description != null) ...[
+            Text(
+              field.description!,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 12),
+          ],
+          ...?field.subFields?.map((subField) {
+            if (_shouldHideField(subField, field.subFields ?? [])) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TranslatedText(
+                    '${subField.label}${subField.required ? ' *' : ''}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  _buildFieldWidgetModal(subField, setModalState),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
   }
 
   Widget _buildRadioFieldModal(service_models.FormField field, StateSetter setModalState) {
@@ -602,6 +653,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Widget _buildFieldWidget(service_models.FormField field) {
     switch (field.type) {
+      case 'group':
+        return _buildGroupField(field);
+      case 'dynamic_list':
+        return _buildDynamicListField(field);
       case 'select':
         return _buildDropdownField(field);
       case 'date':
@@ -622,6 +677,8 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         return _buildRangeField(field);
       case 'color':
         return _buildColorField(field);
+      case 'signature':
+        return _buildSignatureField(field);
       case 'email':
       case 'phone':
       case 'url':
@@ -1021,6 +1078,174 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
 
 
+  Widget _buildGroupField(service_models.FormField field) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        border: Border.all(color: Colors.grey[300]!),
+        borderRadius: BorderRadius.circular(12),
+        color: Colors.grey[50],
+      ),
+      child: Column(
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (field.description != null) ...[
+            Text(
+              field.description!,
+              style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+            ),
+            const SizedBox(height: 12),
+          ],
+          ...?field.subFields?.map((subField) {
+            if (_shouldHideField(subField, field.subFields ?? [])) {
+              return const SizedBox.shrink();
+            }
+            return Padding(
+              padding: const EdgeInsets.only(bottom: 12),
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  TranslatedText(
+                    '${subField.label}${subField.required ? ' *' : ''}',
+                    style: const TextStyle(
+                      fontSize: 13,
+                      fontWeight: FontWeight.w500,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                  const SizedBox(height: 6),
+                  _buildFieldWidget(subField),
+                ],
+              ),
+            );
+          }),
+        ],
+      ),
+    );
+  }
+
+  Widget _buildDynamicListField(service_models.FormField field) {
+    final items = _formValues[field.name] as List<Map<String, dynamic>>? ?? [];
+    
+    return StatefulBuilder(
+      builder: (context, setModalState) {
+        return Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            if (field.description != null) ...[
+              Text(
+                field.description!,
+                style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+              ),
+              const SizedBox(height: 8),
+            ],
+            ...items.asMap().entries.map((entry) {
+              final index = entry.key;
+              return Container(
+                margin: const EdgeInsets.only(bottom: 12),
+                padding: const EdgeInsets.all(12),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[300]!),
+                  borderRadius: BorderRadius.circular(12),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  crossAxisAlignment: CrossAxisAlignment.start,
+                  children: [
+                    Row(
+                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                      children: [
+                        Text(
+                          'Item ${index + 1}',
+                          style: const TextStyle(
+                            fontWeight: FontWeight.bold,
+                            color: AppTheme.primaryColor,
+                          ),
+                        ),
+                        IconButton(
+                          icon: const Icon(Icons.delete, color: Colors.red),
+                          onPressed: () {
+                            setModalState(() {
+                              items.removeAt(index);
+                              _formValues[field.name] = items;
+                            });
+                            setState(() {});
+                          },
+                        ),
+                      ],
+                    ),
+                    const Divider(),
+                    ...?field.subFields?.map((subField) {
+                      final fieldKey = '${field.name}[$index].${subField.name}';
+                      _controllers[fieldKey] ??= TextEditingController();
+                      
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 8),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            TranslatedText(
+                              '${subField.label}${subField.required ? ' *' : ''}',
+                              style: const TextStyle(
+                                fontSize: 12,
+                                fontWeight: FontWeight.w500,
+                              ),
+                            ),
+                            const SizedBox(height: 4),
+                            _buildFieldWidget(subField),
+                          ],
+                        ),
+                      );
+                    }),
+                  ],
+                ),
+              );
+            }),
+            const SizedBox(height: 8),
+            OutlinedButton.icon(
+              onPressed: () {
+                setModalState(() {
+                  items.add({});
+                  _formValues[field.name] = items;
+                });
+                setState(() {});
+              },
+              icon: const Icon(Icons.add),
+              label: Text('Add ${field.label}'),
+              style: OutlinedButton.styleFrom(
+                foregroundColor: AppTheme.accentColor,
+                side: const BorderSide(color: AppTheme.accentColor),
+              ),
+            ),
+          ],
+        );
+      },
+    );
+  }
+
+  Widget _buildSignatureField(service_models.FormField field) {
+    return TextFormField(
+      controller: _controllers[field.name],
+      decoration: InputDecoration(
+        hintText: field.placeholder ?? 'Enter your full name',
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        prefixIcon: const Icon(Icons.edit, color: AppTheme.accentColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      validator: (value) => _validateField(field, value),
+    );
+  }
+
   Widget _buildBottomActions() {
     final l10n = AppLocalizations.of(context)!;
     return Container(
@@ -1109,6 +1334,20 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       bool hasValue = false;
 
       switch (field.type) {
+        case 'group':
+          // Check if all required subfields are filled
+          if (field.subFields != null) {
+            hasValue = field.subFields!.every((subField) {
+              if (!subField.required) return true;
+              final value = _getFieldValue(subField);
+              return value != null && value.isNotEmpty;
+            });
+          }
+          break;
+        case 'dynamic_list':
+          final items = _formValues[field.name] as List?;
+          hasValue = items != null && items.isNotEmpty;
+          break;
         case 'checkbox':
           hasValue = _formValues[field.name] == true;
           break;
