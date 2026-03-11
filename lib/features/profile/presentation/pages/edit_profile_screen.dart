@@ -381,7 +381,7 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
       textCapitalization: label == l10n.fiscalCode ? TextCapitalization.characters : TextCapitalization.none,
       decoration: AppTheme.inputDecoration(label).copyWith(
         prefixIcon: Icon(icon, color: AppTheme.primaryColor),
-        helperText: label == l10n.fiscalCode ? '16 characters' : null,
+        helperText: label == l10n.fiscalCode ? l10n.sixteenCharacters : null,
       ),
       validator: (v) {
         if (isRequired && (v == null || v.trim().isEmpty)) {
@@ -393,10 +393,10 @@ class _EditProfileScreenState extends ConsumerState<EditProfileScreen> {
         if (label == l10n.fiscalCode && v != null && v.isNotEmpty) {
           final fiscalCode = v.trim().toUpperCase();
           if (fiscalCode.length != 16) {
-            return 'Fiscal code must be exactly 16 characters';
+            return l10n.fiscalCodeMust16Chars;
           }
           if (!RegExp(r'^[A-Z]{6}[0-9]{2}[A-Z][0-9]{2}[A-Z][0-9]{3}[A-Z]$').hasMatch(fiscalCode)) {
-            return 'Invalid fiscal code format';
+            return l10n.invalidFiscalCodeFormat;
           }
         }
         return null;

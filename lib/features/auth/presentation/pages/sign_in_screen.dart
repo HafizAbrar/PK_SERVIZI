@@ -67,7 +67,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       if (!await _biometricService.canUseBiometric()) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Biometric authentication not available')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.biometricAuthNotAvailable)),
           );
         }
         return;
@@ -78,14 +78,14 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
       if (credentials == null) {
         if (mounted) {
           ScaffoldMessenger.of(context).showSnackBar(
-            const SnackBar(content: Text('Please login or signup by credentials')),
+            SnackBar(content: Text(AppLocalizations.of(context)!.pleaseLoginWithCredentials)),
           );
         }
         return;
       }
       
       final authenticated = await _biometricService.authenticate(
-        localizedReason: 'Scan your fingerprint to sign in',
+        localizedReason: AppLocalizations.of(context)!.scanFingerprintToSignIn,
       );
       
       if (authenticated && mounted) {
@@ -97,7 +97,7 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
     } catch (e) {
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text('Authentication failed: $e')),
+          SnackBar(content: Text('${AppLocalizations.of(context)!.authenticationFailed}: $e')),
         );
       }
     }

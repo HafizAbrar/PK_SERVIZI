@@ -150,13 +150,13 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
                 const SizedBox(height: AppTheme.spacingXLarge),
                 _buildField(
                   controller: _firstNameController,
-                  label: 'First Name',
+                  label: l10n.firstName,
                   icon: Icons.person_outline,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
                 _buildField(
                   controller: _surnameController,
-                  label: 'Surname',
+                  label: l10n.surname,
                   icon: Icons.person_outline,
                 ),
                 const SizedBox(height: AppTheme.spacingMedium),
@@ -258,10 +258,10 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         }
         if (label == l10n.password) {
           if (v.length < 8) return l10n.passwordMinLength;
-          if (!RegExp(r'[A-Z]').hasMatch(v)) return 'Must contain uppercase letter';
-          if (!RegExp(r'[a-z]').hasMatch(v)) return 'Must contain lowercase letter';
-          if (!RegExp(r'[0-9]').hasMatch(v)) return 'Must contain number';
-          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(v)) return 'Must contain special character';
+          if (!RegExp(r'[A-Z]').hasMatch(v)) return l10n.mustContainUppercase;
+          if (!RegExp(r'[a-z]').hasMatch(v)) return l10n.mustContainLowercase;
+          if (!RegExp(r'[0-9]').hasMatch(v)) return l10n.mustContainNumber;
+          if (!RegExp(r'[!@#$%^&*(),.?":{}|<>]').hasMatch(v)) return l10n.mustContainSpecialChar;
         }
         return null;
       },
@@ -280,7 +280,7 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           Text(
-            'Password Requirements:',
+            l10n.passwordRequirements,
             style: TextStyle(
               fontSize: 12,
               fontWeight: FontWeight.bold,
@@ -288,11 +288,11 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
             ),
           ),
           const SizedBox(height: 8),
-          _buildRequirement('At least 8 characters', _hasMinLength),
-          _buildRequirement('One uppercase letter', _hasUppercase),
-          _buildRequirement('One lowercase letter', _hasLowercase),
-          _buildRequirement('One number', _hasNumber),
-          _buildRequirement('One special character', _hasSpecialChar),
+          _buildRequirement(l10n.atLeast8Characters, _hasMinLength),
+          _buildRequirement(l10n.oneUppercaseLetter, _hasUppercase),
+          _buildRequirement(l10n.oneLowercaseLetter, _hasLowercase),
+          _buildRequirement(l10n.oneNumber, _hasNumber),
+          _buildRequirement(l10n.oneSpecialCharacter, _hasSpecialChar),
         ],
       ),
     );

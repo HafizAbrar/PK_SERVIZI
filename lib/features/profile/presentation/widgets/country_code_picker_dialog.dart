@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import '../../../../core/theme/app_theme.dart';
+import '../../../../generated/l10n/app_localizations.dart';
 
 class CountryCodePickerDialog extends StatefulWidget {
   final String selectedCode;
@@ -273,6 +274,8 @@ class _CountryCodePickerDialogState extends State<CountryCodePickerDialog> {
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context)!;
+    
     return Container(
       height: MediaQuery.of(context).size.height * 0.75,
       decoration: const BoxDecoration(
@@ -296,7 +299,7 @@ class _CountryCodePickerDialogState extends State<CountryCodePickerDialog> {
             child: TextField(
               controller: _searchController,
               decoration: InputDecoration(
-                hintText: 'Search country...',
+                hintText: l10n.searchCountry,
                 prefixIcon: const Icon(Icons.search),
                 border: OutlineInputBorder(
                   borderRadius: BorderRadius.circular(12),
