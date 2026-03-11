@@ -415,24 +415,30 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                       child: Column(
                         children: section.fields
                             .where((field) => field.type != 'hidden')
-                            .map((field) => Padding(
-                          padding: const EdgeInsets.only(bottom: 16),
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              TranslatedText(
-                                '${field.label}${field.required ? ' *' : ''}',
-                                style: const TextStyle(
-                                  fontSize: 14,
-                                  fontWeight: FontWeight.w500,
-                                  color: AppTheme.primaryColor,
+                            .map((field) {
+                              // Check if field should be hidden
+                              if (_shouldHideField(field, section.fields)) {
+                                return const SizedBox.shrink();
+                              }
+                              return Padding(
+                                padding: const EdgeInsets.only(bottom: 16),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    TranslatedText(
+                                      '${field.label}${field.required ? ' *' : ''}',
+                                      style: const TextStyle(
+                                        fontSize: 14,
+                                        fontWeight: FontWeight.w500,
+                                        color: AppTheme.primaryColor,
+                                      ),
+                                    ),
+                                    const SizedBox(height: 8),
+                                    _buildFieldWidgetWithConditionModal(field, section.fields, setModalState),
+                                  ],
                                 ),
-                              ),
-                              const SizedBox(height: 8),
-                              _buildFieldWidgetWithConditionModal(field, section.fields, setModalState),
-                            ],
-                          ),
-                        ))
+                              );
+                            })
                             .toList(),
                       ),
                     ),
@@ -488,7 +494,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
-  Widget _buildFieldWidgetWithConditionModal(service_models.FormField field, List<service_models.FormField> allFields, StateSetter setModalState) {
+  bool _shouldHideField(service_models.FormField field, List<service_models.FormField> allFields) {
     final fieldNameLower = field.name.toLowerCase();
     final fieldLabelLower = field.label.toLowerCase();
     
@@ -496,13 +502,15 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     final hasDocKeyword = fieldNameLower.contains('document') || 
                          fieldNameLower.contains('receipt') ||
                          fieldLabelLower.contains('document') ||
-                         fieldLabelLower.contains('receipt');
+                         fieldLabelLower.contains('receipt') ||
+                         fieldNameLower.contains('file') ||
+                         fieldNameLower.contains('upload');
     
     if (hasDocKeyword) {
       // Find related radio button
       for (var radioField in allFields) {
         if (radioField.type == 'radio') {
-          final selectedValue = _formValues[radioField.name];
+          final selectedValue = _formValues[radioField.name]?.toString().toLowerCase();
           final radioNameLower = radioField.name.toLowerCase();
           final radioLabelLower = radioField.label.toLowerCase();
           
@@ -511,11 +519,18 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
           final radioKeywords = _extractKeywords(radioNameLower + ' ' + radioLabelLower);
           final hasCommonKeyword = fieldKeywords.any((kw) => radioKeywords.contains(kw));
           
-          if (hasCommonKeyword && (selectedValue == 'No' || selectedValue == 'no')) {
-            return const SizedBox.shrink();
+          if (hasCommonKeyword && (selectedValue == 'no' || selectedValue == 'false' || selectedValue == '0')) {
+            return true;
           }
         }
       }
+    }
+    return false;
+  }
+
+  Widget _buildFieldWidgetWithConditionModal(service_models.FormField field, List<service_models.FormField> allFields, StateSetter setModalState) {
+    if (_shouldHideField(field, allFields)) {
+      return const SizedBox.shrink();
     }
     return _buildFieldWidgetModal(field, setModalState);
   }
