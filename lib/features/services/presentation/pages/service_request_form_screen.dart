@@ -9,6 +9,7 @@ import '../../../../generated/l10n/app_localizations.dart';
 import '../../data/models/service.dart' as service_models;
 import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/translated_text.dart';
+import '../../../../core/services/translation_service.dart';
 import 'service_detail_screen.dart';
 
 final serviceFormProvider = FutureProvider.family<service_models.FormSchema, String>((ref, serviceId) async {
@@ -356,11 +357,22 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
+  List<service_models.FormField> _getSortedFields(List<service_models.FormField> fields) {
+    final sorted = List<service_models.FormField>.from(fields);
+    sorted.sort((a, b) {
+      final orderA = a.order ?? 999;
+      final orderB = b.order ?? 999;
+      return orderA.compareTo(orderB);
+    });
+    return sorted;
+  }
+
   void _showSectionDialog(service_models.FormSection section) {
     final l10n = AppLocalizations.of(context)!;
     _currentSection = section;
+    final sortedFields = _getSortedFields(section.fields);
     // Initialize controllers for all fields in the section
-    for (var field in section.fields) {
+    for (var field in sortedFields) {
       if (field.type != 'hidden') {
         _controllers[field.name] ??= TextEditingController(
           text: _formValues[field.name]?.toString() ?? '',
@@ -371,6 +383,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             _controllers[subField.name] ??= TextEditingController(
               text: _formValues[subField.name]?.toString() ?? '',
             );
+            // Initialize formValues for select/radio subfields if not already set
+            if ((subField.type == 'select' || subField.type == 'radio') && _formValues[subField.name] == null) {
+              _formValues[subField.name] = null;
+            }
           }
         }
       }
@@ -418,32 +434,39 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
-                        children: section.fields
+                        children: _getSortedFields(section.fields)
                             .where((field) => field.type != 'hidden')
                             .map((field) {
                               // Check if field should be hidden based on dependencies
                               if (field.dependsOn != null || field.conditionalOn != null) {
-                                if (_shouldHideField(field, section.fields)) {
+                                if (_shouldHideField(field, _getSortedFields(section.fields))) {
                                   return const SizedBox.shrink();
                                 }
                               }
                               return Padding(
                                 padding: const EdgeInsets.only(bottom: 16),
-                                child: Column(
-                                  crossAxisAlignment: CrossAxisAlignment.start,
-                                  children: [
-                                    TranslatedText(
-                                      '${field.label}${field.required ? ' *' : ''}',
-                                      style: const TextStyle(
-                                        fontSize: 14,
-                                        fontWeight: FontWeight.w500,
-                                        color: AppTheme.primaryColor,
+                                child: field.type == 'checkbox'
+                                    ? Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          _buildFieldWidgetWithConditionModal(field, section.fields, setModalState),
+                                        ],
+                                      )
+                                    : Column(
+                                        crossAxisAlignment: CrossAxisAlignment.start,
+                                        children: [
+                                          TranslatedText(
+                                            '${field.label}${field.required ? ' *' : ''}',
+                                            style: const TextStyle(
+                                              fontSize: 14,
+                                              fontWeight: FontWeight.w500,
+                                              color: AppTheme.primaryColor,
+                                            ),
+                                          ),
+                                          const SizedBox(height: 8),
+                                          _buildFieldWidgetWithConditionModal(field, section.fields, setModalState),
+                                        ],
                                       ),
-                                    ),
-                                    const SizedBox(height: 8),
-                                    _buildFieldWidgetWithConditionModal(field, section.fields, setModalState),
-                                  ],
-                                ),
                               );
                             })
                             .toList(),
@@ -456,7 +479,8 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                     child: ElevatedButton(
                       onPressed: () {
                         setState(() {
-                          for (var field in section.fields) {
+                          for (var field in _getSortedFields(section.fields)) {
+                            debugPrint('Saving field: ${field.name} (${field.type})');
                             switch (field.type) {
                               case 'text':
                               case 'email':
@@ -468,15 +492,18 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                               case 'textarea':
                               case 'url':
                               case 'password':
+                              case 'signature':
                                 final value = _controllers[field.name]?.text;
                                 if (value?.isNotEmpty == true) {
                                   _formValues[field.name] = value;
+                                  debugPrint('  Saved: ${field.name} = $value');
                                 }
                                 break;
                               case 'group':
                                 // Save subfield values for group fields
                                 if (field.subFields != null) {
                                   for (var subField in field.subFields!) {
+                                    debugPrint('  Saving subfield: ${subField.name} (${subField.type})');
                                     switch (subField.type) {
                                       case 'text':
                                       case 'email':
@@ -488,13 +515,49 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                                       case 'textarea':
                                       case 'url':
                                       case 'password':
+                                      case 'signature':
                                         final value = _controllers[subField.name]?.text;
                                         if (value?.isNotEmpty == true) {
                                           _formValues[subField.name] = value;
+                                          debugPrint('    Saved: ${subField.name} = $value');
+                                        }
+                                        break;
+                                      case 'select':
+                                      case 'radio':
+                                        final value = _formValues[subField.name];
+                                        if (value != null) {
+                                          debugPrint('    Saved: ${subField.name} = $value');
+                                        }
+                                        break;
+                                      case 'file':
+                                        final files = _uploadedFiles[subField.name];
+                                        if (files != null && files.isNotEmpty) {
+                                          _formValues[subField.name] = files;
+                                          debugPrint('    Saved: ${subField.name} = ${files.length} files');
                                         }
                                         break;
                                     }
                                   }
+                                }
+                                break;
+                              case 'select':
+                              case 'radio':
+                                final value = _formValues[field.name];
+                                if (value != null) {
+                                  debugPrint('  Saved: ${field.name} = $value');
+                                }
+                                break;
+                              case 'checkbox':
+                                final value = _formValues[field.name];
+                                if (value != null) {
+                                  debugPrint('  Saved: ${field.name} = $value');
+                                }
+                                break;
+                              case 'file':
+                                final files = _uploadedFiles[field.name];
+                                if (files != null && files.isNotEmpty) {
+                                  _formValues[field.name] = files;
+                                  debugPrint('  Saved: ${field.name} = ${files.length} files');
                                 }
                                 break;
                             }
@@ -700,7 +763,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: field.placeholder ?? l10n.selectDate,
+        hintText: _getPlaceholderText(field, l10n.selectDate),
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.calendar_today, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -735,13 +798,38 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   }
 
   String? _getFieldValue(service_models.FormField field) {
+    // First check if value exists in _formValues (for fields saved from modal)
+    final formValue = _formValues[field.name]?.toString();
+    if (formValue != null && formValue.isNotEmpty) {
+      return formValue;
+    }
+    
+    // Then check controller for text-based fields
     if (field.type == 'text' || field.type == 'email' ||
         field.type == 'phone' || field.type == 'number' ||
-        field.type == 'date' || field.type == 'time') {
+        field.type == 'date' || field.type == 'time' ||
+        field.type == 'signature') {
       final value = _controllers[field.name]?.text;
       return value?.isNotEmpty == true ? value : null;
     }
-    return _formValues[field.name]?.toString();
+    
+    // For group fields, check if all required subfields have values
+    if (field.type == 'group' && field.subFields != null) {
+      bool allSubFieldsFilled = true;
+      for (var subField in field.subFields!) {
+        if (subField.required) {
+          final subValue = _getFieldValue(subField);
+          if (subValue == null || subValue.isEmpty) {
+            allSubFieldsFilled = false;
+            debugPrint('  Group subfield missing: ${subField.name} (${subField.label})');
+            break;
+          }
+        }
+      }
+      return allSubFieldsFilled ? 'group_filled' : null;
+    }
+    
+    return null;
   }
 
   Widget _buildFieldWidget(service_models.FormField field) {
@@ -797,7 +885,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             setState(() {});
           },
           decoration: InputDecoration(
-            hintText: field.placeholder ?? _getFieldHint(field),
+            hintText: _getPlaceholderText(field),
             hintStyle: TextStyle(color: Colors.grey[400]),
             suffixIcon: field.type == 'password' ? const Icon(Icons.visibility_off) : null,
             border: OutlineInputBorder(
@@ -823,7 +911,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       maxLines: 4,
       decoration: InputDecoration(
-        hintText: field.placeholder ?? _getFieldHint(field),
+        hintText: _getPlaceholderText(field),
         hintStyle: TextStyle(color: Colors.grey[400]),
         border: OutlineInputBorder(
           borderRadius: BorderRadius.circular(16),
@@ -978,7 +1066,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: field.placeholder ?? l10n.selectTime,
+        hintText: _getPlaceholderText(field, l10n.selectTime),
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.access_time, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -1012,7 +1100,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: field.placeholder ?? l10n.selectDateAndTime,
+        hintText: _getPlaceholderText(field, l10n.selectDateAndTime),
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.event, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -1149,7 +1237,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       controller: _controllers[field.name],
       readOnly: true,
       decoration: InputDecoration(
-        hintText: field.placeholder ?? l10n.selectDate,
+        hintText: _getPlaceholderText(field, l10n.selectDate),
         hintStyle: TextStyle(color: Colors.grey[400]),
         suffixIcon: const Icon(Icons.calendar_today, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -1345,7 +1433,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     return TextFormField(
       controller: _controllers[field.name],
       decoration: InputDecoration(
-        hintText: field.placeholder ?? l10n.enterYourFullName,
+        hintText: _getPlaceholderText(field, l10n.enterYourFullName),
         hintStyle: TextStyle(color: Colors.grey[400]),
         prefixIcon: const Icon(Icons.edit, color: AppTheme.accentColor),
         border: OutlineInputBorder(
@@ -1498,6 +1586,55 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
 
   Future<void> _submitForm() async {
     final l10n = AppLocalizations.of(context)!;
+    
+    // Validate that all required fields are filled
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Text(l10n.thisFieldIsRequired),
+          backgroundColor: const Color(0xFFEF4444),
+          behavior: SnackBarBehavior.floating,
+          shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+        ),
+      );
+      return;
+    }
+    
+    // Check if all required fields have values
+    final schemaAsync = ref.read(serviceFormProvider(widget.serviceId));
+    final schema = schemaAsync.value;
+    
+    if (schema != null) {
+      for (var section in schema.sections) {
+        for (var field in section.fields) {
+          if (field.required && field.type != 'hidden') {
+            // Skip fields that should be hidden based on dependencies
+            if (_shouldHideField(field, section.fields)) {
+              debugPrint('Skipping hidden field: ${field.name}');
+              continue;
+            }
+            
+            final value = _getFieldValue(field);
+            debugPrint('Validating field: ${field.name} (${field.label}) = "$value"');
+            debugPrint('  Controller value: "${_controllers[field.name]?.text}"');
+            debugPrint('  FormValues value: "${_formValues[field.name]}"');
+            
+            if (value == null || value.isEmpty) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text('${l10n.thisFieldIsRequired}: ${field.label}'),
+                  backgroundColor: const Color(0xFFEF4444),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              );
+              return;
+            }
+          }
+        }
+      }
+    }
+    
     if (widget.serviceRequestId == null || widget.serviceRequestId!.isEmpty) {
       debugPrint('ERROR: serviceRequestId is null or empty');
       if (mounted) {
@@ -1531,6 +1668,16 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       for (var entry in _formValues.entries) {
         if (entry.value != null) {
           formData[entry.key] = entry.value;
+        }
+      }
+
+      // Add file uploads - convert to file paths or base64
+      for (var entry in _uploadedFiles.entries) {
+        if (entry.value.isNotEmpty) {
+          // Send file paths for each uploaded file
+          final filePaths = entry.value.map((file) => file.path).toList();
+          formData[entry.key] = filePaths.length == 1 ? filePaths.first : filePaths;
+          debugPrint('Added file field: ${entry.key} = $filePaths');
         }
       }
 
@@ -1753,5 +1900,17 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         ),
       ),
     );
+  }
+
+  String _getPlaceholderText(service_models.FormField field, [String? defaultText]) {
+    if (field.placeholder != null && field.placeholder!.isNotEmpty) {
+      return _translateHint(field.placeholder!);
+    }
+    return defaultText ?? _getFieldHint(field);
+  }
+
+  String _translateHint(String hint) {
+    final locale = Localizations.localeOf(context).languageCode;
+    return TranslationService.getCached(hint, locale) ?? hint;
   }
 }

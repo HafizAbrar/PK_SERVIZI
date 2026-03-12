@@ -555,7 +555,7 @@ class ServiceRequestDetailScreenNew extends ConsumerWidget {
             SizedBox(
               width: double.infinity,
               child: ElevatedButton(
-                onPressed: () => context.push('/service-request-form?serviceId=${request['serviceId']}&requestId=${request['id']}'),
+                onPressed: () => context.push('/service-request-form?serviceId=${request['serviceId']}&serviceRequestId=${request['id']}'),
                 style: ElevatedButton.styleFrom(
                   backgroundColor: AppTheme.accentColor,
                   foregroundColor: AppTheme.primaryColor,
