@@ -64,7 +64,10 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         data: (schema) => serviceAsync.when(
           data: (service) => _buildForm(schema, service),
           loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-          error: (_, __) => _buildForm(schema, null),
+          error: (error, stackTrace) {
+            debugPrint('Error loading service: $error');
+            return _buildForm(schema, null);
+          },
         ),
         loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
         error: (error, stackTrace) {
@@ -181,6 +184,11 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     final serviceAsync = ref.watch(serviceDetailProvider(widget.serviceId));
     final isFreeService = serviceAsync.maybeWhen(
       data: (service) => double.tryParse(service.basePrice) == 0,
+      loading: () => false,
+      error: (error, stackTrace) {
+        debugPrint('Error loading service in progress bar: $error');
+        return false;
+      },
       orElse: () => false,
     );
 

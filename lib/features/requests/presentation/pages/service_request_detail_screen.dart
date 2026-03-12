@@ -7,9 +7,28 @@ import '../../../../core/theme/app_theme.dart';
 import '../../../../core/widgets/translated_text.dart';
 
 final serviceRequestDetailNewProvider = FutureProvider.family<Map<String, dynamic>, String>((ref, requestId) async {
-  final apiClient = ref.read(apiClientProvider);
-  final response = await apiClient.get('/api/v1/service-requests/$requestId');
-  return response.data['data'] as Map<String, dynamic>;
+  try {
+    final apiClient = ref.read(apiClientProvider);
+    debugPrint('Loading service request details for requestId: $requestId');
+    final response = await apiClient.get('/api/v1/service-requests/$requestId');
+    debugPrint('Service request detail response: ${response.data}');
+    debugPrint('Service request detail status code: ${response.statusCode}');
+    
+    if (response.data == null) {
+      throw Exception('Response data is null');
+    }
+    
+    final data = response.data['data'] as Map<String, dynamic>?;
+    if (data == null) {
+      throw Exception('Service request data is null in response');
+    }
+    
+    return data;
+  } catch (e, stackTrace) {
+    debugPrint('Error loading service request details: $e');
+    debugPrint('Stack trace: $stackTrace');
+    rethrow;
+  }
 });
 
 class ServiceRequestDetailScreenNew extends ConsumerWidget {

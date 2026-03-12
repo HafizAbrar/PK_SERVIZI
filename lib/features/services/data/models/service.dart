@@ -2,6 +2,26 @@ import 'package:json_annotation/json_annotation.dart';
 
 part 'service.g.dart';
 
+class _BasePriceConverter implements JsonConverter<String, dynamic> {
+  const _BasePriceConverter();
+
+  @override
+  String fromJson(dynamic json) {
+    try {
+      if (json == null) return '0';
+      if (json is String) return json;
+      if (json is int) return json.toString();
+      if (json is double) return json.toString();
+      return json.toString();
+    } catch (e) {
+      return '0';
+    }
+  }
+
+  @override
+  dynamic toJson(String object) => object;
+}
+
 @JsonSerializable()
 class Service {
   final String id;
@@ -9,6 +29,7 @@ class Service {
   final String code;
   final String description;
   final String category;
+  @_BasePriceConverter()
   final String basePrice;
   final List<String> requiredDocuments;
   final String? documentRequirements;

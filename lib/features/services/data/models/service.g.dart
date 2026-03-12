@@ -12,7 +12,7 @@ Service _$ServiceFromJson(Map<String, dynamic> json) => Service(
   code: json['code'] as String,
   description: json['description'] as String,
   category: json['category'] as String,
-  basePrice: json['basePrice'] as String,
+  basePrice: const _BasePriceConverter().fromJson(json['basePrice']),
   requiredDocuments: (json['requiredDocuments'] as List<dynamic>)
       .map((e) => e as String)
       .toList(),
@@ -35,7 +35,7 @@ Map<String, dynamic> _$ServiceToJson(Service instance) => <String, dynamic>{
   'code': instance.code,
   'description': instance.description,
   'category': instance.category,
-  'basePrice': instance.basePrice,
+  'basePrice': const _BasePriceConverter().toJson(instance.basePrice),
   'requiredDocuments': instance.requiredDocuments,
   'documentRequirements': instance.documentRequirements,
   'formSchema': instance.formSchema,
