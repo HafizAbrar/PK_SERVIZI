@@ -15,6 +15,8 @@ final navigationIndexProvider = StateProvider<int>((ref) => 0);
 
 class MainNavigationScreen extends ConsumerWidget {
   const MainNavigationScreen({super.key});
+  
+  static final _scaffoldKey = GlobalKey<ScaffoldState>();
 
   @override
   Widget build(BuildContext context, WidgetRef ref) {
@@ -33,7 +35,7 @@ class MainNavigationScreen extends ConsumerWidget {
       canPop: false,
       onPopInvokedWithResult: (didPop, result) async {
         if (didPop) return;
-        if (Scaffold.of(context).isDrawerOpen) {
+        if (_scaffoldKey.currentState?.isDrawerOpen ?? false) {
           Navigator.of(context).pop();
           return;
         }
@@ -43,6 +45,7 @@ class MainNavigationScreen extends ConsumerWidget {
         }
       },
       child: Scaffold(
+        key: _scaffoldKey,
         drawer: _buildDrawer(context, ref),
         body: IndexedStack(
           index: currentIndex,
