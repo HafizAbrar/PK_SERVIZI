@@ -82,13 +82,9 @@ class _ServiceRequestsScreenState extends ConsumerState<ServiceRequestsScreen> {
         mainAxisAlignment: MainAxisAlignment.start,
         children: [
           Row(
+            mainAxisAlignment: MainAxisAlignment.center,
             children: [
-              IconButton(
-                onPressed: () => context.go('/home'),
-                icon: const Icon(Icons.arrow_back, color: Colors.white, size: 24),
-                padding: EdgeInsets.zero,
-              ),
-              const SizedBox(width: 60),
+
               ClipRRect(
                 borderRadius: BorderRadius.circular(50),
                 child: Image.asset(

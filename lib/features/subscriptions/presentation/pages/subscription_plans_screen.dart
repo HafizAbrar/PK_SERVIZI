@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import '../../../../core/theme/app_theme.dart';
@@ -73,7 +73,7 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
 
   Widget _buildAppBar() {
     return Container(
-      padding: const EdgeInsets.fromLTRB(20, 48, 20, 24),
+      padding: const EdgeInsets.fromLTRB(20, 40, 20, 20),
       decoration: BoxDecoration(
         color: AppTheme.primaryColor,
         borderRadius: const BorderRadius.only(
@@ -88,26 +88,33 @@ class _SubscriptionPlansScreenState extends ConsumerState<SubscriptionPlansScree
           ),
         ],
       ),
-      child: Row(
+      child: Column(
+        mainAxisAlignment: MainAxisAlignment.start,
         children: [
-          GestureDetector(
-            onTap: () {
-              if (Navigator.of(context).canPop()) {
-                context.pop();
-              } else {
-                context.go('/home');
-              }
-            },
-            child: const Icon(Icons.arrow_back_ios, color: Colors.white),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              ClipRRect(
+                borderRadius: BorderRadius.circular(50),
+                child: Image.asset(
+                  'assets/logos/circular_logo.png',
+                  width: 100,
+                  height: 100,
+                  fit: BoxFit.cover,
+                ),
+              ),
+            ],
           ),
-          Expanded(
-            child: Text(
-              AppLocalizations.of(context)?.plans ?? 'Plans',
-              style: const TextStyle(fontSize: 20, fontWeight: FontWeight.bold, color: Colors.white),
-              textAlign: TextAlign.center,
+          const SizedBox(height: 12),
+          Text(
+            AppLocalizations.of(context)?.plans ?? 'Plans',
+            style: const TextStyle(
+              fontSize: 20,
+              fontWeight: FontWeight.bold,
+              color: Colors.white,
             ),
+            textAlign: TextAlign.center,
           ),
-          const SizedBox(width: 24),
         ],
       ),
     );
