@@ -11,16 +11,19 @@ import 'generated/l10n/app_localizations.dart';
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   
-  // Set preferred orientations
   await SystemChrome.setPreferredOrientations([
     DeviceOrientation.portraitUp,
     DeviceOrientation.portraitDown,
   ]);
+
+  SystemChrome.setSystemUIOverlayStyle(
+    const SystemUiOverlayStyle(
+      statusBarColor: Colors.transparent,
+      systemNavigationBarColor: Colors.transparent,
+      systemNavigationBarDividerColor: Colors.transparent,
+    ),
+  );
   
-  // Optimize performance
-  await SystemChrome.setEnabledSystemUIMode(SystemUiMode.edgeToEdge);
-  
-  // Initialize deep link handling
   await DeepLinkService.initialize();
   
   runApp(const ProviderScope(child: MyApp()));

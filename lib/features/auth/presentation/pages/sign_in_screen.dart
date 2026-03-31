@@ -135,118 +135,120 @@ class _SignInScreenState extends ConsumerState<SignInScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
-      body: Container(
-        decoration: AppTheme.cardDecoration.copyWith(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.spacingLarge),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: AppTheme.spacingSmall),
-                Text(
-                  AppLocalizations.of(context)!.welcomeBack,
-                  style: TextStyle(
-                    color: AppTheme.primaryColor,
-                    fontSize: AppTheme.fontSizeXXLarge,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: AppTheme.spacingXSmall),
-                Text(
-                  AppLocalizations.of(context)!.signInToContinue,
-                  style: TextStyle(color: AppTheme.textSecondary),
-                ),
-                const SizedBox(height: AppTheme.spacingXLarge),
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(150),
-                    child: Image.asset(
-                      'assets/logos/TuoCAF logo.png',
-                      height: 80,
-                      width: 500,
-                      fit: BoxFit.fitWidth,
+      body: SafeArea(
+        child: Container(
+          decoration: AppTheme.cardDecoration.copyWith(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.all(AppTheme.spacingLarge),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  Text(
+                    AppLocalizations.of(context)!.welcomeBack,
+                    style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontSize: AppTheme.fontSizeXXLarge,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: AppTheme.spacingXLarge),
-                _buildField(
-                  controller: _emailController,
-                  label: AppLocalizations.of(context)!.email,
-                  icon: Icons.email_outlined,
-                  keyboard: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
-                _buildField(
-                  controller: _passwordController,
-                  label: AppLocalizations.of(context)!.password,
-                  icon: Icons.lock_outline,
-                  obscure: _obscurePassword,
-                  onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
-                ),
-                Align(
-                  alignment: Alignment.centerRight,
-                  child: TextButton(
-                    onPressed: () => context.go('/forgot-password'),
-                    child: Text(
-                      AppLocalizations.of(context)!.forgotPassword,
-                      style: TextStyle(color: AppTheme.primaryColor),
+                  const SizedBox(height: AppTheme.spacingXSmall),
+                  Text(
+                    AppLocalizations.of(context)!.signInToContinue,
+                    style: TextStyle(color: AppTheme.textSecondary),
+                  ),
+                  const SizedBox(height: AppTheme.spacingXLarge),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: Image.asset(
+                        'assets/logos/TuoCAF logo.png',
+                        height: 80,
+                        width: 500,
+                        fit: BoxFit.fitWidth,
+                      ),
                     ),
                   ),
-                ),
-                const SizedBox(height: AppTheme.spacingSmall),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: AppTheme.primaryButtonStyle,
-                    onPressed: isButtonEnabled && !isLoading ? _signIn : null,
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            AppLocalizations.of(context)!.signIn,
-                            style: const TextStyle(
-                              fontSize: AppTheme.fontSizeRegular,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                  const SizedBox(height: AppTheme.spacingXLarge),
+                  _buildField(
+                    controller: _emailController,
+                    label: AppLocalizations.of(context)!.email,
+                    icon: Icons.email_outlined,
+                    keyboard: TextInputType.emailAddress,
                   ),
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
-                Center(
-                  child: IconButton(
-                    onPressed: _biometricLogin,
-                    icon: const Icon(Icons.fingerprint, size: 48),
-                    color: AppTheme.primaryColor,
-                    tooltip: AppLocalizations.of(context)!.signIn,
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  _buildField(
+                    controller: _passwordController,
+                    label: AppLocalizations.of(context)!.password,
+                    icon: Icons.lock_outline,
+                    obscure: _obscurePassword,
+                    onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
                   ),
-                ),
-                const SizedBox(height: AppTheme.spacingSmall),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(AppLocalizations.of(context)!.dontHaveAccount),
-                    TextButton(
-                      onPressed: () => context.go('/register'),
+                  Align(
+                    alignment: Alignment.centerRight,
+                    child: TextButton(
+                      onPressed: () => context.go('/forgot-password'),
                       child: Text(
-                        AppLocalizations.of(context)!.signUp,
+                        AppLocalizations.of(context)!.forgotPassword,
                         style: TextStyle(color: AppTheme.primaryColor),
                       ),
-                    )
-                  ],
-                ),
-              ],
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: AppTheme.primaryButtonStyle,
+                      onPressed: isButtonEnabled && !isLoading ? _signIn : null,
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(
+                              AppLocalizations.of(context)!.signIn,
+                              style: const TextStyle(
+                                fontSize: AppTheme.fontSizeRegular,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  Center(
+                    child: IconButton(
+                      onPressed: _biometricLogin,
+                      icon: const Icon(Icons.fingerprint, size: 48),
+                      color: AppTheme.primaryColor,
+                      tooltip: AppLocalizations.of(context)!.signIn,
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(AppLocalizations.of(context)!.dontHaveAccount),
+                      TextButton(
+                        onPressed: () => context.go('/register'),
+                        child: Text(
+                          AppLocalizations.of(context)!.signUp,
+                          style: TextStyle(color: AppTheme.primaryColor),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),

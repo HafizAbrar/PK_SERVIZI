@@ -1,9 +1,12 @@
+import 'dart:convert';
+import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:file_picker/file_picker.dart';
 import 'package:image_picker/image_picker.dart';
+import 'package:dio/dio.dart';
 import '../../../../core/network/api_client.dart';
 import '../../../../generated/l10n/app_localizations.dart';
 import '../../data/models/service.dart' as service_models;
@@ -87,6 +90,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         _buildProgressBar(),
         Expanded(
           child: SingleChildScrollView(
+            physics: const AlwaysScrollableScrollPhysics(),
             child: Form(
               key: _formKey,
               child: Column(
@@ -94,7 +98,7 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                 children: [
                   _buildFormHeader(schema),
                   _buildSectionTiles(sections),
-                  const SizedBox(height: 120),
+                  SizedBox(height: MediaQuery.of(context).padding.bottom + 140),
                 ],
               ),
             ),
@@ -408,12 +412,15 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
         builder: (context, setModalState) {
           return Padding(
             padding: EdgeInsets.only(
-              bottom: MediaQuery.of(context).viewInsets.bottom,
+              bottom: MediaQuery.of(context).viewInsets.bottom + MediaQuery.of(context).padding.bottom,
             ),
             child: Container(
               decoration: const BoxDecoration(
                 color: Colors.white,
                 borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
+              ),
+              constraints: BoxConstraints(
+                maxHeight: MediaQuery.of(context).size.height * 0.9,
               ),
               padding: const EdgeInsets.all(24),
               child: Column(
@@ -1463,7 +1470,12 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   Widget _buildBottomActions() {
     final l10n = AppLocalizations.of(context)!;
     return Container(
-      padding: const EdgeInsets.all(20),
+      padding: EdgeInsets.fromLTRB(
+        20,
+        20,
+        20,
+        20 + MediaQuery.of(context).padding.bottom,
+      ),
       decoration: BoxDecoration(
         color: Colors.white,
         boxShadow: [
@@ -1661,41 +1673,78 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     try {
       final apiClient = ref.read(apiClientProvider);
 
-      // Prepare form data with proper structure
-      final formData = <String, dynamic>{};
+      // Build JSON string of questionnaire answers (no files)
+      final answersMap = <String, dynamic>{};
 
-      // Add text field values
       for (var entry in _controllers.entries) {
         final value = entry.value.text.trim();
-        if (value.isNotEmpty) {
-          formData[entry.key] = value;
-        }
+        if (value.isNotEmpty) answersMap[entry.key] = value;
       }
 
-      // Add other form values (checkboxes, radios, dropdowns, etc.)
       for (var entry in _formValues.entries) {
-        if (entry.value != null) {
-          formData[entry.key] = entry.value;
+        if (entry.value != null && entry.value is! List<PlatformFile>) {
+          answersMap[entry.key] = entry.value;
         }
       }
 
-      // Add file uploads - convert to file paths or base64
+      // Build multipart/form-data
+      final multipart = FormData();
+
+      // Map from form field names -> API accepted file field names
+      const fileFieldMap = {
+        'document_file': 'identityDocument',
+        'tax_card_file': 'fiscalCode',
+        'permit_file': 'identityDocument',
+        'income_file': 'incomeCertificate',
+        'redditi_esteri_file': 'incomeCertificate',
+        'assegni_mantenimento_file': 'incomeCertificate',
+        'redditi_affitti_file': 'incomeCertificate',
+        'altri_redditi_file': 'incomeCertificate',
+        'giacenza_media_file': 'bankStatement',
+        'altri_investimenti_file': 'bankStatement',
+        'contratto_affitto': 'propertyDocument',
+        'immobili': 'propertyDocument',
+      };
+
+      // formData field must be a JSON string
+      // Files not in the map go into formData as base64
+      final extraFiles = <String, String>{};
       for (var entry in _uploadedFiles.entries) {
-        if (entry.value.isNotEmpty) {
-          // Send file paths for each uploaded file
-          final filePaths = entry.value.map((file) => file.path).toList();
-          formData[entry.key] = filePaths.length == 1 ? filePaths.first : filePaths;
-          debugPrint('Added file field: ${entry.key} = $filePaths');
+        if (!fileFieldMap.containsKey(entry.key) && entry.value.isNotEmpty) {
+          final file = entry.value.first;
+          final bytes = file.bytes ?? (file.path != null ? await _readFileBytes(file.path!) : null);
+          if (bytes != null) {
+            extraFiles[entry.key] = 'data:application/octet-stream;base64,${base64Encode(bytes)}';
+          }
+        }
+      }
+      if (extraFiles.isNotEmpty) answersMap.addAll(extraFiles);
+
+      multipart.fields.add(MapEntry('formData', jsonEncode(answersMap)));
+
+      // Attach mapped files as multipart binary fields
+      final attachedApiFields = <String>{};
+      for (var entry in _uploadedFiles.entries) {
+        final apiField = fileFieldMap[entry.key];
+        if (apiField == null || entry.value.isEmpty) continue;
+        if (attachedApiFields.contains(apiField)) continue; // avoid duplicate field
+        attachedApiFields.add(apiField);
+        final file = entry.value.first;
+        if (file.bytes != null) {
+          multipart.files.add(MapEntry(apiField, MultipartFile.fromBytes(file.bytes!, filename: file.name)));
+        } else if (file.path != null) {
+          multipart.files.add(MapEntry(apiField, await MultipartFile.fromFile(file.path!, filename: file.name)));
         }
       }
 
       debugPrint('Submitting to: /api/v1/service-requests/${widget.serviceRequestId}/questionnaire');
-      debugPrint('Form data: $formData');
+      debugPrint('Answers: $answersMap');
+      debugPrint('formData JSON string: ${jsonEncode(answersMap)}');
+      debugPrint('Files being sent: ${_uploadedFiles.keys.toList()}');
 
-      // Submit form data
       final response = await apiClient.patch(
         '/api/v1/service-requests/${widget.serviceRequestId}/questionnaire',
-        data: formData,
+        data: multipart,
       );
 
       debugPrint('Submit response: ${response.data}');
@@ -1709,9 +1758,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
           ),
         );
-        context.go('/request-submission?serviceId=${widget.serviceId}&requestId=${widget.serviceRequestId}');
+        context.go('/request-submission?requestId=${widget.serviceRequestId}');
       }
     } catch (e) {
+      if (e is DioException) {
+        debugPrint('Form submission error response: ${e.response?.data}');
+        debugPrint('Form submission error status: ${e.response?.statusCode}');
+      }
       debugPrint('Form submission error: $e');
       if (mounted) {
         String errorMessage;
@@ -1920,5 +1973,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   String _translateHint(String hint) {
     final locale = Localizations.localeOf(context).languageCode;
     return TranslationService.getCached(hint, locale) ?? hint;
+  }
+
+  Future<List<int>?> _readFileBytes(String path) async {
+    try {
+      return await File(path).readAsBytes();
+    } catch (_) {
+      return null;
+    }
   }
 }

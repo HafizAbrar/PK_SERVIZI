@@ -21,10 +21,15 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   late final WebViewController _controller;
   bool _isLoading = true;
   String? _serviceId;
+  bool _isDisposed = false;
 
   @override
   void initState() {
     super.initState();
+    _initializeWebView();
+  }
+
+  void _initializeWebView() {
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
@@ -32,14 +37,18 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
-            if (mounted) setState(() => _isLoading = true);
+            if (mounted && !_isDisposed) {
+              setState(() => _isLoading = true);
+            }
           },
           onPageFinished: (String url) {
-            if (mounted) setState(() => _isLoading = false);
+            if (mounted && !_isDisposed) {
+              setState(() => _isLoading = false);
+            }
           },
           onWebResourceError: (WebResourceError error) {
             debugPrint('WebView error: ${error.description}');
-            if (mounted && error.errorType == WebResourceErrorType.hostLookup) {
+            if (mounted && !_isDisposed && error.errorType == WebResourceErrorType.hostLookup) {
               _handlePaymentCancel();
             }
           },
@@ -62,25 +71,26 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   }
 
   Future<void> _loadUrl() async {
+    if (_isDisposed) return;
     try {
       await _controller.loadRequest(Uri.parse(widget.paymentUrl));
     } catch (e) {
       debugPrint('Error loading payment URL: $e');
-      if (mounted) _handlePaymentCancel();
+      if (mounted && !_isDisposed) _handlePaymentCancel();
     }
   }
 
   @override
   void didChangeDependencies() {
     super.didChangeDependencies();
-    // Extract serviceId from current route
+    if (_isDisposed) return;
     final uri = GoRouterState.of(context).uri;
     _serviceId = uri.queryParameters['serviceId'];
     debugPrint('Extracted serviceId: $_serviceId');
-    debugPrint('Full URI: $uri');
   }
 
   void _handlePaymentSuccess() {
+    if (_isDisposed) return;
     debugPrint('Payment success - serviceId: $_serviceId, serviceRequestId: ${widget.serviceRequestId}');
     if (mounted) {
       if (_serviceId != null && widget.serviceRequestId != null && widget.serviceRequestId!.isNotEmpty) {
@@ -92,41 +102,56 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   }
 
   void _handlePaymentCancel() {
+    if (_isDisposed) return;
     if (mounted) {
       context.pop();
     }
   }
 
   @override
+  void dispose() {
+    _isDisposed = true;
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: AppTheme.primaryColor,
-      appBar: AppBar(
-        title: const Text(
-          'Payment',
-          style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+    return PopScope(
+      canPop: false,
+      onPopInvokedWithResult: (didPop, result) {
+        if (!didPop) {
+          _handlePaymentCancel();
+        }
+      },
+      child: Scaffold(
+        backgroundColor: AppTheme.primaryColor,
+        appBar: AppBar(
+          title: const Text(
+            'Payment',
+            style: TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
+          ),
+          backgroundColor: Colors.transparent,
+          elevation: 0,
+          leading: IconButton(
+            icon: const Icon(Icons.close, color: Colors.white),
+            onPressed: () => context.pop(),
+          ),
         ),
-        backgroundColor: Colors.transparent,
-        elevation: 0,
-        leading: IconButton(
-          icon: const Icon(Icons.close, color: Colors.white),
-          onPressed: () => context.pop(),
-        ),
-      ),
-      body: Container(
-        decoration: AppTheme.cardDecoration.copyWith(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: ClipRRect(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-          child: Stack(
-            children: [
-              WebViewWidget(controller: _controller),
-              if (_isLoading)
-                Center(
-                  child: CircularProgressIndicator(color: AppTheme.primaryColor),
-                ),
-            ],
+        body: Container(
+          decoration: AppTheme.cardDecoration.copyWith(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: ClipRRect(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+            child: Stack(
+              children: [
+                WebViewWidget(controller: _controller),
+                if (_isLoading)
+                  Center(
+                    child: CircularProgressIndicator(color: AppTheme.primaryColor),
+                  ),
+              ],
+            ),
           ),
         ),
       ),

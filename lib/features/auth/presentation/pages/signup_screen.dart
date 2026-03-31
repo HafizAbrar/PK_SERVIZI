@@ -109,115 +109,117 @@ class _SignUpScreenState extends ConsumerState<SignUpScreen> {
           style: const TextStyle(fontWeight: FontWeight.bold, color: Colors.white),
         ),
       ),
-      body: Container(
-        decoration: AppTheme.cardDecoration.copyWith(
-          borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
-        ),
-        child: SingleChildScrollView(
-          padding: const EdgeInsets.all(AppTheme.spacingLarge),
-          child: Form(
-            key: _formKey,
-            child: Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                const SizedBox(height: AppTheme.spacingSmall),
-                Text(
-                  l10n.welcomeToPKServizi,
-                  style: TextStyle(
-                    color: AppTheme.primaryColor,
-                    fontSize: AppTheme.fontSizeXXLarge,
-                    fontWeight: FontWeight.bold,
-                  ),
-                ),
-                const SizedBox(height: AppTheme.spacingXSmall),
-                Text(
-                  l10n.createAccountToContinue,
-                  style: TextStyle(color: AppTheme.textSecondary),
-                ),
-                const SizedBox(height: AppTheme.spacingXLarge),
-                Center(
-                  child: ClipRRect(
-                    borderRadius: BorderRadius.circular(150),
-                    child: Image.asset(
-                      'assets/logos/TuoCAF logo.png',
-                      height: 80,
-                      width: 500,
-                      fit: BoxFit.fitWidth,
+      body: SafeArea(
+        child: Container(
+          decoration: AppTheme.cardDecoration.copyWith(
+            borderRadius: const BorderRadius.vertical(top: Radius.circular(28)),
+          ),
+          child: SingleChildScrollView(
+            physics: const ClampingScrollPhysics(),
+            padding: const EdgeInsets.all(AppTheme.spacingLarge),
+            child: Form(
+              key: _formKey,
+              child: Column(
+                crossAxisAlignment: CrossAxisAlignment.start,
+                children: [
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  Text(
+                    l10n.welcomeToPKServizi,
+                    style: TextStyle(
+                      color: AppTheme.primaryColor,
+                      fontSize: AppTheme.fontSizeXXLarge,
+                      fontWeight: FontWeight.bold,
                     ),
                   ),
-                ),
-
-                const SizedBox(height: AppTheme.spacingXLarge),
-                _buildField(
-                  controller: _firstNameController,
-                  label: l10n.firstName,
-                  icon: Icons.person_outline,
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
-                _buildField(
-                  controller: _surnameController,
-                  label: l10n.surname,
-                  icon: Icons.person_outline,
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
-                _buildField(
-                  controller: _emailController,
-                  label: l10n.email,
-                  icon: Icons.email_outlined,
-                  keyboard: TextInputType.emailAddress,
-                ),
-                const SizedBox(height: AppTheme.spacingMedium),
-                _buildField(
-                  controller: _passwordController,
-                  label: l10n.password,
-                  icon: Icons.lock_outline,
-                  obscure: _obscurePassword,
-                  onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
-                ),
-                if (_passwordController.text.isNotEmpty)
-                  const SizedBox(height: 12),
-                if (_passwordController.text.isNotEmpty)
-                  _buildPasswordStrengthIndicator(l10n),
-                const SizedBox(height: AppTheme.spacingLarge),
-                SizedBox(
-                  width: double.infinity,
-                  child: ElevatedButton(
-                    style: AppTheme.primaryButtonStyle,
-                    onPressed: isButtonEnabled && !isLoading ? _registerUser : null,
-                    child: isLoading
-                        ? const SizedBox(
-                            height: 20,
-                            width: 20,
-                            child: CircularProgressIndicator(
-                              strokeWidth: 2,
-                              valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
-                            ),
-                          )
-                        : Text(
-                            l10n.signUp,
-                            style: const TextStyle(
-                              fontSize: AppTheme.fontSizeRegular,
-                              fontWeight: FontWeight.bold,
-                              color: Colors.white,
-                            ),
-                          ),
+                  const SizedBox(height: AppTheme.spacingXSmall),
+                  Text(
+                    l10n.createAccountToContinue,
+                    style: TextStyle(color: AppTheme.textSecondary),
                   ),
-                ),
-                const SizedBox(height: AppTheme.spacingSmall),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Text(l10n.alreadyHaveAccount),
-                    TextButton(
-                      onPressed: () => context.go('/login'),
-                      child: Text(
-                        l10n.signIn,
-                        style: TextStyle(color: AppTheme.primaryColor),
+                  const SizedBox(height: AppTheme.spacingXLarge),
+                  Center(
+                    child: ClipRRect(
+                      borderRadius: BorderRadius.circular(150),
+                      child: Image.asset(
+                        'assets/logos/TuoCAF logo.png',
+                        height: 80,
+                        width: 500,
+                        fit: BoxFit.fitWidth,
                       ),
-                    )
-                  ],
-                ),
-              ],
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingXLarge),
+                  _buildField(
+                    controller: _firstNameController,
+                    label: l10n.firstName,
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  _buildField(
+                    controller: _surnameController,
+                    label: l10n.surname,
+                    icon: Icons.person_outline,
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  _buildField(
+                    controller: _emailController,
+                    label: l10n.email,
+                    icon: Icons.email_outlined,
+                    keyboard: TextInputType.emailAddress,
+                  ),
+                  const SizedBox(height: AppTheme.spacingMedium),
+                  _buildField(
+                    controller: _passwordController,
+                    label: l10n.password,
+                    icon: Icons.lock_outline,
+                    obscure: _obscurePassword,
+                    onToggleVisibility: () => setState(() => _obscurePassword = !_obscurePassword),
+                  ),
+                  if (_passwordController.text.isNotEmpty)
+                    const SizedBox(height: 12),
+                  if (_passwordController.text.isNotEmpty)
+                    _buildPasswordStrengthIndicator(l10n),
+                  const SizedBox(height: AppTheme.spacingLarge),
+                  SizedBox(
+                    width: double.infinity,
+                    child: ElevatedButton(
+                      style: AppTheme.primaryButtonStyle,
+                      onPressed: isButtonEnabled && !isLoading ? _registerUser : null,
+                      child: isLoading
+                          ? const SizedBox(
+                              height: 20,
+                              width: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 2,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : Text(
+                              l10n.signUp,
+                              style: const TextStyle(
+                                fontSize: AppTheme.fontSizeRegular,
+                                fontWeight: FontWeight.bold,
+                                color: Colors.white,
+                              ),
+                            ),
+                    ),
+                  ),
+                  const SizedBox(height: AppTheme.spacingSmall),
+                  Row(
+                    mainAxisAlignment: MainAxisAlignment.center,
+                    children: [
+                      Text(l10n.alreadyHaveAccount),
+                      TextButton(
+                        onPressed: () => context.go('/login'),
+                        child: Text(
+                          l10n.signIn,
+                          style: TextStyle(color: AppTheme.primaryColor),
+                        ),
+                      )
+                    ],
+                  ),
+                ],
+              ),
             ),
           ),
         ),
