@@ -17,7 +17,8 @@ class PaymentCheckoutScreen extends StatefulWidget {
   State<PaymentCheckoutScreen> createState() => _PaymentCheckoutScreenState();
 }
 
-class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
+class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen>
+    with WidgetsBindingObserver {
   late final WebViewController _controller;
   bool _isLoading = true;
   String? _serviceId;
@@ -26,7 +27,17 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _initializeWebView();
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    if (_isDisposed) return;
+    if (state == AppLifecycleState.paused) {
+      // Pause JS to free memory when app is backgrounded
+      _controller.runJavaScript('document.dispatchEvent(new Event("visibilitychange"))');
+    }
   }
 
   void _initializeWebView() {
@@ -34,6 +45,7 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..setBackgroundColor(Colors.white)
       ..enableZoom(false)
+      ..setOnConsoleMessage((_) {}) // suppress console spam
       ..setNavigationDelegate(
         NavigationDelegate(
           onPageStarted: (String url) {
@@ -53,7 +65,6 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
             }
           },
           onNavigationRequest: (NavigationRequest request) {
-            debugPrint('Navigation request: ${request.url}');
             if (request.url.contains('success') || request.url.contains('payment_intent')) {
               _handlePaymentSuccess();
               return NavigationDecision.prevent;
@@ -91,8 +102,9 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
 
   void _handlePaymentSuccess() {
     if (_isDisposed) return;
-    debugPrint('Payment success - serviceId: $_serviceId, serviceRequestId: ${widget.serviceRequestId}');
     if (mounted) {
+      // Stop WebView JS before navigating away
+      _controller.loadRequest(Uri.parse('about:blank'));
       if (_serviceId != null && widget.serviceRequestId != null && widget.serviceRequestId!.isNotEmpty) {
         context.go('/service-request-form/$_serviceId?serviceRequestId=${widget.serviceRequestId}');
       } else {
@@ -111,6 +123,9 @@ class _PaymentCheckoutScreenState extends State<PaymentCheckoutScreen> {
   @override
   void dispose() {
     _isDisposed = true;
+    WidgetsBinding.instance.removeObserver(this);
+    // Load blank page to stop all JS processes before disposal
+    _controller.loadRequest(Uri.parse('about:blank'));
     super.dispose();
   }
 

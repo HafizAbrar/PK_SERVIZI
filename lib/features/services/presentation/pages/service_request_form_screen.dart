@@ -47,6 +47,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   final Map<String, dynamic> _formValues = {};
   final Map<String, List<PlatformFile>> _uploadedFiles = {};
   service_models.FormSection? _currentSection;
+  bool _isSubmitting = false;
+  double _uploadProgress = 0.0;
+  String _uploadStatus = '';
 
   @override
   void dispose() {
@@ -61,23 +64,28 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     final schemaAsync = ref.watch(serviceFormProvider(widget.serviceId));
     final serviceAsync = ref.watch(serviceDetailProvider(widget.serviceId));
 
-    return Scaffold(
-      backgroundColor: AppTheme.backgroundLight,
-      body: schemaAsync.when(
-        data: (schema) => serviceAsync.when(
-          data: (service) => _buildForm(schema, service),
-          loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-          error: (error, stackTrace) {
-            debugPrint('Error loading service: $error');
-            return _buildForm(schema, null);
-          },
+    return Stack(
+      children: [
+        Scaffold(
+          backgroundColor: AppTheme.backgroundLight,
+          body: schemaAsync.when(
+            data: (schema) => serviceAsync.when(
+              data: (service) => _buildForm(schema, service),
+              loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+              error: (error, stackTrace) {
+                debugPrint('Error loading service: $error');
+                return _buildForm(schema, null);
+              },
+            ),
+            loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
+            error: (error, stackTrace) {
+              debugPrint('Error loading form schema: $error');
+              return _buildError(error.toString());
+            },
+          ),
         ),
-        loading: () => const Center(child: CircularProgressIndicator(color: AppTheme.primaryColor)),
-        error: (error, stackTrace) {
-          debugPrint('Error loading form schema: $error');
-          return _buildError(error.toString());
-        },
-      ),
+        if (_isSubmitting) _buildProgressOverlay(),
+      ],
     );
   }
 
@@ -1607,7 +1615,6 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
   Future<void> _submitForm() async {
     final l10n = AppLocalizations.of(context)!;
     
-    // Validate that all required fields are filled
     if (!_formKey.currentState!.validate()) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
@@ -1620,7 +1627,6 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       return;
     }
     
-    // Check if all required fields have values
     final schemaAsync = ref.read(serviceFormProvider(widget.serviceId));
     final schema = schemaAsync.value;
     
@@ -1628,17 +1634,9 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       for (var section in schema.sections) {
         for (var field in section.fields) {
           if (field.required && field.type != 'hidden') {
-            // Skip fields that should be hidden based on dependencies
-            if (_shouldHideField(field, section.fields)) {
-              debugPrint('Skipping hidden field: ${field.name}');
-              continue;
-            }
+            if (_shouldHideField(field, section.fields)) continue;
             
             final value = _getFieldValue(field);
-            debugPrint('Validating field: ${field.name} (${field.label}) = "$value"');
-            debugPrint('  Controller value: "${_controllers[field.name]?.text}"');
-            debugPrint('  FormValues value: "${_formValues[field.name]}"');
-            
             if (value == null || value.isEmpty) {
               ScaffoldMessenger.of(context).showSnackBar(
                 SnackBar(
@@ -1656,7 +1654,6 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     }
     
     if (widget.serviceRequestId == null || widget.serviceRequestId!.isEmpty) {
-      debugPrint('ERROR: serviceRequestId is null or empty');
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
           SnackBar(
@@ -1671,9 +1668,15 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     }
 
     try {
+      setState(() {
+        _isSubmitting = true;
+        _uploadProgress = 0.0;
+        _uploadStatus = 'Preparing submission...';
+      });
+
       final apiClient = ref.read(apiClientProvider);
 
-      // Build JSON string of questionnaire answers (no files)
+      // Build questionnaire answers (text only)
       final answersMap = <String, dynamic>{};
 
       for (var entry in _controllers.entries) {
@@ -1682,72 +1685,94 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       }
 
       for (var entry in _formValues.entries) {
-        if (entry.value != null && entry.value is! List<PlatformFile>) {
+        if (entry.value != null && 
+            entry.value is! List<PlatformFile> &&
+            entry.value is! List) {
           answersMap[entry.key] = entry.value;
         }
       }
 
-      // Build multipart/form-data
-      final multipart = FormData();
+      // Build multipart form data
+      final formData = FormData();
+      formData.fields.add(MapEntry('formData', jsonEncode(answersMap)));
 
-      // Map from form field names -> API accepted file field names
-      const fileFieldMap = {
+      // Map form field names to API expected field names
+      const fileFieldMapping = {
         'document_file': 'identityDocument',
+        'carta_identita': 'identityDocument',
+        'passaporto': 'identityDocument',
         'tax_card_file': 'fiscalCode',
-        'permit_file': 'identityDocument',
+        'codice_fiscale': 'fiscalCode',
+        'cf_coniuge': 'fiscalCode',
         'income_file': 'incomeCertificate',
-        'redditi_esteri_file': 'incomeCertificate',
-        'assegni_mantenimento_file': 'incomeCertificate',
-        'redditi_affitti_file': 'incomeCertificate',
-        'altri_redditi_file': 'incomeCertificate',
-        'giacenza_media_file': 'bankStatement',
-        'altri_investimenti_file': 'bankStatement',
-        'contratto_affitto': 'propertyDocument',
-        'immobili': 'propertyDocument',
+        'certificato_reddito': 'incomeCertificate',
+        'bank_statement': 'bankStatement',
+        'estratto_conto': 'bankStatement',
+        'property_document': 'propertyDocument',
+        'documento_proprieta': 'propertyDocument',
+        'visura_catastale': 'visuraCatastale',
+        'cu_certificate': 'cuCertificate',
+        'certificazione_unica': 'cuCertificate',
+        'property_deed': 'propertyDeed',
+        'atto_proprieta': 'propertyDeed',
+        'permit_file': 'identityDocument',
+        'permesso_soggiorno': 'identityDocument',
+        'atto_nascita': 'otherDocument',
+        'certificato_penale': 'otherDocument',
+        'atto_matrimonio': 'familyDocuments',
+        'stato_famiglia': 'familyDocuments',
+        'versamento_250': 'otherDocument',
+        'certificato_lingua': 'otherDocument',
+        'marca_bollo': 'otherDocument',
+        'doc_coniuge': 'familyDocuments',
       };
 
-      // formData field must be a JSON string
-      // Files not in the map go into formData as base64
-      final extraFiles = <String, String>{};
+      // Group files by API field name to handle arrays
+      final filesByApiField = <String, List<PlatformFile>>{};
       for (var entry in _uploadedFiles.entries) {
-        if (!fileFieldMap.containsKey(entry.key) && entry.value.isNotEmpty) {
-          final file = entry.value.first;
-          final bytes = file.bytes ?? (file.path != null ? await _readFileBytes(file.path!) : null);
-          if (bytes != null) {
-            extraFiles[entry.key] = 'data:application/octet-stream;base64,${base64Encode(bytes)}';
+        if (entry.value.isNotEmpty) {
+          final apiFieldName = fileFieldMapping[entry.key] ?? 'otherDocument';
+          filesByApiField[apiFieldName] ??= [];
+          filesByApiField[apiFieldName]!.addAll(entry.value);
+        }
+      }
+
+      // Add files - for array fields, send multiple files with same field name
+      for (var entry in filesByApiField.entries) {
+        final fieldName = entry.key;
+        final files = entry.value;
+        
+        for (var file in files) {
+          if (file.bytes != null) {
+            formData.files.add(MapEntry(fieldName, MultipartFile.fromBytes(file.bytes!, filename: file.name)));
+          } else if (file.path != null) {
+            formData.files.add(MapEntry(fieldName, await MultipartFile.fromFile(file.path!, filename: file.name)));
           }
         }
       }
-      if (extraFiles.isNotEmpty) answersMap.addAll(extraFiles);
 
-      multipart.fields.add(MapEntry('formData', jsonEncode(answersMap)));
+      debugPrint('Submitting with ${filesByApiField.length} file field types');
+      debugPrint('File fields: ${filesByApiField.keys.toList()}');
 
-      // Attach mapped files as multipart binary fields
-      final attachedApiFields = <String>{};
-      for (var entry in _uploadedFiles.entries) {
-        final apiField = fileFieldMap[entry.key];
-        if (apiField == null || entry.value.isEmpty) continue;
-        if (attachedApiFields.contains(apiField)) continue; // avoid duplicate field
-        attachedApiFields.add(apiField);
-        final file = entry.value.first;
-        if (file.bytes != null) {
-          multipart.files.add(MapEntry(apiField, MultipartFile.fromBytes(file.bytes!, filename: file.name)));
-        } else if (file.path != null) {
-          multipart.files.add(MapEntry(apiField, await MultipartFile.fromFile(file.path!, filename: file.name)));
-        }
-      }
-
-      debugPrint('Submitting to: /api/v1/service-requests/${widget.serviceRequestId}/questionnaire');
-      debugPrint('Answers: $answersMap');
-      debugPrint('formData JSON string: ${jsonEncode(answersMap)}');
-      debugPrint('Files being sent: ${_uploadedFiles.keys.toList()}');
-
-      final response = await apiClient.patch(
+      final response = await apiClient.dio.patch(
         '/api/v1/service-requests/${widget.serviceRequestId}/questionnaire',
-        data: multipart,
+        data: formData,
+        options: Options(
+          headers: {'Content-Type': 'multipart/form-data'},
+        ),
+        onSendProgress: (sent, total) {
+          setState(() {
+            _uploadProgress = sent / total;
+            _uploadStatus = 'Uploading... ${(sent / 1024 / 1024).toStringAsFixed(1)}MB / ${(total / 1024 / 1024).toStringAsFixed(1)}MB';
+          });
+        },
       );
 
-      debugPrint('Submit response: ${response.data}');
+      setState(() {
+        _isSubmitting = false;
+        _uploadProgress = 0.0;
+        _uploadStatus = '';
+      });
 
       if (mounted) {
         ScaffoldMessenger.of(context).showSnackBar(
@@ -1762,14 +1787,15 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       }
     } catch (e) {
       if (e is DioException) {
-        debugPrint('Form submission error response: ${e.response?.data}');
-        debugPrint('Form submission error status: ${e.response?.statusCode}');
+        debugPrint('Form submission error: ${e.response?.data}');
       }
-      debugPrint('Form submission error: $e');
+      setState(() {
+        _isSubmitting = false;
+        _uploadProgress = 0.0;
+        _uploadStatus = '';
+      });
       if (mounted) {
         String errorMessage;
-        
-        // Parse error and provide user-friendly message
         final errorString = e.toString().toLowerCase();
         if (errorString.contains('401')) {
           errorMessage = 'Your session has expired. Please log in again.';
@@ -1981,5 +2007,75 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     } catch (_) {
       return null;
     }
+  }
+
+  Widget _buildProgressOverlay() {
+    return Container(
+      color: Colors.black.withOpacity(0.7),
+      child: Center(
+        child: Container(
+          margin: const EdgeInsets.symmetric(horizontal: 40),
+          padding: const EdgeInsets.all(32),
+          decoration: BoxDecoration(
+            color: Colors.white,
+            borderRadius: BorderRadius.circular(20),
+            boxShadow: [
+              BoxShadow(
+                color: Colors.black.withOpacity(0.3),
+                blurRadius: 20,
+                offset: const Offset(0, 10),
+              ),
+            ],
+          ),
+          child: Column(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Stack(
+                alignment: Alignment.center,
+                children: [
+                  SizedBox(
+                    width: 100,
+                    height: 100,
+                    child: CircularProgressIndicator(
+                      value: _uploadProgress,
+                      strokeWidth: 8,
+                      backgroundColor: Colors.grey[200],
+                      valueColor: const AlwaysStoppedAnimation<Color>(AppTheme.accentColor),
+                    ),
+                  ),
+                  Text(
+                    '${(_uploadProgress * 100).toInt()}%',
+                    style: const TextStyle(
+                      fontSize: 24,
+                      fontWeight: FontWeight.bold,
+                      color: AppTheme.primaryColor,
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(height: 24),
+              Text(
+                _uploadStatus,
+                style: const TextStyle(
+                  fontSize: 16,
+                  fontWeight: FontWeight.w600,
+                  color: AppTheme.primaryColor,
+                ),
+                textAlign: TextAlign.center,
+              ),
+              const SizedBox(height: 8),
+              Text(
+                'Please wait...',
+                style: TextStyle(
+                  fontSize: 14,
+                  color: Colors.grey[600],
+                ),
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
   }
 }
