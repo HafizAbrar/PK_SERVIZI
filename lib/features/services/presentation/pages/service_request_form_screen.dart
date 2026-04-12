@@ -1696,63 +1696,56 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       final formData = FormData();
       formData.fields.add(MapEntry('formData', jsonEncode(answersMap)));
 
-      // Map form field names to API expected field names
+      // Map form field names to API expected field names based on API documentation
+      // IMPORTANT: string($binary) fields accept only ONE file, array<string> fields accept multiple
       const fileFieldMapping = {
-        'document_file': 'identityDocument',
+        'document_file': 'identityDocument',  // string($binary) - single file
         'carta_identita': 'identityDocument',
         'passaporto': 'identityDocument',
-        'tax_card_file': 'fiscalCode',
+        'permit_file': 'visuraCatastale',  // string($binary) - single file (changed from identityDocument)
+        'permesso_soggiorno': 'visuraCatastale',
+        'tax_card_file': 'fiscalCode',  // string($binary) - single file
         'codice_fiscale': 'fiscalCode',
         'cf_coniuge': 'fiscalCode',
-        'income_file': 'incomeCertificate',
+        'income_file': 'incomeCertificate',  // string($binary) - single file
         'certificato_reddito': 'incomeCertificate',
-        'bank_statement': 'bankStatement',
+        'bank_statement': 'bankStatement',  // string($binary) - single file
         'estratto_conto': 'bankStatement',
-        'property_document': 'propertyDocument',
+        'property_document': 'propertyDocument',  // string($binary) - single file
         'documento_proprieta': 'propertyDocument',
-        'visura_catastale': 'visuraCatastale',
-        'cu_certificate': 'cuCertificate',
+        'visura_catastale': 'visuraCatastale',  // string($binary) - single file
+        'cu_certificate': 'cuCertificate',  // string($binary) - single file
         'certificazione_unica': 'cuCertificate',
-        'property_deed': 'propertyDeed',
+        'property_deed': 'propertyDeed',  // string($binary) - single file
         'atto_proprieta': 'propertyDeed',
-        'permit_file': 'identityDocument',
-        'permesso_soggiorno': 'identityDocument',
-        'atto_nascita': 'otherDocument',
-        'certificato_penale': 'otherDocument',
-        'atto_matrimonio': 'familyDocuments',
+        // Array fields - can accept multiple files
+        'atto_nascita': 'medicalReceipts',  // array<string> - multiple files OK
+        'certificato_penale': 'expenseReceipts',  // array<string> - multiple files OK
+        'versamento_250': 'incomeDocuments',  // array<string> - multiple files OK
+        'certificato_lingua': 'incomeDocuments',
+        'marca_bollo': 'expenseReceipts',
+        'atto_matrimonio': 'familyDocuments',  // array<string> - multiple files OK
         'stato_famiglia': 'familyDocuments',
-        'versamento_250': 'otherDocument',
-        'certificato_lingua': 'otherDocument',
-        'marca_bollo': 'otherDocument',
         'doc_coniuge': 'familyDocuments',
+        'documenti_integrazione': 'incomeDocuments',
       };
 
-      // Group files by API field name to handle arrays
-      final filesByApiField = <String, List<PlatformFile>>{};
+      // Add files with mapped field names
       for (var entry in _uploadedFiles.entries) {
         if (entry.value.isNotEmpty) {
           final apiFieldName = fileFieldMapping[entry.key] ?? 'otherDocument';
-          filesByApiField[apiFieldName] ??= [];
-          filesByApiField[apiFieldName]!.addAll(entry.value);
-        }
-      }
-
-      // Add files - for array fields, send multiple files with same field name
-      for (var entry in filesByApiField.entries) {
-        final fieldName = entry.key;
-        final files = entry.value;
-        
-        for (var file in files) {
-          if (file.bytes != null) {
-            formData.files.add(MapEntry(fieldName, MultipartFile.fromBytes(file.bytes!, filename: file.name)));
-          } else if (file.path != null) {
-            formData.files.add(MapEntry(fieldName, await MultipartFile.fromFile(file.path!, filename: file.name)));
+          for (var file in entry.value) {
+            if (file.bytes != null) {
+              formData.files.add(MapEntry(apiFieldName, MultipartFile.fromBytes(file.bytes!, filename: file.name)));
+            } else if (file.path != null) {
+              formData.files.add(MapEntry(apiFieldName, await MultipartFile.fromFile(file.path!, filename: file.name)));
+            }
           }
         }
       }
 
-      debugPrint('Submitting with ${filesByApiField.length} file field types');
-      debugPrint('File fields: ${filesByApiField.keys.toList()}');
+      debugPrint('Submitting with ${_uploadedFiles.length} file fields');
+      debugPrint('Mapped file fields: ${_uploadedFiles.keys.map((k) => '$k -> ${fileFieldMapping[k] ?? "otherDocument"}').toList()}');
 
       final response = await apiClient.dio.patch(
         '/api/v1/service-requests/${widget.serviceRequestId}/questionnaire',
