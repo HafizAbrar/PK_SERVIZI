@@ -351,5 +351,6 @@
   "searchCountry": "Cerca paese...",
   "fiscalCodeMust16Chars": "Il codice fiscale deve essere esattamente di 16 caratteri",
   "invalidFiscalCodeFormat": "Formato codice fiscale non valido",
-  "sixteenCharacters": "16 caratteri"
+  "sixteenCharacters": "16 caratteri",
+  "pleaseProvideAllRequiredData": "Si prega di fornire tutti i dati richiesti"
 }

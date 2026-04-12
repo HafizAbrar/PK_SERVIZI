@@ -387,10 +387,183 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     return sorted;
   }
 
+  String? _getFirstMissingRequiredField(service_models.FormSection section) {
+    for (var field in section.fields) {
+      if (field.required && field.type != 'hidden') {
+        if (_shouldHideField(field, section.fields)) continue;
+        
+        bool hasValue = false;
+        
+        switch (field.type) {
+          case 'text':
+          case 'email':
+          case 'phone':
+          case 'number':
+          case 'date':
+          case 'time':
+          case 'datetime':
+          case 'textarea':
+          case 'url':
+          case 'password':
+          case 'signature':
+            final value = _controllers[field.name]?.text;
+            hasValue = value?.isNotEmpty == true;
+            break;
+          case 'group':
+            if (field.subFields != null) {
+              for (var subField in field.subFields!) {
+                if (!subField.required) continue;
+                if (_shouldHideField(subField, field.subFields ?? [])) continue;
+                
+                bool subHasValue = false;
+                switch (subField.type) {
+                  case 'text':
+                  case 'email':
+                  case 'phone':
+                  case 'number':
+                  case 'date':
+                  case 'time':
+                  case 'datetime':
+                  case 'textarea':
+                  case 'url':
+                  case 'password':
+                  case 'signature':
+                    final value = _controllers[subField.name]?.text;
+                    subHasValue = value?.isNotEmpty == true;
+                    break;
+                  case 'select':
+                  case 'radio':
+                    subHasValue = _formValues[subField.name] != null;
+                    break;
+                  case 'checkbox':
+                    subHasValue = _formValues[subField.name] == true;
+                    break;
+                  case 'file':
+                    subHasValue = _uploadedFiles[subField.name]?.isNotEmpty == true;
+                    break;
+                  default:
+                    subHasValue = true;
+                }
+                
+                if (!subHasValue) {
+                  return subField.label;
+                }
+              }
+              hasValue = true;
+            }
+            break;
+          case 'select':
+          case 'radio':
+            hasValue = _formValues[field.name] != null;
+            break;
+          case 'checkbox':
+            hasValue = _formValues[field.name] == true;
+            break;
+          case 'file':
+            hasValue = _uploadedFiles[field.name]?.isNotEmpty == true;
+            break;
+          case 'dynamic_list':
+            final items = _formValues[field.name] as List?;
+            hasValue = items != null && items.isNotEmpty;
+            break;
+          default:
+            hasValue = true;
+        }
+        
+        if (!hasValue) {
+          return field.label;
+        }
+      }
+    }
+    return null;
+  }
+
+  bool _isSectionValid(service_models.FormSection section) {
+    for (var field in section.fields) {
+      if (field.required && field.type != 'hidden') {
+        if (_shouldHideField(field, section.fields)) continue;
+        
+        bool hasValue = false;
+        
+        switch (field.type) {
+          case 'text':
+          case 'email':
+          case 'phone':
+          case 'number':
+          case 'date':
+          case 'time':
+          case 'datetime':
+          case 'textarea':
+          case 'url':
+          case 'password':
+          case 'signature':
+            final value = _controllers[field.name]?.text;
+            hasValue = value?.isNotEmpty == true;
+            break;
+          case 'group':
+            if (field.subFields != null) {
+              hasValue = field.subFields!.every((subField) {
+                if (!subField.required) return true;
+                if (_shouldHideField(subField, field.subFields ?? [])) return true;
+                
+                switch (subField.type) {
+                  case 'text':
+                  case 'email':
+                  case 'phone':
+                  case 'number':
+                  case 'date':
+                  case 'time':
+                  case 'datetime':
+                  case 'textarea':
+                  case 'url':
+                  case 'password':
+                  case 'signature':
+                    final value = _controllers[subField.name]?.text;
+                    return value?.isNotEmpty == true;
+                  case 'select':
+                  case 'radio':
+                    return _formValues[subField.name] != null;
+                  case 'checkbox':
+                    return _formValues[subField.name] == true;
+                  case 'file':
+                    return _uploadedFiles[subField.name]?.isNotEmpty == true;
+                  default:
+                    return true;
+                }
+              });
+            }
+            break;
+          case 'select':
+          case 'radio':
+            hasValue = _formValues[field.name] != null;
+            break;
+          case 'checkbox':
+            hasValue = _formValues[field.name] == true;
+            break;
+          case 'file':
+            hasValue = _uploadedFiles[field.name]?.isNotEmpty == true;
+            break;
+          case 'dynamic_list':
+            final items = _formValues[field.name] as List?;
+            hasValue = items != null && items.isNotEmpty;
+            break;
+          default:
+            hasValue = true;
+        }
+        
+        if (!hasValue) return false;
+      }
+    }
+    return true;
+  }
+
   void _showSectionDialog(service_models.FormSection section) {
     final l10n = AppLocalizations.of(context)!;
+    final scaffoldContext = context; // Capture scaffold context for SnackBar
     _currentSection = section;
     final sortedFields = _getSortedFields(section.fields);
+    String? validationError;
+    
     // Initialize controllers for all fields in the section
     for (var field in sortedFields) {
       if (field.type != 'hidden') {
@@ -454,6 +627,57 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                     ],
                   ),
                   const SizedBox(height: 16),
+                  if (validationError != null)
+                    Container(
+                      padding: const EdgeInsets.all(16),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFEF2F2),
+                        borderRadius: BorderRadius.circular(12),
+                        border: Border.all(color: const Color(0xFFEF4444).withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Container(
+                            padding: const EdgeInsets.all(2),
+                            decoration: const BoxDecoration(
+                              color: Color(0xFFEF4444),
+                              shape: BoxShape.circle,
+                            ),
+                            child: const Icon(
+                              Icons.priority_high,
+                              color: Colors.white,
+                              size: 16,
+                            ),
+                          ),
+                          const SizedBox(width: 12),
+                          Expanded(
+                            child: Column(
+                              crossAxisAlignment: CrossAxisAlignment.start,
+                              children: [
+                                Text(
+                                  l10n.thisFieldIsRequired,
+                                  style: const TextStyle(
+                                    color: Color(0xFFEF4444),
+                                    fontSize: 14,
+                                    fontWeight: FontWeight.bold,
+                                  ),
+                                ),
+                                const SizedBox(height: 4),
+                                Text(
+                                  validationError!,
+                                  style: TextStyle(
+                                    color: Colors.grey[700],
+                                    fontSize: 13,
+                                  ),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  if (validationError != null) const SizedBox(height: 16),
                   Expanded(
                     child: SingleChildScrollView(
                       child: Column(
@@ -501,6 +725,21 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                     width: double.infinity,
                     child: ElevatedButton(
                       onPressed: () {
+                        final missingField = _getFirstMissingRequiredField(section);
+                        
+                        if (missingField != null) {
+                          setModalState(() {
+                            validationError = missingField;
+                          });
+                          return;
+                        }
+                        
+                        // Clear any previous validation error
+                        setModalState(() {
+                          validationError = null;
+                        });
+                        
+                        // All required fields are filled, proceed with saving
                         setState(() {
                           for (var field in _getSortedFields(section.fields)) {
                             debugPrint('Saving field: ${field.name} (${field.type})');
@@ -589,12 +828,13 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
                         Navigator.pop(context);
                       },
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: AppTheme.accentColor,
+                        backgroundColor: _isSectionValid(section) ? AppTheme.accentColor : Colors.grey[400],
                         foregroundColor: Colors.white,
                         padding: const EdgeInsets.symmetric(vertical: 16),
                         shape: RoundedRectangleBorder(
                           borderRadius: BorderRadius.circular(12),
                         ),
+                        elevation: _isSectionValid(section) ? 2 : 0,
                       ),
                       child: Text(
                         l10n.saveDraft,
@@ -671,6 +911,413 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     return _buildFieldWidgetModal(field, setModalState);
   }
 
+  Widget _buildTextFormFieldModal(service_models.FormField field, StateSetter setModalState) {
+    return TextFormField(
+      controller: _controllers[field.name],
+      keyboardType: _getKeyboardType(field.type),
+      obscureText: field.type == 'password',
+      inputFormatters: _getInputFormatters(field.type),
+      onChanged: (value) {
+        _formValues[field.name] = value;
+        setModalState(() {});
+        setState(() {});
+      },
+      decoration: InputDecoration(
+        hintText: _getPlaceholderText(field),
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        suffixIcon: field.type == 'password' ? const Icon(Icons.visibility_off) : null,
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      validator: (value) => _validateField(field, value),
+    );
+  }
+
+  Widget _buildTextAreaFieldModal(service_models.FormField field, StateSetter setModalState) {
+    return TextFormField(
+      controller: _controllers[field.name],
+      maxLines: 4,
+      onChanged: (value) {
+        _formValues[field.name] = value;
+        setModalState(() {});
+        setState(() {});
+      },
+      decoration: InputDecoration(
+        hintText: _getPlaceholderText(field),
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      validator: (value) => _validateField(field, value),
+    );
+  }
+
+  Widget _buildCheckboxFieldModal(service_models.FormField field, StateSetter setModalState) {
+    return CheckboxListTile(
+      title: TranslatedText('${field.label}${field.required ? ' *' : ''}'),
+      value: _formValues[field.name] ?? false,
+      onChanged: (value) {
+        setModalState(() {
+          _formValues[field.name] = value;
+        });
+        setState(() {
+          _formValues[field.name] = value;
+        });
+      },
+      controlAffinity: ListTileControlAffinity.leading,
+      contentPadding: EdgeInsets.zero,
+    );
+  }
+
+  Widget _buildDropdownFieldModal(service_models.FormField field, StateSetter setModalState) {
+    return DropdownButtonFormField<String>(
+      value: _formValues[field.name],
+      decoration: InputDecoration(
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      items: field.options?.map((option) => DropdownMenuItem(value: option, child: TranslatedText(option))).toList(),
+      onChanged: (value) {
+        setModalState(() {
+          _formValues[field.name] = value;
+        });
+        setState(() {
+          _formValues[field.name] = value;
+        });
+      },
+      validator: (value) => _validateField(field, value?.toString()),
+    );
+  }
+
+  Widget _buildTimeFieldModal(service_models.FormField field, StateSetter setModalState) {
+    final l10n = AppLocalizations.of(context)!;
+    return TextFormField(
+      controller: _controllers[field.name],
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: _getPlaceholderText(field, l10n.selectTime),
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        suffixIcon: const Icon(Icons.access_time, color: AppTheme.accentColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      onTap: () async {
+        final time = await showTimePicker(
+          context: context,
+          initialTime: TimeOfDay.now(),
+        );
+        if (time != null && mounted) {
+          _controllers[field.name]!.text = time.format(context);
+          _formValues[field.name] = time.format(context);
+          setModalState(() {});
+          setState(() {});
+        }
+      },
+      validator: (value) => _validateField(field, value),
+    );
+  }
+
+  Widget _buildDateTimeFieldModal(service_models.FormField field, StateSetter setModalState) {
+    final l10n = AppLocalizations.of(context)!;
+    return TextFormField(
+      controller: _controllers[field.name],
+      readOnly: true,
+      decoration: InputDecoration(
+        hintText: _getPlaceholderText(field, l10n.selectDateAndTime),
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        suffixIcon: const Icon(Icons.event, color: AppTheme.accentColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      onTap: () async {
+        final date = await showDatePicker(
+          context: context,
+          initialDate: DateTime.now(),
+          firstDate: DateTime(1900),
+          lastDate: DateTime(2100),
+        );
+        if (date != null && mounted) {
+          final time = await showTimePicker(
+            context: context,
+            initialTime: TimeOfDay.now(),
+          );
+          if (time != null && mounted) {
+            final dateTime = DateTime(date.year, date.month, date.day, time.hour, time.minute);
+            final formattedValue = '${dateTime.day}/${dateTime.month}/${dateTime.year} ${time.format(context)}';
+            _controllers[field.name]!.text = formattedValue;
+            _formValues[field.name] = formattedValue;
+            setModalState(() {});
+            setState(() {});
+          }
+        }
+      },
+      validator: (value) => _validateField(field, value),
+    );
+  }
+
+  Widget _buildSignatureFieldModal(service_models.FormField field, StateSetter setModalState) {
+    final l10n = AppLocalizations.of(context)!;
+    return TextFormField(
+      controller: _controllers[field.name],
+      onChanged: (value) {
+        _formValues[field.name] = value;
+        setModalState(() {});
+        setState(() {});
+      },
+      decoration: InputDecoration(
+        hintText: _getPlaceholderText(field, l10n.enterYourFullName),
+        hintStyle: TextStyle(color: Colors.grey[400]),
+        prefixIcon: const Icon(Icons.edit, color: AppTheme.accentColor),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: BorderSide(color: Colors.grey[100]!),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(16),
+          borderSide: const BorderSide(color: AppTheme.accentColor, width: 2),
+        ),
+        contentPadding: const EdgeInsets.all(16),
+        filled: true,
+        fillColor: Colors.white,
+      ),
+      validator: (value) => _validateField(field, value),
+    );
+  }
+
+  Widget _buildFileFieldModal(service_models.FormField field, StateSetter setModalState) {
+    final l10n = AppLocalizations.of(context)!;
+    final files = _uploadedFiles[field.name] ?? [];
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        Row(
+          children: [
+            Expanded(
+              child: GestureDetector(
+                onTap: () => _pickFile(field.name, setModalState),
+                child: Container(
+                  padding: const EdgeInsets.all(20),
+                  decoration: BoxDecoration(
+                    border: Border.all(color: Colors.grey[100]!),
+                    borderRadius: BorderRadius.circular(16),
+                    color: Colors.white,
+                  ),
+                  child: Column(
+                    children: [
+                      Container(
+                        padding: const EdgeInsets.all(12),
+                        decoration: BoxDecoration(
+                          color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                          borderRadius: BorderRadius.circular(12),
+                        ),
+                        child: const Icon(Icons.upload_file, color: AppTheme.accentColor, size: 32),
+                      ),
+                      const SizedBox(height: 12),
+                      Text(
+                        l10n.chooseFile,
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+            const SizedBox(width: 12),
+            GestureDetector(
+              onTap: () => _pickImageFromCamera(field.name, setModalState),
+              child: Container(
+                padding: const EdgeInsets.all(20),
+                decoration: BoxDecoration(
+                  border: Border.all(color: Colors.grey[100]!),
+                  borderRadius: BorderRadius.circular(16),
+                  color: Colors.white,
+                ),
+                child: Column(
+                  children: [
+                    Container(
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: AppTheme.primaryColor.withValues(alpha: 0.05),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(Icons.camera_alt, color: AppTheme.accentColor, size: 32),
+                    ),
+                    const SizedBox(height: 12),
+                    Text(
+                      l10n.camera,
+                      style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, color: AppTheme.primaryColor),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ],
+        ),
+        if (files.isNotEmpty) ...
+        files.map((file) => Padding(
+          padding: const EdgeInsets.only(top: 8),
+          child: Row(
+            children: [
+              const Icon(Icons.attach_file, size: 16, color: AppTheme.accentColor),
+              Expanded(child: Text(file.name, style: const TextStyle(fontSize: 12))),
+              IconButton(
+                icon: const Icon(Icons.close, size: 16),
+                onPressed: () => _removeFile(field.name, file, setModalState),
+              ),
+            ],
+          ),
+        )),
+      ],
+    );
+  }
+
+  Widget _buildDynamicListFieldModal(service_models.FormField field, StateSetter setModalState) {
+    final l10n = AppLocalizations.of(context)!;
+    final items = _formValues[field.name] as List<Map<String, dynamic>>? ?? [];
+    
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.start,
+      children: [
+        if (field.description != null) ...[
+          Text(
+            field.description!,
+            style: TextStyle(fontSize: 12, color: Colors.grey[600]),
+          ),
+          const SizedBox(height: 8),
+        ],
+        ...items.asMap().entries.map((entry) {
+          final index = entry.key;
+          return Container(
+            margin: const EdgeInsets.only(bottom: 12),
+            padding: const EdgeInsets.all(12),
+            decoration: BoxDecoration(
+              border: Border.all(color: Colors.grey[300]!),
+              borderRadius: BorderRadius.circular(12),
+              color: Colors.white,
+            ),
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    Text(
+                      '${l10n.information} ${index + 1}',
+                      style: const TextStyle(
+                        fontWeight: FontWeight.bold,
+                        color: AppTheme.primaryColor,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.delete, color: Colors.red),
+                      onPressed: () {
+                        setModalState(() {
+                          items.removeAt(index);
+                          _formValues[field.name] = items;
+                        });
+                        setState(() {});
+                      },
+                    ),
+                  ],
+                ),
+                const Divider(),
+                ...?field.subFields?.map((subField) {
+                  final fieldKey = '${field.name}[$index].${subField.name}';
+                  _controllers[fieldKey] ??= TextEditingController();
+                  
+                  return Padding(
+                    padding: const EdgeInsets.only(bottom: 8),
+                    child: Column(
+                      crossAxisAlignment: CrossAxisAlignment.start,
+                      children: [
+                        TranslatedText(
+                          '${subField.label}${subField.required ? ' *' : ''}',
+                          style: const TextStyle(
+                            fontSize: 12,
+                            fontWeight: FontWeight.w500,
+                          ),
+                        ),
+                        const SizedBox(height: 4),
+                        _buildFieldWidgetModal(subField, setModalState),
+                      ],
+                    ),
+                  );
+                }),
+              ],
+            ),
+          );
+        }),
+        const SizedBox(height: 8),
+        OutlinedButton.icon(
+          onPressed: () {
+            setModalState(() {
+              items.add({});
+              _formValues[field.name] = items;
+            });
+            setState(() {});
+          },
+          icon: const Icon(Icons.add),
+          label: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              Text('${l10n.enter} '),
+              TranslatedText(field.label),
+            ],
+          ),
+          style: OutlinedButton.styleFrom(
+            foregroundColor: AppTheme.accentColor,
+            side: const BorderSide(color: AppTheme.accentColor),
+          ),
+        ),
+      ],
+    );
+  }
+
   List<String> _extractKeywords(String text) {
     return text
         .split(RegExp(r'[\s_-]+'))
@@ -685,11 +1332,31 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       case 'group':
         return _buildGroupFieldModal(field, setModalState);
       case 'dynamic_list':
-        return _buildDynamicListField(field);
+        return _buildDynamicListFieldModal(field, setModalState);
       case 'date':
         return _buildDateFieldModal(field, setModalState);
+      case 'select':
+        return _buildDropdownFieldModal(field, setModalState);
+      case 'checkbox':
+        return _buildCheckboxFieldModal(field, setModalState);
+      case 'file':
+        return _buildFileFieldModal(field, setModalState);
+      case 'textarea':
+        return _buildTextAreaFieldModal(field, setModalState);
+      case 'time':
+        return _buildTimeFieldModal(field, setModalState);
+      case 'datetime':
+        return _buildDateTimeFieldModal(field, setModalState);
+      case 'signature':
+        return _buildSignatureFieldModal(field, setModalState);
+      case 'email':
+      case 'phone':
+      case 'url':
+      case 'password':
+      case 'number':
+      case 'text':
       default:
-        return _buildFieldWidget(field);
+        return _buildTextFormFieldModal(field, setModalState);
     }
   }
 
@@ -1475,8 +2142,23 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
     );
   }
 
+  bool _isFormValid(service_models.FormSchema schema) {
+    for (var section in schema.sections) {
+      if (!_isSectionValid(section)) {
+        return false;
+      }
+    }
+    return true;
+  }
+
   Widget _buildBottomActions() {
     final l10n = AppLocalizations.of(context)!;
+    final schemaAsync = ref.watch(serviceFormProvider(widget.serviceId));
+    final isFormValid = schemaAsync.maybeWhen(
+      data: (schema) => _isFormValid(schema),
+      orElse: () => false,
+    );
+    
     return Container(
       padding: EdgeInsets.fromLTRB(
         20,
@@ -1497,13 +2179,26 @@ class _ServiceRequestFormScreenState extends ConsumerState<ServiceRequestFormScr
       child: SizedBox(
         width: double.infinity,
         child: ElevatedButton(
-          onPressed: _submitForm,
+          onPressed: () {
+            if (!isFormValid) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(
+                  content: Text(l10n.pleaseProvideAllRequiredData),
+                  backgroundColor: const Color(0xFFEF4444),
+                  behavior: SnackBarBehavior.floating,
+                  shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                ),
+              );
+              return;
+            }
+            _submitForm();
+          },
           style: ElevatedButton.styleFrom(
-            backgroundColor: AppTheme.accentColor,
-            foregroundColor: AppTheme.primaryColor,
+            backgroundColor: isFormValid ? AppTheme.accentColor : Colors.grey[400],
+            foregroundColor: isFormValid ? AppTheme.primaryColor : Colors.grey[600],
             padding: const EdgeInsets.symmetric(vertical: 16),
             shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(16)),
-            elevation: 0,
+            elevation: isFormValid ? 2 : 0,
           ),
           child: Row(
             mainAxisAlignment: MainAxisAlignment.center,
